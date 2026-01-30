@@ -614,7 +614,7 @@ const Login = () => {
           textAlign: 'center',
         }}>
           <p style={{ color: '#94a3b8', fontSize: '13px', margin: '0' }}>
-            Need assistance? Contact <span style={{ color: currentRole.color, fontWeight: '600' }}>support@hostel.edu</span>
+            Need assistance? Contact <span style={{ color: currentRole.color, fontWeight: '600' }}>dhanadharsinis@gmail.com</span>
           </p>
         </div>
       </div>
