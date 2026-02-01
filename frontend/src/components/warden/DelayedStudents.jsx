@@ -216,22 +216,6 @@ const DelayedStudents = () => {
               )}
             </>
           )}
-
-          {/* Stats Summary */}
-          <div className="stats-summary">
-            <div className="stat-box stat-outpass">
-              <span className="stat-number">{delayedOutpasses.length}</span>
-              <span className="stat-label">Outpass Delays</span>
-            </div>
-            <div className="stat-box stat-vacation">
-              <span className="stat-number">{delayedVacations.length}</span>
-              <span className="stat-label">Vacation Delays</span>
-            </div>
-            <div className="stat-box stat-total">
-              <span className="stat-number">{delayedOutpasses.length + delayedVacations.length}</span>
-              <span className="stat-label">Total Delayed</span>
-            </div>
-          </div>
         </div>
       </div>
     </div>
