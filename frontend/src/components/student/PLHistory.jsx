@@ -9,6 +9,7 @@ const PLHistory = () => {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [downloadingId, setDownloadingId] = useState(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const navigate = useNavigate();
 
   const menuItems = [
@@ -24,24 +25,24 @@ const PLHistory = () => {
   }, []);
 
   const formatDateTime = (dateString) => {
-  if (!dateString) return 'N/A';
-  
-  try {
-    const date = new Date(dateString);
-    if (isNaN(date.getTime())) return 'Invalid Date';
+    if (!dateString) return 'N/A';
     
-    return date.toLocaleString('en-IN', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  } catch (error) {
-    console.error('Error formatting date:', error);
-    return 'Invalid Date';
-  }
-};
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return 'Invalid Date';
+      
+      return date.toLocaleString('en-IN', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return 'Invalid Date';
+    }
+  };
 
   const fetchRequests = async () => {
     try {
@@ -132,30 +133,26 @@ const PLHistory = () => {
   };
 
   const canDownloadPDF = (request) => {
-    // Only show download for approved PLs that are NOT expired or completed
     if (request.status !== 'approved') {
       return false;
     }
 
-    // Check if QR code exists
     if (!request.qrCode) {
       return false;
     }
 
-    // Check if PL has expired (arrival date passed)
     const currentDateTime = new Date();
     const arrivalDateTime = new Date(request.arrivalDateTime);
     
     if (arrivalDateTime < currentDateTime) {
-      return false; // Don't show download for expired PLs
+      return false;
     }
 
-    // Check if fully used
     if (request.isFullyUsed) {
-      return false; // Don't show download for completed PLs
+      return false;
     }
 
-    return true; // Only active approved PLs can download
+    return true;
   };
 
   const getActionButtons = (request) => {
@@ -273,9 +270,39 @@ const PLHistory = () => {
     return request.status;
   };
 
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
+
+  const closeSidebar = () => {
+    setIsSidebarOpen(false);
+  };
+
   return (
     <div className="dashboard-container">
-      <Sidebar menuItems={menuItems} />
+      {/* Hamburger Button */}
+      <button 
+        className={`hamburger-btn ${isSidebarOpen ? 'active' : ''}`}
+        onClick={toggleSidebar}
+        aria-label="Toggle menu"
+      >
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+
+      {/* Sidebar Overlay */}
+      <div 
+        className={`sidebar-overlay ${isSidebarOpen ? 'active' : ''}`}
+        onClick={closeSidebar}
+      ></div>
+
+      <Sidebar 
+        menuItems={menuItems}
+        isOpen={isSidebarOpen}
+        onClose={closeSidebar}
+      />
+      
       <div className="main-content">
         <Navbar title="Permission Letter History" />
         

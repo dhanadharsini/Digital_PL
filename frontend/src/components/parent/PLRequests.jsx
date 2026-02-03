@@ -6,6 +6,7 @@ import { api } from '../../services/api';
 const PLRequests = () => {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const menuItems = [
     { label: 'Dashboard', path: '/parent' },
@@ -53,9 +54,39 @@ const PLRequests = () => {
     }
   };
 
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
+
+  const closeSidebar = () => {
+    setIsSidebarOpen(false);
+  };
+
   return (
     <div className="dashboard-container">
-      <Sidebar menuItems={menuItems} />
+      {/* Hamburger Button */}
+      <button 
+        className={`hamburger-btn ${isSidebarOpen ? 'active' : ''}`}
+        onClick={toggleSidebar}
+        aria-label="Toggle menu"
+      >
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+
+      {/* Sidebar Overlay */}
+      <div 
+        className={`sidebar-overlay ${isSidebarOpen ? 'active' : ''}`}
+        onClick={closeSidebar}
+      ></div>
+
+      <Sidebar 
+        menuItems={menuItems}
+        isOpen={isSidebarOpen}
+        onClose={closeSidebar}
+      />
+      
       <div className="main-content">
         <Navbar title="Pending PL Requests" />
         

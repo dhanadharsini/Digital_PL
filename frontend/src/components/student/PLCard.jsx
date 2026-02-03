@@ -12,6 +12,7 @@ const PLCard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [downloading, setDownloading] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const menuItems = [
     { label: 'Dashboard', path: '/student' },
@@ -52,10 +53,40 @@ const PLCard = () => {
     }
   };
 
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
+
+  const closeSidebar = () => {
+    setIsSidebarOpen(false);
+  };
+
   if (loading) {
     return (
       <div className="dashboard-container">
-        <Sidebar menuItems={menuItems} />
+        {/* Hamburger Button */}
+        <button 
+          className={`hamburger-btn ${isSidebarOpen ? 'active' : ''}`}
+          onClick={toggleSidebar}
+          aria-label="Toggle menu"
+        >
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+
+        {/* Sidebar Overlay */}
+        <div 
+          className={`sidebar-overlay ${isSidebarOpen ? 'active' : ''}`}
+          onClick={closeSidebar}
+        ></div>
+
+        <Sidebar 
+          menuItems={menuItems}
+          isOpen={isSidebarOpen}
+          onClose={closeSidebar}
+        />
+        
         <div className="main-content">
           <Navbar title="Permission Letter Card" />
           <div className="loading-spinner">
@@ -69,7 +100,29 @@ const PLCard = () => {
   if (error) {
     return (
       <div className="dashboard-container">
-        <Sidebar menuItems={menuItems} />
+        {/* Hamburger Button */}
+        <button 
+          className={`hamburger-btn ${isSidebarOpen ? 'active' : ''}`}
+          onClick={toggleSidebar}
+          aria-label="Toggle menu"
+        >
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+
+        {/* Sidebar Overlay */}
+        <div 
+          className={`sidebar-overlay ${isSidebarOpen ? 'active' : ''}`}
+          onClick={closeSidebar}
+        ></div>
+
+        <Sidebar 
+          menuItems={menuItems}
+          isOpen={isSidebarOpen}
+          onClose={closeSidebar}
+        />
+        
         <div className="main-content">
           <Navbar title="Permission Letter Card" />
           <div className="card">
@@ -92,7 +145,29 @@ const PLCard = () => {
 
   return (
     <div className="dashboard-container">
-      <Sidebar menuItems={menuItems} />
+      {/* Hamburger Button */}
+      <button 
+        className={`hamburger-btn ${isSidebarOpen ? 'active' : ''}`}
+        onClick={toggleSidebar}
+        aria-label="Toggle menu"
+      >
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+
+      {/* Sidebar Overlay */}
+      <div 
+        className={`sidebar-overlay ${isSidebarOpen ? 'active' : ''}`}
+        onClick={closeSidebar}
+      ></div>
+
+      <Sidebar 
+        menuItems={menuItems}
+        isOpen={isSidebarOpen}
+        onClose={closeSidebar}
+      />
+      
       <div className="main-content">
         <Navbar title="Permission Letter Card" />
         

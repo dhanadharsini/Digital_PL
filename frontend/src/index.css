@@ -1077,3 +1077,241 @@ table tbody tr:last-child td {
     padding: 20px;
   }
 }
+/* ========================================
+   HAMBURGER MENU STYLES
+   ======================================== */
+
+.hamburger-btn {
+  display: none;
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 1001;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  border: none;
+  border-radius: 10px;
+  padding: 12px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hamburger-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+}
+
+.hamburger-btn span {
+  display: block;
+  width: 24px;
+  height: 3px;
+  background: white;
+  margin: 5px 0;
+  transition: all 0.3s ease;
+  border-radius: 2px;
+}
+
+.hamburger-btn.active span:nth-child(1) {
+  transform: rotate(45deg) translate(8px, 8px);
+}
+
+.hamburger-btn.active span:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburger-btn.active span:nth-child(3) {
+  transform: rotate(-45deg) translate(7px, -7px);
+}
+
+/* Mobile Sidebar Overlay */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 99;
+  animation: fadeIn 0.3s ease;
+  backdrop-filter: blur(4px);
+}
+
+.sidebar-overlay.active {
+  display: block;
+}
+
+/* ========================================
+   RESPONSIVE DESIGN - UPDATED
+   ======================================== */
+
+@media (max-width: 1024px) {
+  .sidebar {
+    width: 260px;
+  }
+
+  .main-content {
+    margin-left: 260px;
+    width: calc(100% - 260px);
+  }
+}
+
+@media (max-width: 768px) {
+  /* Show hamburger button on mobile */
+  .hamburger-btn {
+    display: block;
+  }
+
+  /* Hide sidebar by default on mobile */
+  .sidebar {
+    position: fixed;
+    left: -100%;
+    width: 280px;
+    height: 100vh;
+    transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 100;
+  }
+
+  /* Show sidebar when active */
+  .sidebar.active {
+    left: 0;
+    box-shadow: 8px 0 32px rgba(0, 0, 0, 0.3);
+  }
+
+  /* Adjust main content for mobile */
+  .main-content {
+    margin-left: 0;
+    width: 100%;
+    padding: 80px 20px 20px;
+  }
+
+  .navbar {
+    padding: 20px 24px;
+  }
+
+  .navbar h2 {
+    font-size: 24px;
+  }
+
+  .stats-container {
+    grid-template-columns: 1fr;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+  }
+
+  .action-buttons button {
+    width: 100%;
+  }
+
+  .confirmation-content,
+  .reset-modal-content {
+    padding: 24px;
+    width: 95%;
+  }
+
+  .reset-modal-header {
+    padding: 28px 24px 20px;
+  }
+
+  .reset-modal-body {
+    padding: 24px;
+  }
+
+  .confirmation-content h3 {
+    font-size: 22px;
+  }
+
+  .confirmation-actions,
+  .reset-modal-actions {
+    flex-direction: column;
+  }
+
+  .confirmation-actions button,
+  .reset-modal-actions button {
+    width: 100%;
+  }
+
+  .detail-row {
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .detail-row span {
+    text-align: left;
+    max-width: 100%;
+  }
+
+  .instruction-item {
+    flex-direction: column;
+  }
+
+  .instruction-number {
+    width: 40px;
+    height: 40px;
+    font-size: 16px;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .welcome-message {
+    padding: 28px 24px;
+  }
+
+  .welcome-message h1 {
+    font-size: 26px;
+  }
+}
+
+@media (max-width: 480px) {
+  .main-content {
+    padding: 70px 16px 16px;
+  }
+
+  .sidebar {
+    width: 260px;
+  }
+
+  .card {
+    padding: 20px;
+  }
+
+  .stat-card {
+    padding: 24px;
+  }
+
+  table th,
+  table td {
+    padding: 12px 14px;
+    font-size: 13px;
+  }
+  
+  .reset-modal-content {
+    width: 95%;
+    border-radius: 16px;
+  }
+  
+  .reset-modal-header {
+    padding: 24px 20px 16px;
+  }
+  
+  .reset-modal-body {
+    padding: 20px;
+  }
+}
+
+/* Additional status badges for completed and expired */
+.status-completed {
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  color: white;
+  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.3);
+}
+
+.status-expired {
+  background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+  color: white;
+  box-shadow: 0 2px 8px rgba(107, 114, 128, 0.3);
+}

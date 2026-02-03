@@ -9,6 +9,7 @@ const OutpassQR = () => {
   const { id } = useParams();
   const [outpass, setOutpass] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const menuItems = [
     { label: 'Dashboard', path: '/student' },
@@ -43,10 +44,40 @@ const OutpassQR = () => {
     });
   };
 
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
+
+  const closeSidebar = () => {
+    setIsSidebarOpen(false);
+  };
+
   if (loading) {
     return (
       <div className="dashboard-container">
-        <Sidebar menuItems={menuItems} />
+        {/* Hamburger Button */}
+        <button 
+          className={`hamburger-btn ${isSidebarOpen ? 'active' : ''}`}
+          onClick={toggleSidebar}
+          aria-label="Toggle menu"
+        >
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+
+        {/* Sidebar Overlay */}
+        <div 
+          className={`sidebar-overlay ${isSidebarOpen ? 'active' : ''}`}
+          onClick={closeSidebar}
+        ></div>
+
+        <Sidebar 
+          menuItems={menuItems}
+          isOpen={isSidebarOpen}
+          onClose={closeSidebar}
+        />
+        
         <div className="main-content">
           <Navbar title="Outpass QR Code" />
           <div className="loading">Loading outpass...</div>
@@ -58,7 +89,29 @@ const OutpassQR = () => {
   if (!outpass) {
     return (
       <div className="dashboard-container">
-        <Sidebar menuItems={menuItems} />
+        {/* Hamburger Button */}
+        <button 
+          className={`hamburger-btn ${isSidebarOpen ? 'active' : ''}`}
+          onClick={toggleSidebar}
+          aria-label="Toggle menu"
+        >
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+
+        {/* Sidebar Overlay */}
+        <div 
+          className={`sidebar-overlay ${isSidebarOpen ? 'active' : ''}`}
+          onClick={closeSidebar}
+        ></div>
+
+        <Sidebar 
+          menuItems={menuItems}
+          isOpen={isSidebarOpen}
+          onClose={closeSidebar}
+        />
+        
         <div className="main-content">
           <Navbar title="Outpass QR Code" />
           <div className="error-state">
@@ -72,7 +125,29 @@ const OutpassQR = () => {
 
   return (
     <div className="dashboard-container">
-      <Sidebar menuItems={menuItems} />
+      {/* Hamburger Button */}
+      <button 
+        className={`hamburger-btn ${isSidebarOpen ? 'active' : ''}`}
+        onClick={toggleSidebar}
+        aria-label="Toggle menu"
+      >
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+
+      {/* Sidebar Overlay */}
+      <div 
+        className={`sidebar-overlay ${isSidebarOpen ? 'active' : ''}`}
+        onClick={closeSidebar}
+      ></div>
+
+      <Sidebar 
+        menuItems={menuItems}
+        isOpen={isSidebarOpen}
+        onClose={closeSidebar}
+      />
+      
       <div className="main-content">
         <Navbar title="Outpass QR Code" />
 

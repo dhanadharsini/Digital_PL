@@ -6,6 +6,7 @@ import { api } from '../../services/api';
 const RequestHistory = () => {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const menuItems = [
     { label: 'Dashboard', path: '/parent' },
@@ -28,19 +29,88 @@ const RequestHistory = () => {
     }
   };
 
+  const getDisplayStatus = (request) => {
+    if (request.status === 'approved') {
+      const currentDateTime = new Date();
+      const arrivalDateTime = new Date(request.arrivalDateTime);
+
+      if (arrivalDateTime < currentDateTime) {
+        return 'expired';
+      }
+
+      if (request.isFullyUsed) {
+        return 'completed';
+      }
+    }
+
+    return request.status;
+  };
+
   const getStatusBadge = (status) => {
     const statusClasses = {
       pending: 'status-pending',
       'parent-approved': 'status-parent-approved',
       approved: 'status-approved',
-      rejected: 'status-rejected'
+      rejected: 'status-rejected',
+      expired: 'status-expired',
+      completed: 'status-completed'
     };
     return <span className={`status-badge ${statusClasses[status]}`}>{status.toUpperCase()}</span>;
   };
 
+  const formatDateTime = (dateString) => {
+    if (!dateString) return 'N/A';
+    
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return 'Invalid Date';
+      
+      return date.toLocaleString('en-IN', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return 'Invalid Date';
+    }
+  };
+
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
+
+  const closeSidebar = () => {
+    setIsSidebarOpen(false);
+  };
+
   return (
     <div className="dashboard-container">
-      <Sidebar menuItems={menuItems} />
+      {/* Hamburger Button */}
+      <button 
+        className={`hamburger-btn ${isSidebarOpen ? 'active' : ''}`}
+        onClick={toggleSidebar}
+        aria-label="Toggle menu"
+      >
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+
+      {/* Sidebar Overlay */}
+      <div 
+        className={`sidebar-overlay ${isSidebarOpen ? 'active' : ''}`}
+        onClick={closeSidebar}
+      ></div>
+
+      <Sidebar 
+        menuItems={menuItems}
+        isOpen={isSidebarOpen}
+        onClose={closeSidebar}
+      />
+      
       <div className="main-content">
         <Navbar title="Request History" />
         
@@ -71,9 +141,9 @@ const RequestHistory = () => {
                       <td>{request.regNo}</td>
                       <td>{request.placeOfVisit}</td>
                       <td>{request.reasonOfVisit}</td>
-                      <td>{new Date(request.departureDateTime).toLocaleString()}</td>
-                      <td>{new Date(request.arrivalDateTime).toLocaleString()}</td>
-                      <td>{getStatusBadge(request.status)}</td>
+                      <td>{formatDateTime(request.departureDateTime)}</td>
+                      <td>{formatDateTime(request.arrivalDateTime)}</td>
+                      <td>{getStatusBadge(getDisplayStatus(request))}</td>
                       <td>{getStatusBadge(request.parentStatus)}</td>
                     </tr>
                   ))}
