@@ -10,6 +10,7 @@ const Attendance = () => {
   const [attendance, setAttendance] = useState({});
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const menuItems = [
     { label: 'Dashboard', path: '/warden' },
@@ -50,10 +51,8 @@ const Attendance = () => {
       const response = await api.get(`/warden/attendance/students?date=${selectedDate}`);
       setStudents(response.data.students);
 
-      // Initialize attendance state - Students on vacation default to absent
       const attendanceState = {};
       response.data.students.forEach(student => {
-        // If student is on vacation ON THIS DATE, always mark as absent
         if (student.isOnVacation) {
           attendanceState[student._id] = 'absent';
         } else {
@@ -70,7 +69,6 @@ const Attendance = () => {
   };
 
   const handleAttendanceChange = (studentId, status) => {
-    // Only allow changes for today's date and students not on vacation
     if (!isToday(selectedDate)) {
       return;
     }
@@ -84,7 +82,6 @@ const Attendance = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Verify it's today's date
     if (!isToday(selectedDate)) {
       alert('You can only mark attendance for today!');
       return;
@@ -103,7 +100,7 @@ const Attendance = () => {
       });
 
       alert('Attendance marked successfully!');
-      fetchStudents(); // Refresh to show updated data
+      fetchStudents();
     } catch (error) {
       console.error('Error marking attendance:', error);
       alert('Failed to mark attendance');
@@ -112,7 +109,6 @@ const Attendance = () => {
     }
   };
 
-  // Calculate statistics based on CURRENT attendance state (for selected date)
   const stats = {
     total: students.length,
     present: Object.values(attendance).filter(status => status === 'present').length,
@@ -120,13 +116,42 @@ const Attendance = () => {
     onVacation: students.filter(s => s.isOnVacation).length
   };
 
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
+
+  const closeSidebar = () => {
+    setIsSidebarOpen(false);
+  };
+
   return (
     <div className="dashboard-container">
-      <Sidebar menuItems={menuItems} />
+      {/* Hamburger Button */}
+      <button 
+        className={`hamburger-btn ${isSidebarOpen ? 'active' : ''}`}
+        onClick={toggleSidebar}
+        aria-label="Toggle menu"
+      >
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+
+      {/* Sidebar Overlay */}
+      <div 
+        className={`sidebar-overlay ${isSidebarOpen ? 'active' : ''}`}
+        onClick={closeSidebar}
+      ></div>
+
+      <Sidebar 
+        menuItems={menuItems}
+        isOpen={isSidebarOpen}
+        onClose={closeSidebar}
+      />
+      
       <div className="main-content">
         <Navbar title="Mark Attendance" />
 
-        {/* Statistics Panel - Shows counts for SELECTED DATE */}
         <div className="stats-panel">
           <div className="stat-card stat-total">
             <div className="stat-icon">👥</div>
@@ -152,7 +177,6 @@ const Attendance = () => {
         </div>
 
         <div className="card">
-          {/* Date Selector with Warning */}
           <div style={{ marginBottom: '20px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '10px' }}>
               <label style={{ fontWeight: '600', fontSize: '16px' }}>Select Date:</label>
@@ -171,7 +195,6 @@ const Attendance = () => {
               />
             </div>
 
-            {/* Show warning if not today */}
             {!isToday(selectedDate) && (
               <div style={{
                 padding: '12px 16px',
@@ -195,7 +218,6 @@ const Attendance = () => {
               </div>
             )}
 
-            {/* Show success message for today */}
             {isToday(selectedDate) && (
               <div style={{
                 padding: '12px 16px',
@@ -269,9 +291,7 @@ const Attendance = () => {
                           )}
                         </td>
                         <td>
-                          {/* Show radio buttons ONLY for today's date */}
                           {isToday(selectedDate) ? (
-                            // TODAY: Show interactive radio buttons (disabled for vacation students)
                             <div style={{ display: 'flex', gap: '10px' }}>
                               <label style={{ 
                                 display: 'flex', 
@@ -327,7 +347,6 @@ const Attendance = () => {
                               </label>
                             </div>
                           ) : (
-                            // PAST DATES: Show text status only
                             <div style={{ display: 'flex', gap: '10px' }}>
                               {attendance[student._id] === 'present' ? (
                                 <span style={{
@@ -363,7 +382,6 @@ const Attendance = () => {
                 </table>
               </div>
 
-              {/* Only show submit button for today */}
               {isToday(selectedDate) && (
                 <button
                   type="submit"

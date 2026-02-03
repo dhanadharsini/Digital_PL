@@ -9,6 +9,7 @@ const DelayedStudents = () => {
   const [delayedVacations, setDelayedVacations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('outpass');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const menuItems = [
     { label: 'Dashboard', path: '/warden' },
@@ -62,9 +63,39 @@ const DelayedStudents = () => {
     return `${mins} minutes`;
   };
 
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
+
+  const closeSidebar = () => {
+    setIsSidebarOpen(false);
+  };
+
   return (
     <div className="dashboard-container">
-      <Sidebar menuItems={menuItems} />
+      {/* Hamburger Button */}
+      <button 
+        className={`hamburger-btn ${isSidebarOpen ? 'active' : ''}`}
+        onClick={toggleSidebar}
+        aria-label="Toggle menu"
+      >
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+
+      {/* Sidebar Overlay */}
+      <div 
+        className={`sidebar-overlay ${isSidebarOpen ? 'active' : ''}`}
+        onClick={closeSidebar}
+      ></div>
+
+      <Sidebar 
+        menuItems={menuItems}
+        isOpen={isSidebarOpen}
+        onClose={closeSidebar}
+      />
+      
       <div className="main-content">
         <Navbar title="Delayed Students" />
 
@@ -74,7 +105,6 @@ const DelayedStudents = () => {
             <p>Monitor students who have exceeded their allowed time limits</p>
           </div>
 
-          {/* Tab Navigation */}
           <div className="tabs-container">
             <button 
               className={`tab-button ${activeTab === 'outpass' ? 'active' : ''}`}
@@ -94,7 +124,6 @@ const DelayedStudents = () => {
             <div className="loading">Loading delayed students...</div>
           ) : (
             <>
-              {/* Outpass Delays Tab */}
               {activeTab === 'outpass' && (
                 <div className="tab-content">
                   <div className="section-header">
@@ -161,7 +190,6 @@ const DelayedStudents = () => {
                 </div>
               )}
 
-              {/* Vacation Delays Tab */}
               {activeTab === 'vacation' && (
                 <div className="tab-content">
                   <div className="section-header">
