@@ -24,27 +24,24 @@ const PLHistory = () => {
   }, []);
 
   const formatDateTime = (dateString) => {
-    if (!dateString) return 'N/A';
+  if (!dateString) return 'N/A';
+  
+  try {
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return 'Invalid Date';
     
-    try {
-      const date = new Date(dateString);
-      
-      if (isNaN(date.getTime())) return 'Invalid Date';
-      
-      const day = date.getDate();
-      const month = date.getMonth() + 1;
-      const year = date.getFullYear();
-      const hours = date.getHours();
-      const minutes = String(date.getMinutes()).padStart(2, '0');
-      const period = hours >= 12 ? 'PM' : 'AM';
-      const displayHours = hours % 12 || 12;
-      
-      return `${day}/${month}/${year}, ${displayHours}:${minutes} ${period}`;
-    } catch (error) {
-      console.error('Error formatting date:', error);
-      return 'Invalid Date';
-    }
-  };
+    return date.toLocaleString('en-IN', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  } catch (error) {
+    console.error('Error formatting date:', error);
+    return 'Invalid Date';
+  }
+};
 
   const fetchRequests = async () => {
     try {
