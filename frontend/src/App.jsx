@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -46,6 +46,18 @@ import QRScanner from "./components/warden/QRScanner.jsx";
 
 function App() {
   const { user } = useAuth();
+
+  useEffect(() => {
+    // Initialize theme on app load
+    const savedTheme = localStorage.getItem('theme');
+    const prefersDark = savedTheme ? savedTheme === 'dark' : true;
+    
+    if (!prefersDark) {
+      document.body.classList.add('light-mode');
+    } else {
+      document.body.classList.remove('light-mode');
+    }
+  }, []);
 
   return (
     <Router>

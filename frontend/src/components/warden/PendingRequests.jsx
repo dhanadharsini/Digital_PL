@@ -6,7 +6,6 @@ import { api } from '../../services/api';
 const PendingRequests = () => {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const menuItems = [
     { label: 'Dashboard', path: '/warden' },
@@ -35,10 +34,11 @@ const PendingRequests = () => {
   const handleApprove = async (id) => {
     if (window.confirm('Are you sure you want to approve this request?')) {
       try {
+        // FIXED: Changed from /approve-request/ to /approve/
         const response = await api.post(`/warden/approve/${id}`);
         console.log('Approve response:', response.data);
         
-        fetchRequests();
+        fetchRequests(); // Refresh the list
         alert('Request approved successfully!');
       } catch (error) {
         console.error('Approve error:', error);
@@ -52,10 +52,11 @@ const PendingRequests = () => {
     const reason = window.prompt('Please provide reason for rejection:');
     if (reason) {
       try {
+        // FIXED: Changed from /reject-request/ to /reject/
         const response = await api.post(`/warden/reject/${id}`, { reason });
         console.log('Reject response:', response.data);
         
-        fetchRequests();
+        fetchRequests(); // Refresh the list
         alert('Request rejected successfully!');
       } catch (error) {
         console.error('Reject error:', error);
@@ -65,39 +66,9 @@ const PendingRequests = () => {
     }
   };
 
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
-
-  const closeSidebar = () => {
-    setIsSidebarOpen(false);
-  };
-
   return (
     <div className="dashboard-container">
-      {/* Hamburger Button */}
-      <button 
-        className={`hamburger-btn ${isSidebarOpen ? 'active' : ''}`}
-        onClick={toggleSidebar}
-        aria-label="Toggle menu"
-      >
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
-
-      {/* Sidebar Overlay */}
-      <div 
-        className={`sidebar-overlay ${isSidebarOpen ? 'active' : ''}`}
-        onClick={closeSidebar}
-      ></div>
-
-      <Sidebar 
-        menuItems={menuItems}
-        isOpen={isSidebarOpen}
-        onClose={closeSidebar}
-      />
-      
+      <Sidebar menuItems={menuItems} />
       <div className="main-content">
         <Navbar title="Pending PL Requests" />
         

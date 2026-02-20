@@ -6,7 +6,6 @@ import { api } from '../../services/api';
 
 const WardenDashboard = () => {
   const { user } = useAuth();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [stats, setStats] = useState({
     totalStudents: 0,
     studentsInHostel: 0,
@@ -23,6 +22,7 @@ const WardenDashboard = () => {
     { label: 'QR Scanner', path: '/warden/qr-scanner' }
   ];
 
+
   useEffect(() => {
     fetchStats();
   }, []);
@@ -36,39 +36,9 @@ const WardenDashboard = () => {
     }
   };
 
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
-
-  const closeSidebar = () => {
-    setIsSidebarOpen(false);
-  };
-
   return (
     <div className="dashboard-container">
-      {/* Hamburger Button */}
-      <button 
-        className={`hamburger-btn ${isSidebarOpen ? 'active' : ''}`}
-        onClick={toggleSidebar}
-        aria-label="Toggle menu"
-      >
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
-
-      {/* Sidebar Overlay */}
-      <div 
-        className={`sidebar-overlay ${isSidebarOpen ? 'active' : ''}`}
-        onClick={closeSidebar}
-      ></div>
-
-      <Sidebar 
-        menuItems={menuItems}
-        isOpen={isSidebarOpen}
-        onClose={closeSidebar}
-      />
-      
+      <Sidebar menuItems={menuItems} />
       <div className="main-content">
         <Navbar title="Warden Dashboard" />
         

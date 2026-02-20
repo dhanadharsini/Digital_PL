@@ -4,7 +4,6 @@ import Navbar from '../common/Navbar';
 import { api } from '../../services/api';
 
 const AddParent = () => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [formData, setFormData] = useState({
     parentId: '',
     name: '',
@@ -61,39 +60,9 @@ const AddParent = () => {
     }
   };
 
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
-
-  const closeSidebar = () => {
-    setIsSidebarOpen(false);
-  };
-
   return (
     <div className="dashboard-container">
-      {/* Hamburger Button */}
-      <button 
-        className={`hamburger-btn ${isSidebarOpen ? 'active' : ''}`}
-        onClick={toggleSidebar}
-        aria-label="Toggle menu"
-      >
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
-
-      {/* Sidebar Overlay */}
-      <div 
-        className={`sidebar-overlay ${isSidebarOpen ? 'active' : ''}`}
-        onClick={closeSidebar}
-      ></div>
-
-      <Sidebar 
-        menuItems={menuItems}
-        isOpen={isSidebarOpen}
-        onClose={closeSidebar}
-      />
-      
+      <Sidebar menuItems={menuItems} />
       <div className="main-content">
         <Navbar title="Add New Parent" />
         

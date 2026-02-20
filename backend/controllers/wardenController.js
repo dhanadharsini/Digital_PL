@@ -7,7 +7,11 @@ import { sendEmail } from '../config/email.js';
 import { generateQRCode } from '../utils/generateQR.js';
 import { 
   plApprovedByWardenEmail, 
-  plRejectedByWardenEmail 
+  plRejectedByWardenEmail,
+  outpassCreatedEmail,
+  outpassCompletedEmail,
+  plApprovedByWardenEmailToParent,
+  plRejectedByWardenEmailToParent
 } from '../utils/emailTemplates.js';
 import Outpass from '../models/Outpass.js';
 import Attendance from '../models/Attendance.js';
@@ -175,6 +179,7 @@ export const approveRequest = async (req, res) => {
     console.log('7. Attempting to send email notification...');
     try {
       const student = await Student.findOne({ regNo: pl.regNo });
+      const parent = await Parent.findOne({ studentRegNo: pl.regNo });
       
       if (student && student.email) {
         console.log('   Student email found:', student.email);
@@ -188,20 +193,41 @@ export const approveRequest = async (req, res) => {
           
           await sendEmail(
             student.email,
-            'Permission Letter Approved',
+            'Permission Letter Approved - Hostel Portal',
             emailHtml
           );
-          console.log('   ✓ Email sent successfully');
+          console.log('   ✓ Student email sent successfully');
         } catch (emailError) {
-          console.log('   ⚠ Email failed (non-critical):', emailError.message);
-          // Continue - email is not critical
+          console.log('   ⚠ Student email failed (non-critical):', emailError.message);
+        }
+
+        // Send email to parent as well
+        if (parent && parent.email) {
+          console.log('   Parent email found:', parent.email);
+          try {
+            const parentEmailHtml = plApprovedByWardenEmailToParent(student.name, parent.name, {
+              placeOfVisit: pl.placeOfVisit,
+              departureDateTime: pl.departureDateTime,
+              arrivalDateTime: pl.arrivalDateTime
+            });
+            
+            await sendEmail(
+              parent.email,
+              'Your Ward\'s Permission Letter Approved - Hostel Portal',
+              parentEmailHtml
+            );
+            console.log('   ✓ Parent email sent successfully');
+          } catch (parentEmailError) {
+            console.log('   ⚠ Parent email failed (non-critical):', parentEmailError.message);
+          }
+        } else {
+          console.log('   ⚠ No parent email found - skipping parent notification');
         }
       } else {
-        console.log('   ⚠ No student email found - skipping email');
+        console.log('   ⚠ No student email found - skipping all emails');
       }
     } catch (emailLookupError) {
-      console.log('   ⚠ Student lookup failed (non-critical):', emailLookupError.message);
-      // Continue - email is not critical
+      console.log('   ⚠ Email lookup failed (non-critical):', emailLookupError.message);
     }
 
     console.log('========================================');
@@ -264,9 +290,9 @@ export const rejectRequest = async (req, res) => {
     const student = await Student.findOne({ regNo: pl.regNo });
     const parent = await Parent.findOne({ studentRegNo: pl.regNo });
     
+    // Send email to student
     if (student) {
-      // Send email to student
-      const emailHtml = plRejectedByWardenEmail(
+      const studentEmailHtml = plRejectedByWardenEmail(
         student.name, 
         parent?.email,
         {
@@ -279,18 +305,33 @@ export const rejectRequest = async (req, res) => {
       
       await sendEmail(
         student.email,
-        'Permission Letter Rejected by Warden',
-        emailHtml
+        'Permission Letter Rejected by Warden - Hostel Portal',
+        studentEmailHtml
       );
+      console.log('   ✓ Student rejection email sent');
+    }
 
-      // Send email to parent as well
-      if (parent) {
-        await sendEmail(
-          parent.email,
-          'Permission Letter Rejected by Warden',
-          emailHtml
-        );
-      }
+    // Send email to parent with parent-specific template
+    if (parent && parent.email) {
+      const parentEmailHtml = plRejectedByWardenEmailToParent(
+        student?.name || 'Student', 
+        parent.name,
+        {
+          placeOfVisit: pl.placeOfVisit,
+          departureDateTime: pl.departureDateTime,
+          arrivalDateTime: pl.arrivalDateTime
+        },
+        reason
+      );
+      
+      await sendEmail(
+        parent.email,
+        'Your Ward\'s Permission Letter Rejected - Hostel Portal',
+        parentEmailHtml
+      );
+      console.log('   ✓ Parent rejection email sent');
+    } else {
+      console.log('   ⚠ No parent email found - skipping parent notification');
     }
 
     res.json({ 
@@ -792,6 +833,21 @@ export const logOutpassAction = async (req, res) => {
       outpass.exitApprovedBy = wardenId;
       await outpass.save();
 
+      // Send exit notification email
+      try {
+        const student = await Student.findById(outpass.studentId);
+        if (student && student.email) {
+          const emailHtml = outpassCreatedEmail(student.name, outpass.placeOfVisit);
+          await sendEmail(
+            student.email,
+            'Outpass Exit Logged',
+            emailHtml
+          );
+        }
+      } catch (emailError) {
+        console.log('Email notification failed (non-critical):', emailError.message);
+      }
+
       return res.json({
         success: true,
         message: `✓ Exit logged successfully. ${name} must return by ${expectedReturnTime.toLocaleTimeString()}`,
@@ -825,6 +881,21 @@ export const logOutpassAction = async (req, res) => {
       outpass.delayDuration = isDelayed ? delayInMinutes : 0;
       outpass.entryApprovedBy = wardenId;
       await outpass.save();
+
+      // Send completion notification email
+      try {
+        const student = await Student.findById(outpass.studentId);
+        if (student && student.email) {
+          const emailHtml = outpassCompletedEmail(student.name, outpass.placeOfVisit);
+          await sendEmail(
+            student.email,
+            'Outpass Completed - Welcome Back',
+            emailHtml
+          );
+        }
+      } catch (emailError) {
+        console.log('Email notification failed (non-critical):', emailError.message);
+      }
 
       let message = `✓ Entry logged successfully. ${name} has returned to the hostel`;
       if (isDelayed) {
