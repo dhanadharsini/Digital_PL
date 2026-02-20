@@ -9,7 +9,7 @@ import { useAuth } from "./context/AuthContext.jsx";
 
 // Pages
 import Login from "./pages/Login.jsx";
-
+import ChangePassword from "./pages/ChangePassword.jsx";
 // Common Components
 import ProtectedRoute from "./components/common/ProtectedRoute.jsx";
 
@@ -256,6 +256,9 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route path="/login" element={<Login />} />
+        <Route path="/change-password" element={<ChangePassword />} />
+        <Route path="/:role/change-password" element={<ChangePassword />} />
         <Route path="/" element={<Navigate to="/login" />} />
       </Routes>
     </Router>

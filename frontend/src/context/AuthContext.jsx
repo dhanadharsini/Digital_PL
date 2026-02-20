@@ -14,14 +14,19 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isTempPassword, setIsTempPassword] = useState(false);
 
   useEffect(() => {
     // Check if user is logged in
     const token = localStorage.getItem('token');
     const userData = localStorage.getItem('user');
+    const tempPassword = localStorage.getItem('isTempPassword');
     
     if (token && userData) {
       setUser(JSON.parse(userData));
+      if (tempPassword) {
+        setIsTempPassword(JSON.parse(tempPassword));
+      }
       api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
     }
     setLoading(false);
@@ -30,14 +35,21 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password, role) => {
     try {
       const response = await api.post('/auth/login', { email, password, role });
-      const { token, user: userData } = response.data;
+      const { token, user: userData, isTempPassword } = response.data;
       
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(userData));
+      if (isTempPassword) {
+        localStorage.setItem('isTempPassword', JSON.stringify(true));
+        setIsTempPassword(true);
+      } else {
+        localStorage.removeItem('isTempPassword');
+        setIsTempPassword(false);
+      }
       api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       
       setUser(userData);
-      return { success: true };
+      return { success: true, isTempPassword };
     } catch (error) {
       return { 
         success: false, 
@@ -49,15 +61,18 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    localStorage.removeItem('isTempPassword');
     delete api.defaults.headers.common['Authorization'];
     setUser(null);
+    setIsTempPassword(false);
   };
 
   const value = {
     user,
     login,
     logout,
-    loading
+    loading,
+    isTempPassword
   };
 
   return (

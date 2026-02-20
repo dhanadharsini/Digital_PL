@@ -60,7 +60,12 @@ const Login = () => {
     const result = await login(formData.email, formData.password, formData.role);
     
     if (result.success) {
-      navigate(`/${formData.role}`);
+      if (result.isTempPassword) {
+        // Redirect to change password page if temp password was used
+        navigate(`/${formData.role}/change-password`);
+      } else {
+        navigate(`/${formData.role}`);
+      }
     } else {
       setError(result.message);
     }
