@@ -237,6 +237,10 @@ export const rejectRequest = async (req, res) => {
     pl.parentStatus = 'rejected';
     pl.status = 'rejected';
     pl.rejectionReason = reason || 'Rejected by parent';
+    
+    // Clear email approval tokens to prevent duplicate actions
+    pl.emailApprovalTokens = {};
+    
     await pl.save();
     
     console.log('✓ Request rejected successfully');
@@ -287,3 +291,4 @@ export const getRequestHistory = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
+
