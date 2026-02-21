@@ -69,11 +69,9 @@ export const login = async (req, res) => {
     }
 
     if (isTempPasswordValid) {
-      await Model.updateOne(
-        { _id: user._id },
-        { $set: { resetToken: null, resetTokenExpiry: null } }
-      );
-      console.log('Temporary password cleared after login');
+      // DO NOT clear the resetToken here - keep it so changePassword knows it's a temp login
+      // resetToken will be cleared when user changes password
+      console.log('Temporary password used - keeping resetToken for change password flow');
     }
 
     const token = generateToken(user._id, role);
