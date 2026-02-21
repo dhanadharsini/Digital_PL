@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
 
 export default function ChangePassword() {
-  const { user, logout, isTempPassword } = useAuth();
+  const { user, logout, isTempPassword: contextIsTempPassword } = useAuth();
   const navigate = useNavigate();
+  const [isTempPassword, setIsTempPassword] = useState(false);
   const [formData, setFormData] = useState({
     currentPassword: '',
     newPassword: '',
@@ -15,7 +16,24 @@ export default function ChangePassword() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  if (!isTempPassword && !user) {
+  useEffect(() => {
+    // Check localStorage directly in case context state was lost
+    const tempPasswordFlag = localStorage.getItem('isTempPassword');
+    console.log('Raw localStorage isTempPassword:', tempPasswordFlag);
+    
+    if (tempPasswordFlag === 'true' || tempPasswordFlag === true) {
+      console.log('Setting isTempPassword to true from localStorage');
+      setIsTempPassword(true);
+    } else if (contextIsTempPassword) {
+      console.log('Setting isTempPassword to true from context');
+      setIsTempPassword(true);
+    } else {
+      console.log('Setting isTempPassword to false');
+      setIsTempPassword(false);
+    }
+  }, [contextIsTempPassword]);
+
+  if (!user) {
     navigate('/login');
     return null;
   }
@@ -33,6 +51,10 @@ export default function ChangePassword() {
     setSuccess('');
     setLoading(true);
 
+    console.log('=== CHANGE PASSWORD SUBMISSION ===');
+    console.log('isTempPassword state:', isTempPassword);
+    console.log('localStorage isTempPassword:', localStorage.getItem('isTempPassword'));
+
     // Validation
     if (!formData.newPassword || !formData.confirmPassword) {
       setError('Please fill in all fields');
@@ -40,8 +62,14 @@ export default function ChangePassword() {
       return;
     }
 
+    if (!isTempPassword && !formData.currentPassword) {
+      setError('Please provide current password');
+      setLoading(false);
+      return;
+    }
+
     if (formData.newPassword !== formData.confirmPassword) {
-      setError('Passwords do not match');
+      setError('New passwords do not match');
       setLoading(false);
       return;
     }
@@ -53,11 +81,23 @@ export default function ChangePassword() {
     }
 
     try {
-      const response = await api.post('/auth/change-password', {
-        currentPassword: formData.currentPassword || formData.currentPassword,
-        newPassword: formData.newPassword
+      console.log('Preparing payload...');
+      
+      const payload = {
+        newPassword: formData.newPassword,
+        isTempPassword: isTempPassword,
+        currentPassword: formData.currentPassword || ''
+      };
+
+      console.log('Sending payload:', {
+        newPassword: '***',
+        isTempPassword: payload.isTempPassword,
+        currentPassword: payload.currentPassword ? '***' : ''
       });
 
+      const response = await api.post('/auth/change-password', payload);
+      
+      console.log('Password change response:', response.data);
       setSuccess('Password changed successfully!');
       
       setTimeout(() => {
@@ -65,6 +105,7 @@ export default function ChangePassword() {
         navigate('/login');
       }, 2000);
     } catch (err) {
+      console.error('Password change error:', err.response?.data || err.message);
       setError(err.response?.data?.message || 'Failed to change password');
     } finally {
       setLoading(false);
@@ -169,7 +210,8 @@ export default function ChangePassword() {
                   fontSize: '14px',
                   outline: 'none',
                   transition: 'all 0.2s ease',
-                  boxSizing: 'border-box'
+                  boxSizing: 'border-box',
+                  color: '#1f2937'
                 }}
                 onFocus={(e) => {
                   e.target.style.borderColor = '#6366f1';
@@ -208,7 +250,8 @@ export default function ChangePassword() {
                 fontSize: '14px',
                 outline: 'none',
                 transition: 'all 0.2s ease',
-                boxSizing: 'border-box'
+                boxSizing: 'border-box',
+                color: '#1f2937'
               }}
               onFocus={(e) => {
                 e.target.style.borderColor = '#6366f1';
@@ -246,7 +289,8 @@ export default function ChangePassword() {
                 fontSize: '14px',
                 outline: 'none',
                 transition: 'all 0.2s ease',
-                boxSizing: 'border-box'
+                boxSizing: 'border-box',
+                color: '#1f2937'
               }}
               onFocus={(e) => {
                 e.target.style.borderColor = '#6366f1';
@@ -274,6 +318,16 @@ export default function ChangePassword() {
               cursor: loading ? 'not-allowed' : 'pointer',
               transition: 'all 0.2s ease',
               opacity: loading ? 0.8 : 1
+            }}
+            onMouseEnter={(e) => {
+              if (!loading) {
+                e.target.style.background = '#4f46e5';
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (!loading) {
+                e.target.style.background = '#6366f1';
+              }
             }}
           >
             {loading ? 'Changing Password...' : '🔐 Change Password'}

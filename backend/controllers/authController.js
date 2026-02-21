@@ -1,4 +1,5 @@
 import jwt from 'jsonwebtoken';
+import bcryptjs from 'bcryptjs';
 import User from '../models/User.js';
 import Student from '../models/Student.js';
 import Parent from '../models/Parent.js';
@@ -16,7 +17,7 @@ export const login = async (req, res) => {
   try {
     const { email, password, role } = req.body;
 
-    console.log('Login attempt:', { email, role }); // Debug log
+    console.log('Login attempt:', { email, role });
 
     if (!email || !password || !role) {
       return res.status(400).json({ message: 'Please provide email, password, and role' });
@@ -44,7 +45,7 @@ export const login = async (req, res) => {
 
     user = await Model.findOne({ email: email.toLowerCase() });
 
-    console.log('User found:', user ? 'Yes' : 'No'); // Debug log
+    console.log('User found:', user ? 'Yes' : 'No');
 
     if (!user) {
       return res.status(401).json({ message: 'Invalid credentials - User not found' });
@@ -52,7 +53,6 @@ export const login = async (req, res) => {
 
     const isPasswordMatch = await user.matchPassword(password);
 
-    // Check if user has a valid reset token that hasn't expired
     let isTempPasswordValid = false;
     if (user.resetToken && user.resetTokenExpiry) {
       const now = new Date();
@@ -61,14 +61,13 @@ export const login = async (req, res) => {
       }
     }
 
-    console.log('Password match:', isPasswordMatch); // Debug log
-    console.log('Temp password valid:', isTempPasswordValid); // Debug log
+    console.log('Password match:', isPasswordMatch);
+    console.log('Temp password valid:', isTempPasswordValid);
 
     if (!isPasswordMatch && !isTempPasswordValid) {
       return res.status(401).json({ message: 'Invalid credentials - Wrong password' });
     }
 
-    // If using temporary password, clear it after successful login
     if (isTempPasswordValid) {
       await Model.updateOne(
         { _id: user._id },
@@ -109,7 +108,6 @@ export const forgotPassword = async (req, res) => {
     const normalizedEmail = email.toLowerCase().trim();
     console.log('Normalized Email:', normalizedEmail);
 
-    // Search across all user types
     let user = await User.findOne({ email: normalizedEmail });
     console.log('User found in Admin:', user ? 'Yes' : 'No');
     
@@ -128,7 +126,6 @@ export const forgotPassword = async (req, res) => {
 
     if (!user) {
       console.log('No user found with email:', normalizedEmail);
-      // Return success anyway to prevent email enumeration
       return res.json({ 
         message: 'If an account exists with this email, you will receive password reset instructions.' 
       });
@@ -136,10 +133,8 @@ export const forgotPassword = async (req, res) => {
 
     console.log('Generating reset token for user:', user.name || user.email);
 
-    // Generate temporary password
     const tempPassword = await user.generateResetToken();
     
-    // Use updateOne instead of save to avoid middleware issues
     await user.constructor.updateOne(
       { _id: user._id },
       { 
@@ -152,7 +147,6 @@ export const forgotPassword = async (req, res) => {
     console.log('Reset token generated and saved');
     console.log('Temp password:', tempPassword);
 
-    // Send email with temporary password
     try {
       console.log('Sending email to:', normalizedEmail);
       const emailHtml = forgotPasswordEmail(normalizedEmail, tempPassword);
@@ -173,8 +167,6 @@ export const forgotPassword = async (req, res) => {
     } catch (emailError) {
       console.error('✗ Email sending failed:');
       console.error('Error:', emailError.message);
-      console.error('Full error:', emailError);
-      // Return success anyway to prevent revealing server issues
       res.json({ 
         message: 'If an account exists with this email, you will receive password reset instructions.' 
       });
@@ -194,7 +186,6 @@ export const resetPassword = async (req, res) => {
       return res.status(400).json({ message: 'Please provide email, temporary password, and new password' });
     }
 
-    // Search across all user types
     let user = await User.findOne({ email: email.toLowerCase() });
     
     if (!user) {
@@ -211,17 +202,14 @@ export const resetPassword = async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    // Verify temporary password
     if (user.resetToken !== tempPassword) {
       return res.status(400).json({ message: 'Invalid temporary password' });
     }
 
-    // Check if token has expired
     if (!user.resetTokenExpiry || new Date() > user.resetTokenExpiry) {
       return res.status(400).json({ message: 'Password reset token has expired. Please request a new one.' });
     }
 
-    // Update password
     user.password = newPassword;
     user.resetToken = null;
     user.resetTokenExpiry = null;
@@ -239,56 +227,88 @@ export const changePassword = async (req, res) => {
     const userId = req.user._id;
     const { currentPassword, newPassword } = req.body;
 
-    console.log('=== CHANGE PASSWORD REQUEST ===');
+    console.log('\n=== CHANGE PASSWORD REQUEST ===');
     console.log('User ID:', userId);
+    console.log('Has currentPassword:', !!currentPassword);
+    console.log('Has newPassword:', !!newPassword);
 
     if (!newPassword) {
-      return res.status(400).json({ message: 'Please provide new password' });
+      return res.status(400).json({ message: 'New password is required' });
     }
 
-    // Find user across all models
-    let user = await User.findById(userId);
-    let Model = User;
+    if (newPassword.length < 6) {
+      return res.status(400).json({ message: 'Password must be at least 6 characters' });
+    }
+
+    let user = null;
+    let Model = null;
+
+    user = await User.findById(userId);
+    if (user) {
+      Model = User;
+      console.log('User found in Admin model');
+    }
     
     if (!user) {
       user = await Student.findById(userId);
-      Model = Student;
+      if (user) {
+        Model = Student;
+        console.log('User found in Student model');
+      }
     }
+    
     if (!user) {
       user = await Parent.findById(userId);
-      Model = Parent;
+      if (user) {
+        Model = Parent;
+        console.log('User found in Parent model');
+      }
     }
+    
     if (!user) {
       user = await Warden.findById(userId);
-      Model = Warden;
+      if (user) {
+        Model = Warden;
+        console.log('User found in Warden model');
+      }
     }
 
-    if (!user) {
+    if (!user || !Model) {
+      console.log('User not found');
       return res.status(404).json({ message: 'User not found' });
     }
 
     console.log('User found:', user.name || user.email);
+    console.log('User has resetToken:', !!user.resetToken);
 
-    // If user has temp password and no current password provided, skip verification
-    // Otherwise verify current password
-    if (user.resetToken) {
-      console.log('User has temp password, skipping current password verification');
-    } else {
+    // SIMPLE LOGIC: If user has a resetToken, they just logged in with temp password
+    // In that case, skip current password verification
+    const skipPasswordVerification = !!user.resetToken;
+
+    if (!skipPasswordVerification) {
+      console.log('Verifying current password...');
+      
       if (!currentPassword) {
-        return res.status(400).json({ message: 'Please provide current password' });
+        console.log('ERROR: Current password not provided');
+        return res.status(400).json({ message: 'Current password is required' });
       }
 
       const isPasswordMatch = await user.matchPassword(currentPassword);
       if (!isPasswordMatch) {
+        console.log('ERROR: Current password incorrect');
         return res.status(401).json({ message: 'Current password is incorrect' });
       }
-      console.log('Current password verified');
+      console.log('SUCCESS: Current password verified');
+    } else {
+      console.log('Temp password detected - skipping current password verification');
     }
 
-    // Update password using updateOne to avoid middleware
-    const hashedPassword = await require('bcryptjs').hash(newPassword, 10);
-    
-    await Model.updateOne(
+    console.log('Hashing new password...');
+    const hashedPassword = await bcryptjs.hash(newPassword, 10);
+    console.log('Password hashed successfully');
+
+    console.log('Updating password in database...');
+    const result = await Model.updateOne(
       { _id: userId },
       { 
         $set: { 
@@ -299,12 +319,19 @@ export const changePassword = async (req, res) => {
       }
     );
 
-    console.log('Password updated successfully');
-    console.log('=== CHANGE PASSWORD SUCCESS ===');
+    console.log('Update successful. Modified:', result.modifiedCount);
+    console.log('=== CHANGE PASSWORD SUCCESS ===\n');
 
-    res.json({ message: 'Password changed successfully' });
+    return res.json({ message: 'Password changed successfully' });
+
   } catch (error) {
-    console.error('Change Password Error:', error);
-    res.status(500).json({ message: 'Server error', error: error.message });
+    console.error('\n=== CHANGE PASSWORD ERROR ===');
+    console.error('Error:', error.message);
+    console.error('Stack:', error.stack);
+    console.error('===\n');
+    return res.status(500).json({ 
+      message: 'Failed to change password', 
+      error: error.message 
+    });
   }
 };
