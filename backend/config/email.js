@@ -22,11 +22,6 @@ transporter.verify((error, success) => {
 
 export const sendEmail = async (to, subject, html) => {
   try {
-    console.log('=== ATTEMPTING TO SEND EMAIL ===');
-    console.log('To:', to);
-    console.log('Subject:', subject);
-    console.log('From:', process.env.EMAIL_USER || 'dhanadharsinis@gmail.com');
-
     const mailOptions = {
       from: process.env.EMAIL_USER || 'dhanadharsinis@gmail.com',
       to: to,
@@ -35,15 +30,8 @@ export const sendEmail = async (to, subject, html) => {
     };
 
     const info = await transporter.sendMail(mailOptions);
-    console.log('✓ Email sent successfully!');
-    console.log('Message ID:', info.messageId);
-    console.log('Response:', info.response);
     return info;
   } catch (error) {
-    console.error('✗ Error sending email:');
-    console.error('Error message:', error.message);
-    console.error('Error code:', error.code);
-    console.error('Error stack:', error.stack);
     throw error;
   }
 };

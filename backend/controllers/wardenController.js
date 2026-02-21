@@ -1025,10 +1025,6 @@ export const getDelayedVacationStudents = async (req, res) => {
 
     const currentDateTime = new Date();
 
-    console.log('=== CHECKING DELAYED VACATION STUDENTS ===');
-    console.log('Warden:', warden.name, '| Hostel:', warden.hostelName);
-    console.log('Current Time:', currentDateTime.toISOString());
-
     // Find PLs where:
     // 1. Arrival date has passed
     // 2. Status is 'approved' OR (status is 'expired' but not fully used)
@@ -1044,8 +1040,6 @@ export const getDelayedVacationStudents = async (req, res) => {
         }
       ]
     });
-
-    console.log(`Found ${expiredPLs.length} PLs with passed arrival dates in ${warden.hostelName}`);
 
     const delayedVacationStudents = [];
 
@@ -1065,8 +1059,6 @@ export const getDelayedVacationStudents = async (req, res) => {
           // Calculate delay duration in minutes
           const arrivalTime = new Date(pl.arrivalDateTime);
           const delayInMinutes = Math.floor((currentDateTime - arrivalTime) / (1000 * 60));
-          
-          console.log(`✅ DELAYED: ${pl.name} (${pl.regNo}) - ${delayInMinutes} minutes late`);
           
           delayedVacationStudents.push({
             _id: pl._id,
@@ -1091,11 +1083,8 @@ export const getDelayedVacationStudents = async (req, res) => {
     // Sort by delay duration (most delayed first)
     delayedVacationStudents.sort((a, b) => b.delayDuration - a.delayDuration);
 
-    console.log(`\n=== RESULT: ${delayedVacationStudents.length} delayed vacation students ===\n`);
-
     res.json(delayedVacationStudents);
   } catch (error) {
-    console.error('Get Delayed Vacation Students Error:', error);
     res.status(500).json({ 
       message: 'Server error',
       error: error.message 

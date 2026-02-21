@@ -156,13 +156,10 @@ export const requestPL = async (req, res) => {
       arrivalDateTime
     });
 
-    console.log('Permission Letter Created:', permissionLetter._id);
-
     // Find parent
     const parent = await Parent.findOne({ studentRegNo: regNo });
     
     if (parent) {
-      console.log('Parent found:', parent.email);
       // TRY to send email - but don't fail if it doesn't work
       try {
         const emailHtml = plRequestToParentEmail(name, {
