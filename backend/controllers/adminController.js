@@ -39,16 +39,36 @@ export const addStudent = async (req, res) => {
       parentName
     } = req.body;
 
+    // Validation
+    if (!regNo || !name || !email || !password || !mobileNo || !yearOfStudy || !department || !hostelName || !roomNo || !parentName) {
+      console.log('Validation failed. Missing fields:', {
+        regNo: !regNo,
+        name: !name,
+        email: !email,
+        password: !password,
+        mobileNo: !mobileNo,
+        yearOfStudy: !yearOfStudy,
+        department: !department,
+        hostelName: !hostelName,
+        roomNo: !roomNo,
+        parentName: !parentName
+      });
+      return res.status(400).json({ message: 'All fields are required' });
+    }
+
     // Check if student already exists
-    const studentExists = await Student.findOne({ $or: [{ email }, { regNo }] });
+    const studentExists = await Student.findOne({ $or: [{ email: email.toLowerCase() }, { regNo }] });
     if (studentExists) {
+      console.log('Student already exists:', { email: email.toLowerCase(), regNo });
       return res.status(400).json({ message: 'Student already exists with this email or registration number' });
     }
+
+    console.log('Creating student with data:', { regNo, name, email: email.toLowerCase(), mobileNo, yearOfStudy });
 
     const student = await Student.create({
       regNo,
       name,
-      email,
+      email: email.toLowerCase(),
       password,
       mobileNo,
       yearOfStudy,
@@ -57,6 +77,8 @@ export const addStudent = async (req, res) => {
       roomNo,
       parentName
     });
+
+    console.log('Student created successfully:', student._id);
 
     res.status(201).json({
       message: 'Student added successfully',
@@ -68,8 +90,12 @@ export const addStudent = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Server error' });
+    console.error('ERROR in addStudent:', error.message);
+    console.error('Error details:', error);
+    res.status(500).json({ 
+      message: error.message || 'Server error',
+      error: error.message 
+    });
   }
 };
 
@@ -85,27 +111,46 @@ export const addParent = async (req, res) => {
       studentRegNo
     } = req.body;
 
+    // Validation
+    if (!parentId || !name || !email || !password || !mobileNo || !studentRegNo) {
+      console.log('Parent validation failed. Missing fields:', {
+        parentId: !parentId,
+        name: !name,
+        email: !email,
+        password: !password,
+        mobileNo: !mobileNo,
+        studentRegNo: !studentRegNo
+      });
+      return res.status(400).json({ message: 'All fields are required' });
+    }
+
     // Check if parent already exists
-    const parentExists = await Parent.findOne({ $or: [{ email }, { parentId }] });
+    const parentExists = await Parent.findOne({ $or: [{ email: email.toLowerCase() }, { parentId }] });
     if (parentExists) {
+      console.log('Parent already exists:', { email: email.toLowerCase(), parentId });
       return res.status(400).json({ message: 'Parent already exists with this email or parent ID' });
     }
 
     // Verify student exists
     const student = await Student.findOne({ regNo: studentRegNo });
     if (!student) {
-      return res.status(404).json({ message: 'Student not found with this registration number' });
+      console.log('Student not found with regNo:', studentRegNo);
+      return res.status(400).json({ message: 'Student not found with this registration number' });
     }
+
+    console.log('Creating parent for student:', studentRegNo);
 
     const parent = await Parent.create({
       parentId,
       name,
-      email,
+      email: email.toLowerCase(),
       password,
       mobileNo,
       studentName,
       studentRegNo
     });
+
+    console.log('Parent created successfully:', parent._id);
 
     res.status(201).json({
       message: 'Parent added successfully',
@@ -117,8 +162,12 @@ export const addParent = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Server error' });
+    console.error('ERROR in addParent:', error.message);
+    console.error('Error details:', error);
+    res.status(500).json({ 
+      message: error.message || 'Server error',
+      error: error.message 
+    });
   }
 };
 
@@ -133,20 +182,38 @@ export const addWarden = async (req, res) => {
       hostelName
     } = req.body;
 
+    // Validation
+    if (!wardenId || !name || !email || !password || !mobileNo || !hostelName) {
+      console.log('Warden validation failed. Missing fields:', {
+        wardenId: !wardenId,
+        name: !name,
+        email: !email,
+        password: !password,
+        mobileNo: !mobileNo,
+        hostelName: !hostelName
+      });
+      return res.status(400).json({ message: 'All fields are required' });
+    }
+
     // Check if warden already exists
-    const wardenExists = await Warden.findOne({ $or: [{ email }, { wardenId }] });
+    const wardenExists = await Warden.findOne({ $or: [{ email: email.toLowerCase() }, { wardenId }] });
     if (wardenExists) {
+      console.log('Warden already exists:', { email: email.toLowerCase(), wardenId });
       return res.status(400).json({ message: 'Warden already exists with this email or warden ID' });
     }
+
+    console.log('Creating warden for hostel:', hostelName);
 
     const warden = await Warden.create({
       wardenId,
       name,
-      email,
+      email: email.toLowerCase(),
       password,
       mobileNo,
       hostelName
     });
+
+    console.log('Warden created successfully:', warden._id);
 
     res.status(201).json({
       message: 'Warden added successfully',
@@ -158,8 +225,12 @@ export const addWarden = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Server error' });
+    console.error('ERROR in addWarden:', error.message);
+    console.error('Error details:', error);
+    res.status(500).json({ 
+      message: error.message || 'Server error',
+      error: error.message 
+    });
   }
 };
 

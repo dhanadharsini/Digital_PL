@@ -14,18 +14,18 @@ import { protect, authorize } from '../middleware/auth.js';
 
 const router = express.Router();
 
-// Protect all routes and authorize only student
-router.use(protect);
-router.use(authorize('student'));
+// Create student authorization middleware
+const studentAuth = authorize('student');
 
-router.get('/stats', getStats);
-router.get('/details', getStudentDetails);
-router.post('/request-pl', requestPL);
-router.get('/pl-requests', getPLRequests);
-router.get('/pl-card/:id', getPLCard);
-router.post('/outpass/request', requestOutpass);
-router.get('/outpass/history', getOutpassHistory);
-router.get('/outpass/active', getActiveOutpass);
-router.get('/profile', getProfile);
+// Apply middleware to routes
+router.get('/stats', protect, studentAuth, getStats);
+router.get('/details', protect, studentAuth, getStudentDetails);
+router.post('/request-pl', protect, studentAuth, requestPL);
+router.get('/pl-requests', protect, studentAuth, getPLRequests);
+router.get('/pl-card/:id', protect, studentAuth, getPLCard);
+router.post('/outpass/request', protect, studentAuth, requestOutpass);
+router.get('/outpass/history', protect, studentAuth, getOutpassHistory);
+router.get('/outpass/active', protect, studentAuth, getActiveOutpass);
+router.get('/profile', protect, studentAuth, getProfile);
 
 export default router;

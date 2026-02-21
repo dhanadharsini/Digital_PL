@@ -15,19 +15,25 @@ import { protect, authorize } from '../middleware/auth.js';
 
 const router = express.Router();
 
-// Protect all routes and authorize only admin
-router.use(protect);
-router.use(authorize('admin'));
+// Create admin authorization middleware
+const adminAuth = authorize('admin');
 
-router.get('/stats', getStats);
-router.post('/add-student', addStudent);
-router.post('/add-parent', addParent);
-router.post('/add-warden', addWarden);
-router.get('/students', getAllStudents);
-router.get('/parents', getAllParents);
-router.get('/wardens', getAllWardens);
-router.delete('/student/:id', deleteStudent);
-router.delete('/parent/:id', deleteParent);
-router.delete('/warden/:id', deleteWarden);
+// Stats endpoint
+router.get('/stats', protect, adminAuth, getStats);
+
+// Add new users
+router.post('/add-student', protect, adminAuth, addStudent);
+router.post('/add-parent', protect, adminAuth, addParent);
+router.post('/add-warden', protect, adminAuth, addWarden);
+
+// Get all users
+router.get('/students', protect, adminAuth, getAllStudents);
+router.get('/parents', protect, adminAuth, getAllParents);
+router.get('/wardens', protect, adminAuth, getAllWardens);
+
+// Delete users
+router.delete('/student/:id', protect, adminAuth, deleteStudent);
+router.delete('/parent/:id', protect, adminAuth, deleteParent);
+router.delete('/warden/:id', protect, adminAuth, deleteWarden);
 
 export default router;

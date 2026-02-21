@@ -1,5 +1,5 @@
 import express from 'express';
-import { protect, authorize } from '../middleware/auth.js';  // ← CHANGED THIS
+import { protect, authorize } from '../middleware/auth.js';
 import {
   getStats,
   getPendingRequests,
@@ -17,32 +17,31 @@ import {
 
 const router = express.Router();
 
-// Apply authentication and role authorization to all routes
-router.use(protect);  // ← CHANGED THIS
-router.use(authorize('warden'));  // ← CHANGED THIS
+// Create warden authorization middleware
+const wardenAuth = authorize('warden');
 
 // Dashboard stats
-router.get('/stats', getStats);
+router.get('/stats', protect, wardenAuth, getStats);
 
 // Permission Letter Management
-router.get('/pending-requests', getPendingRequests);
-router.post('/approve/:id', approveRequest);
-router.post('/reject/:id', rejectRequest);
+router.get('/pending-requests', protect, wardenAuth, getPendingRequests);
+router.post('/approve/:id', protect, wardenAuth, approveRequest);
+router.post('/reject/:id', protect, wardenAuth, rejectRequest);
 
 // Student Management
-router.get('/students', getStudents);
+router.get('/students', protect, wardenAuth, getStudents);
 
 // QR Code Verification
-router.post('/verify-qr', verifyQR);
-router.post('/log-entry-exit', logEntryExit);
+router.post('/verify-qr', protect, wardenAuth, verifyQR);
+router.post('/log-entry-exit', protect, wardenAuth, logEntryExit);
 
 // Outpass Management
-router.post('/outpass/verify-qr', verifyOutpassQR);
-router.post('/outpass/log-action', logOutpassAction);
-router.get('/outpass/delayed', getDelayedStudents);
-router.get('/outpass/active', getActiveOutpasses);
+router.post('/outpass/verify-qr', protect, wardenAuth, verifyOutpassQR);
+router.post('/outpass/log-action', protect, wardenAuth, logOutpassAction);
+router.get('/outpass/delayed', protect, wardenAuth, getDelayedStudents);
+router.get('/outpass/active', protect, wardenAuth, getActiveOutpasses);
 
 // Vacation Delayed Students
-router.get('/vacation/delayed', getDelayedVacationStudents);
+router.get('/vacation/delayed', protect, wardenAuth, getDelayedVacationStudents);
 
 export default router;

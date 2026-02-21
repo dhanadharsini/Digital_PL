@@ -1,6 +1,3 @@
-// Add this temporary test endpoint to backend/routes/parent.js
-// This will help us verify the parent record exists
-
 import express from 'express';
 import {
   getStats,
@@ -13,17 +10,18 @@ import { protect, authorize } from '../middleware/auth.js';
 
 const router = express.Router();
 
-router.use(protect);
-router.use(authorize('parent'));
+// Create parent authorization middleware
+const parentAuth = authorize('parent');
 
-router.get('/stats', getStats);
-router.get('/pending-requests', getPendingRequests);
-router.post('/approve-request/:id', approveRequest);
-router.post('/reject-request/:id', rejectRequest);
-router.get('/request-history', getRequestHistory);
+// Apply middleware to routes
+router.get('/stats', protect, parentAuth, getStats);
+router.get('/pending-requests', protect, parentAuth, getPendingRequests);
+router.post('/approve-request/:id', protect, parentAuth, approveRequest);
+router.post('/reject-request/:id', protect, parentAuth, rejectRequest);
+router.get('/request-history', protect, parentAuth, getRequestHistory);
 
-// ===== TEMPORARY DEBUG ENDPOINT =====
-router.get('/debug-info', async (req, res) => {
+// Debug endpoint
+router.get('/debug-info', protect, parentAuth, async (req, res) => {
   try {
     const Parent = (await import('../models/Parent.js')).default;
     const PermissionLetter = (await import('../models/PermissionLetter.js')).default;
