@@ -147,9 +147,6 @@ export const plApprovedByWardenEmail = (studentName, plDetails) => {
           </div>
           
           <p>You can now view your PL card with QR code in your student portal.</p>
-          <p style="text-align: center; margin-top: 20px;">
-            <a href="${process.env.FRONTEND_URL}/student/pl-history" class="button">View PL Card</a>
-          </p>
         </div>
       </div>
     </body>

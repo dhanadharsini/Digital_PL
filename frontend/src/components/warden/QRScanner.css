@@ -45,8 +45,10 @@
 
 .message.success {
   background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
-  color: #065f46;
+  color: #0f172a;
   border: 2px solid #6ee7b7;
+  font-size: 18px;
+  font-weight: 700;
 }
 
 .message.error {

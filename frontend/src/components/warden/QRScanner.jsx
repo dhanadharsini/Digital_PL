@@ -19,7 +19,6 @@ const QRScanner = () => {
     { label: 'Dashboard', path: '/warden' },
     { label: 'Pending Requests', path: '/warden/pending-requests' },
     { label: 'Students List', path: '/warden/students' },
-    { label: 'Attendance', path: '/warden/attendance' },
     { label: 'Delayed Students', path: '/warden/delayed-students' },
     { label: 'QR Scanner', path: '/warden/qr-scanner' }
   ];

@@ -17,7 +17,6 @@ const WardenDashboard = () => {
     { label: 'Dashboard', path: '/warden' },
     { label: 'Pending Requests', path: '/warden/pending-requests' },
     { label: 'Students List', path: '/warden/students' },
-    { label: 'Attendance', path: '/warden/attendance' },
     { label: 'Delayed Students', path: '/warden/delayed-students' },
     { label: 'QR Scanner', path: '/warden/qr-scanner' }
   ];
@@ -74,9 +73,6 @@ const WardenDashboard = () => {
             </button>
             <button className="btn btn-secondary" onClick={() => window.location.href = '/warden/students'}>
               View Students
-            </button>
-            <button className="btn btn-primary" onClick={() => window.location.href = '/warden/attendance'}>
-              Take Attendance
             </button>
             <button className="btn btn-success" onClick={() => window.location.href = '/warden/qr-scanner'}>
               Scan QR Code

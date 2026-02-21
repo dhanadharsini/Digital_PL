@@ -8,9 +8,6 @@ import {
   getStudents,
   verifyQR,
   logEntryExit,
-  getStudentsForAttendance,
-  markAttendance,
-  getAttendanceReport,
   verifyOutpassQR,
   logOutpassAction,
   getDelayedStudents,
@@ -38,11 +35,6 @@ router.get('/students', getStudents);
 // QR Code Verification
 router.post('/verify-qr', verifyQR);
 router.post('/log-entry-exit', logEntryExit);
-
-// Attendance Management
-router.get('/attendance/students', getStudentsForAttendance);
-router.post('/attendance/mark', markAttendance);
-router.get('/attendance/report', getAttendanceReport);
 
 // Outpass Management
 router.post('/outpass/verify-qr', verifyOutpassQR);

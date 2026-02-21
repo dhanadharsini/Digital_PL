@@ -14,7 +14,6 @@ import {
   plRejectedByWardenEmailToParent
 } from '../utils/emailTemplates.js';
 import Outpass from '../models/Outpass.js';
-import Attendance from '../models/Attendance.js';
 
 export const getStats = async (req, res) => {
   try {

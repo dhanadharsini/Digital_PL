@@ -40,7 +40,6 @@ import RequestHistory from "./components/parent/RequestHistory.jsx";
 import WardenDashboard from "./components/warden/WardenDashboard.jsx";
 import PendingRequests from "./components/warden/PendingRequests.jsx";
 import StudentsList from "./components/warden/StudentsList.jsx";
-import WardenAttendance from "./components/warden/Attendance.jsx";
 import DelayedStudents from "./components/warden/DelayedStudents.jsx";
 import QRScanner from "./components/warden/QRScanner.jsx";
 
@@ -229,14 +228,6 @@ function App() {
           element={
             <ProtectedRoute allowedRoles={["warden"]}>
               <StudentsList />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/warden/attendance"
-          element={
-            <ProtectedRoute allowedRoles={["warden"]}>
-              <WardenAttendance />
             </ProtectedRoute>
           }
         />
