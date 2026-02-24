@@ -44,7 +44,7 @@ import DelayedStudents from "./components/warden/DelayedStudents.jsx";
 import QRScanner from "./components/warden/QRScanner.jsx";
 
 function App() {
-  const { user } = useAuth();
+  const { user, isTempPassword } = useAuth();
 
   useEffect(() => {
     // Initialize theme on app load
@@ -57,6 +57,13 @@ function App() {
       document.body.classList.remove('light-mode');
     }
   }, []);
+
+  // Redirect to change password if user logged in with temporary password
+  useEffect(() => {
+    if (user && isTempPassword && window.location.pathname !== '/change-password' && !window.location.pathname.includes('/change-password')) {
+      window.location.href = '/change-password';
+    }
+  }, [user, isTempPassword]);
 
   return (
     <Router>

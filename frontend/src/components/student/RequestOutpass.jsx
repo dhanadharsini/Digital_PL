@@ -119,17 +119,6 @@ const RequestOutpass = () => {
                 />
               </div>
 
-              <div className="info-box">
-                <h4>⏱️ Important Information:</h4>
-                <ul>
-                  <li>Outpass is valid for <strong>4 hours</strong> from exit time</li>
-                  <li>QR code will be generated with all your details automatically</li>
-                  <li>Show the QR code to the warden when <strong>leaving</strong></li>
-                  <li>Show the same QR code when <strong>returning</strong></li>
-                  <li>Late returns will be recorded and may have consequences</li>
-                </ul>
-              </div>
-
               <button 
                 type="submit" 
                 className="btn btn-primary submit-btn"

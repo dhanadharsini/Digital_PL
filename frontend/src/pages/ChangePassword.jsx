@@ -100,6 +100,9 @@ export default function ChangePassword() {
       console.log('Password change response:', response.data);
       setSuccess('Password changed successfully!');
       
+      // Clear temporary password flag
+      localStorage.removeItem('isTempPassword');
+      
       setTimeout(() => {
         logout();
         navigate('/login');
