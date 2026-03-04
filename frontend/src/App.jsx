@@ -65,16 +65,20 @@ function App() {
     }
   }, [user, isTempPassword]);
 
+  // Redirect to dashboard if user is already logged in and trying to access login page
+  useEffect(() => {
+    if (user?.role && window.location.pathname === '/login') {
+      window.location.href = `/${user.role}`;
+    }
+  }, [user]);
+
   return (
     <Router>
       <Routes>
-        <Route
-  path="/login"
-  element={
-    user?.role ? <Navigate to={`/${user.role}`} /> : <Login />
-  }
-/>
-        {/* Admin Routes */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/change-password" element={<ChangePassword />} />
+        <Route path="/:role/change-password" element={<ChangePassword />} />
+        <Route path="/" element={<Navigate to="/login" />} />
         <Route
           path="/admin"
           element={

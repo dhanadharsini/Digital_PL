@@ -5,8 +5,8 @@ import PermissionLetter from '../models/PermissionLetter.js';
 import EntryExitLog from '../models/EntryExitLog.js';
 import { sendEmail } from '../config/email.js';
 import { generateQRCode } from '../utils/generateQR.js';
-import { 
-  plApprovedByWardenEmail, 
+import {
+  plApprovedByWardenEmail,
   plRejectedByWardenEmail,
   outpassCreatedEmail,
   outpassCompletedEmail,
@@ -19,31 +19,58 @@ export const getStats = async (req, res) => {
   try {
     const warden = await Warden.findById(req.user._id);
 
-    const totalStudents = await Student.countDocuments({ 
-      hostelName: warden.hostelName 
+    const totalStudents = await Student.countDocuments({
+      hostelName: warden.hostelName
     });
-    
-    const studentsInHostel = await Student.countDocuments({ 
+
+    const studentsInHostel = await Student.countDocuments({
       hostelName: warden.hostelName,
       isOnVacation: false
     });
-    
-    const studentsOnVacation = await Student.countDocuments({ 
+
+    const studentsOnVacation = await Student.countDocuments({
       hostelName: warden.hostelName,
       isOnVacation: true
     });
-    
-    const pendingRequests = await PermissionLetter.countDocuments({ 
+
+    // Get pending requests and filter out orphaned records
+    const allPendingRequests = await PermissionLetter.find({
       hostelName: warden.hostelName,
       status: 'parent-approved',
       wardenStatus: 'pending'
     });
 
+    console.log('\n=== PENDING REQUESTS STATS DEBUG ===');
+    console.log(`Hostel: ${warden.hostelName}`);
+    console.log(`Total pending from DB: ${allPendingRequests.length}`);
+
+    if (allPendingRequests.length > 0) {
+      console.log('Pending requests details:');
+      allPendingRequests.forEach((req, idx) => {
+        console.log(`  [${idx}] ${req.name} (${req.regNo}) - StudentID: ${req.studentId}`);
+      });
+    }
+
+    // Filter out requests for non-existent students
+    let validPendingCount = 0;
+    for (const request of allPendingRequests) {
+      const studentExists = await Student.findById(request.studentId);
+      if (studentExists) {
+        validPendingCount++;
+        console.log(`✓ Valid request: ${request.name} (${request.regNo})`);
+      } else {
+        console.log(`✗ Orphaned request: ${request.name} (${request.regNo}) - Student not found`);
+      }
+    }
+
+    console.log(`Result: ${validPendingCount} valid requests`);
+    console.log('=====================================\n');
+
     res.json({
       totalStudents,
       studentsInHostel,
       studentsOnVacation,
-      pendingRequests
+      pendingRequests: validPendingCount
     });
   } catch (error) {
     console.error(error);
@@ -55,13 +82,28 @@ export const getPendingRequests = async (req, res) => {
   try {
     const warden = await Warden.findById(req.user._id);
 
-    const requests = await PermissionLetter.find({
+    // First get all pending requests
+    const allRequests = await PermissionLetter.find({
       hostelName: warden.hostelName,
       status: 'parent-approved',
       wardenStatus: 'pending'
     }).sort({ createdAt: -1 });
 
-    res.json(requests);
+    // Filter out requests for non-existent students
+    const validRequests = [];
+    for (const request of allRequests) {
+      const studentExists = await Student.findById(request.studentId);
+      if (studentExists) {
+        validRequests.push(request);
+      } else {
+        console.log(`Removing orphaned request for deleted student: ${request.name} (${request.regNo})`);
+        // Optionally delete the orphaned request
+        // await PermissionLetter.findByIdAndDelete(request._id);
+      }
+    }
+
+    console.log(`Found ${allRequests.length} total pending requests, ${validRequests.length} valid requests`);
+    res.json(validRequests);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server error' });
@@ -79,11 +121,11 @@ export const approveRequest = async (req, res) => {
     console.log('PL ID:', req.params.id);
     console.log('Warden User ID:', req.user?._id);
     console.log('Warden Role:', req.user?.role);
-    
+
     // 1. Find the warden
     const warden = await Warden.findById(req.user._id);
     console.log('1. Warden lookup result:', warden ? `Found: ${warden.name}` : 'NOT FOUND');
-    
+
     if (!warden) {
       console.log('ERROR: Warden not found in database');
       return res.status(404).json({ message: 'Warden not found' });
@@ -92,7 +134,7 @@ export const approveRequest = async (req, res) => {
     // 2. Find the permission letter
     const pl = await PermissionLetter.findById(req.params.id);
     console.log('2. PL lookup result:', pl ? `Found: ${pl.name}` : 'NOT FOUND');
-    
+
     if (!pl) {
       console.log('ERROR: Permission letter not found');
       return res.status(404).json({ message: 'Permission letter not found' });
@@ -116,8 +158,8 @@ export const approveRequest = async (req, res) => {
     if (pl.wardenStatus !== 'pending') {
       console.log('ERROR: Already processed');
       console.log(`   - Current wardenStatus: ${pl.wardenStatus}`);
-      return res.status(400).json({ 
-        message: `This request has already been ${pl.wardenStatus}` 
+      return res.status(400).json({
+        message: `This request has already been ${pl.wardenStatus}`
       });
     }
 
@@ -125,7 +167,7 @@ export const approveRequest = async (req, res) => {
 
     // 5. Generate QR Code
     console.log('5. Generating QR Code...');
-    
+
     const qrData = {
       plId: pl._id.toString(),
       studentId: pl.studentId.toString(),
@@ -137,9 +179,9 @@ export const approveRequest = async (req, res) => {
       arrivalDateTime: pl.arrivalDateTime.toISOString(),
       type: 'permission-letter'
     };
-    
+
     console.log('   QR Data prepared:', JSON.stringify(qrData, null, 2));
-    
+
     let qrCode;
     try {
       qrCode = await generateQRCode(qrData);
@@ -148,29 +190,29 @@ export const approveRequest = async (req, res) => {
     } catch (qrError) {
       console.error('   ✗ QR generation FAILED:', qrError.message);
       console.error('   QR Error stack:', qrError.stack);
-      return res.status(500).json({ 
+      return res.status(500).json({
         message: 'Failed to generate QR code',
-        error: qrError.message 
+        error: qrError.message
       });
     }
 
     // 6. Update the permission letter
     console.log('6. Updating Permission Letter...');
-    
+
     pl.wardenStatus = 'approved';
     pl.status = 'approved';
     pl.qrCode = qrCode;
     pl.approvedAt = new Date();
-    
+
     try {
       await pl.save();
       console.log('   ✓ Permission letter saved successfully');
     } catch (saveError) {
       console.error('   ✗ Save FAILED:', saveError.message);
       console.error('   Save error stack:', saveError.stack);
-      return res.status(500).json({ 
+      return res.status(500).json({
         message: 'Failed to save permission letter',
-        error: saveError.message 
+        error: saveError.message
       });
     }
 
@@ -179,17 +221,17 @@ export const approveRequest = async (req, res) => {
     try {
       const student = await Student.findOne({ regNo: pl.regNo });
       const parent = await Parent.findOne({ studentRegNo: pl.regNo });
-      
+
       if (student && student.email) {
         console.log('   Student email found:', student.email);
-        
+
         try {
           const emailHtml = plApprovedByWardenEmail(student.name, {
             placeOfVisit: pl.placeOfVisit,
             departureDateTime: pl.departureDateTime,
             arrivalDateTime: pl.arrivalDateTime
           });
-          
+
           await sendEmail(
             student.email,
             'Permission Letter Approved - Hostel Portal',
@@ -209,7 +251,7 @@ export const approveRequest = async (req, res) => {
               departureDateTime: pl.departureDateTime,
               arrivalDateTime: pl.arrivalDateTime
             });
-            
+
             await sendEmail(
               parent.email,
               'Your Ward\'s Permission Letter Approved - Hostel Portal',
@@ -234,7 +276,7 @@ export const approveRequest = async (req, res) => {
     console.log('========================================\n');
 
     // 8. Send success response
-    res.status(200).json({ 
+    res.status(200).json({
       message: 'Request approved successfully',
       permissionLetter: {
         _id: pl._id,
@@ -253,8 +295,8 @@ export const approveRequest = async (req, res) => {
     console.error('Error message:', error.message);
     console.error('Error stack:', error.stack);
     console.error('========================================\n');
-    
-    res.status(500).json({ 
+
+    res.status(500).json({
       message: 'Failed to approve request',
       error: error.message,
       errorType: error.name
@@ -288,11 +330,11 @@ export const rejectRequest = async (req, res) => {
     // Get student and parent details
     const student = await Student.findOne({ regNo: pl.regNo });
     const parent = await Parent.findOne({ studentRegNo: pl.regNo });
-    
+
     // Send email to student
     if (student) {
       const studentEmailHtml = plRejectedByWardenEmail(
-        student.name, 
+        student.name,
         parent?.email,
         {
           placeOfVisit: pl.placeOfVisit,
@@ -301,7 +343,7 @@ export const rejectRequest = async (req, res) => {
         },
         reason
       );
-      
+
       await sendEmail(
         student.email,
         'Permission Letter Rejected by Warden - Hostel Portal',
@@ -313,7 +355,7 @@ export const rejectRequest = async (req, res) => {
     // Send email to parent with parent-specific template
     if (parent && parent.email) {
       const parentEmailHtml = plRejectedByWardenEmailToParent(
-        student?.name || 'Student', 
+        student?.name || 'Student',
         parent.name,
         {
           placeOfVisit: pl.placeOfVisit,
@@ -322,7 +364,7 @@ export const rejectRequest = async (req, res) => {
         },
         reason
       );
-      
+
       await sendEmail(
         parent.email,
         'Your Ward\'s Permission Letter Rejected - Hostel Portal',
@@ -333,9 +375,9 @@ export const rejectRequest = async (req, res) => {
       console.log('   ⚠ No parent email found - skipping parent notification');
     }
 
-    res.json({ 
+    res.json({
       message: 'Request rejected successfully',
-      permissionLetter: pl 
+      permissionLetter: pl
     });
   } catch (error) {
     console.error(error);
@@ -381,20 +423,36 @@ export const verifyQR = async (req, res) => {
     try {
       parsedData = JSON.parse(qrData);
     } catch (error) {
+      console.error('Error parsing QR data:', error.message);
       return res.status(400).json({ message: 'Invalid QR code format' });
     }
 
     const { plId, studentId, regNo } = parsedData;
+    console.log(`Verifying PL QR: plId=${plId}, studentId=${studentId}, regNo=${regNo}`);
 
     // Verify permission letter
+    if (!plId) {
+      console.log('Error: plId missing in QR data');
+      return res.status(400).json({ message: 'Invalid QR code: missing PL ID' });
+    }
+
     const pl = await PermissionLetter.findById(plId);
-    if (!pl || pl.status !== 'approved') {
+    if (!pl) {
+      console.log(`Error: Permission letter not found for ID: ${plId}`);
+      return res.status(400).json({ message: 'Invalid or unapproved permission letter (Not Found)' });
+    }
+
+    console.log(`PL found: status=${pl.status}, studentId=${pl.studentId}`);
+
+    if (pl.status !== 'approved') {
+      console.log(`Error: PL status is ${pl.status}, expected "approved"`);
       return res.status(400).json({ message: 'Invalid or unapproved permission letter' });
     }
 
     // Get student details
     const student = await Student.findById(studentId);
     if (!student) {
+      console.log(`Error: Student not found for ID: ${studentId}`);
       return res.status(404).json({ message: 'Student not found' });
     }
 
@@ -414,8 +472,8 @@ export const verifyQR = async (req, res) => {
       currentStatus = 'On Vacation';
     } else {
       // Both exit and entry logged
-      return res.status(400).json({ 
-        message: 'This permission letter has already been fully processed' 
+      return res.status(400).json({
+        message: 'This permission letter has already been fully processed'
       });
     }
 
@@ -428,7 +486,8 @@ export const verifyQR = async (req, res) => {
         placeOfVisit: pl.placeOfVisit,
         arrivalDateTime: pl.arrivalDateTime,
         action,
-        currentStatus
+        currentStatus,
+        profilePhoto: student.profilePhoto || null
       }
     });
   } catch (error) {
@@ -465,8 +524,8 @@ export const logEntryExit = async (req, res) => {
 
     // Check if already expired/fully used
     if (pl.status === 'expired' || pl.isFullyUsed) {
-      return res.status(400).json({ 
-        message: 'This permission letter has expired. Student must request a new PL.' 
+      return res.status(400).json({
+        message: 'This permission letter has expired. Student must request a new PL.'
       });
     }
 
@@ -558,8 +617,8 @@ export const getStudentsForAttendance = async (req, res) => {
     }
 
     // Get all students in warden's hostel
-    const students = await Student.find({ 
-      hostelName: warden.hostelName 
+    const students = await Student.find({
+      hostelName: warden.hostelName
     }).select('-password').sort({ roomNo: 1 });
 
     // Get attendance records for this date
@@ -626,7 +685,7 @@ export const markAttendance = async (req, res) => {
 
       // Get student details
       const student = await Student.findById(studentId);
-      
+
       if (!student || student.hostelName !== warden.hostelName) {
         continue; // Skip if student not found or not in warden's hostel
       }
@@ -683,7 +742,7 @@ export const getAttendanceReport = async (req, res) => {
 
     const start = new Date(startDate);
     start.setHours(0, 0, 0, 0);
-    
+
     const end = new Date(endDate);
     end.setHours(23, 59, 59, 999);
 
@@ -694,10 +753,10 @@ export const getAttendanceReport = async (req, res) => {
 
     // Group by student
     const studentAttendance = {};
-    
+
     attendanceRecords.forEach(record => {
       const studentKey = record.studentId.toString();
-      
+
       if (!studentAttendance[studentKey]) {
         studentAttendance[studentKey] = {
           studentId: record.studentId,
@@ -706,7 +765,7 @@ export const getAttendanceReport = async (req, res) => {
           records: []
         };
       }
-      
+
       studentAttendance[studentKey].records.push({
         date: record.date,
         status: record.status,
@@ -752,6 +811,9 @@ export const verifyOutpassQR = async (req, res) => {
       status: 'active'
     });
 
+    // Get student details for profile photo
+    const student = await Student.findById(studentId);
+
     if (!outpass) {
       return res.status(404).json({ message: 'No active outpass found for this student' });
     }
@@ -766,8 +828,8 @@ export const verifyOutpassQR = async (req, res) => {
       action = 'entry';
       currentStatus = 'Out on Outpass';
     } else {
-      return res.status(400).json({ 
-        message: 'This outpass has already been completed' 
+      return res.status(400).json({
+        message: 'This outpass has already been completed'
       });
     }
 
@@ -782,7 +844,8 @@ export const verifyOutpassQR = async (req, res) => {
         action,
         currentStatus,
         exitTime: outpass.exitTime,
-        expectedReturnTime: outpass.expectedReturnTime
+        expectedReturnTime: outpass.expectedReturnTime,
+        profilePhoto: student?.profilePhoto || null
       }
     });
   } catch (error) {
@@ -870,7 +933,7 @@ export const logOutpassAction = async (req, res) => {
 
       const actualReturnTime = new Date();
       const expectedReturnTime = new Date(outpass.expectedReturnTime);
-      
+
       const delayInMinutes = Math.floor((actualReturnTime - expectedReturnTime) / (1000 * 60));
       const isDelayed = delayInMinutes > 0;
 
@@ -945,32 +1008,87 @@ export const getDelayedStudents = async (req, res) => {
       actualReturnTime: null  // Haven't returned yet
     });
 
-    // Check which active outpasses are currently delayed
+    // Check which active outpasses are currently delayed and filter orphaned records
     const currentlyDelayedStudents = [];
-    
+
     for (const outpass of activeOutpasses) {
+      // Check if student still exists
+      const studentExists = await Student.findById(outpass.studentId);
+      if (!studentExists) {
+        console.log(`Removing orphaned delayed outpass for deleted student: ${outpass.name} (${outpass.regNo})`);
+        continue;
+      }
+
       const expectedReturn = new Date(outpass.expectedReturnTime);
-      
+
       if (currentTime > expectedReturn) {
         // This student is currently delayed (still out past 4 hours)
         const delayMinutes = Math.floor((currentTime - expectedReturn) / (1000 * 60));
-        
+
         currentlyDelayedStudents.push({
           ...outpass.toObject(),
           delayDuration: delayMinutes,
           isCurrentlyDelayed: true,
-          status: 'active-delayed' // Custom status for display
+          status: 'active-delayed', // Custom status for display
+          expectedReturnTimeFormatted: expectedReturn.toLocaleString('en-IN', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          }),
+          exitTimeFormatted: new Date(outpass.exitTime).toLocaleString('en-IN', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          })
         });
       }
     }
 
-    // 3. Combine both lists
+    // 3. Combine both lists and filter orphaned records from completed list
+    const validCompletedDelayed = [];
+
+    for (const s of completedDelayedStudents) {
+      const studentExists = await Student.findById(s.studentId);
+      if (studentExists) {
+        validCompletedDelayed.push({
+          ...s.toObject(),
+          isCurrentlyDelayed: false,
+          expectedReturnTimeFormatted: new Date(s.expectedReturnTime).toLocaleString('en-IN', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          }),
+          exitTimeFormatted: new Date(s.exitTime).toLocaleString('en-IN', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          }),
+          actualReturnTimeFormatted: s.actualReturnTime
+            ? new Date(s.actualReturnTime).toLocaleString('en-IN', {
+              day: '2-digit',
+              month: 'short',
+              year: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit'
+            })
+            : null
+        });
+      } else {
+        console.log(`Removing orphaned completed delayed outpass for deleted student: ${s.name} (${s.regNo})`);
+      }
+    }
+
     const allDelayedStudents = [
       ...currentlyDelayedStudents,  // Currently delayed (still out)
-      ...completedDelayedStudents.map(s => ({
-        ...s.toObject(),
-        isCurrentlyDelayed: false
-      }))
+      ...validCompletedDelayed
     ];
 
     // Sort by delay duration (most delayed first)
@@ -986,27 +1104,52 @@ export const getActiveOutpasses = async (req, res) => {
   try {
     const warden = await Warden.findById(req.user._id);
 
-    const activeOutpasses = await Outpass.find({
+    const allActiveOutpasses = await Outpass.find({
       hostelName: warden.hostelName,
       status: 'active',
       exitTime: { $ne: null }
     }).sort({ exitTime: -1 });
 
+    // Filter out orphaned outpasses and calculate delays
+    const validOutpasses = [];
     const now = new Date();
-    const updatedOutpasses = activeOutpasses.map(outpass => {
+
+    for (const outpass of allActiveOutpasses) {
+      const studentExists = await Student.findById(outpass.studentId);
+      if (!studentExists) {
+        console.log(`Removing orphaned active outpass for deleted student: ${outpass.name} (${outpass.regNo})`);
+        continue;
+      }
+
       const expectedReturn = new Date(outpass.expectedReturnTime);
       const isCurrentlyDelayed = now > expectedReturn;
-      
-      return {
+      const currentDelayMinutes = isCurrentlyDelayed
+        ? Math.floor((now - expectedReturn) / (1000 * 60))
+        : 0;
+
+      validOutpasses.push({
         ...outpass.toObject(),
         isCurrentlyDelayed,
-        currentDelayMinutes: isCurrentlyDelayed 
-          ? Math.floor((now - expectedReturn) / (1000 * 60)) 
-          : 0
-      };
-    });
+        currentDelayMinutes,
+        expectedReturnTimeFormatted: expectedReturn.toLocaleString('en-IN', {
+          day: '2-digit',
+          month: 'short',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        }),
+        exitTimeFormatted: new Date(outpass.exitTime).toLocaleString('en-IN', {
+          day: '2-digit',
+          month: 'short',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        })
+      });
+    }
 
-    res.json(updatedOutpasses);
+    console.log(`Active outpasses: ${allActiveOutpasses.length} total, ${validOutpasses.length} valid`);
+    res.json(validOutpasses);
   } catch (error) {
     console.error('Get Active Outpasses Error:', error);
     res.status(500).json({ message: 'Server error' });
@@ -1018,12 +1161,15 @@ export const getActiveOutpasses = async (req, res) => {
 export const getDelayedVacationStudents = async (req, res) => {
   try {
     const warden = await Warden.findById(req.user._id);
-    
+
     if (!warden) {
       return res.status(404).json({ message: 'Warden not found' });
     }
 
     const currentDateTime = new Date();
+
+    console.log('\n=== Fetching Delayed Vacation Students ===');
+    console.log('Current time:', currentDateTime.toLocaleString('en-IN'));
 
     // Find PLs where:
     // 1. Arrival date has passed
@@ -1034,16 +1180,30 @@ export const getDelayedVacationStudents = async (req, res) => {
       arrivalDateTime: { $lt: currentDateTime },
       $or: [
         { status: 'approved' },
-        { 
+        {
           status: 'expired',
           isFullyUsed: { $ne: true }
         }
       ]
     });
 
+    console.log(`Found ${expiredPLs.length} expired PLs in database`);
+
     const delayedVacationStudents = [];
 
     for (const pl of expiredPLs) {
+      // Check if student still exists (filter orphaned records)
+      const studentExists = await Student.findById(pl.studentId);
+      if (!studentExists) {
+        console.log(`Removing orphaned delayed vacation record for deleted student: ${pl.name} (${pl.regNo})`);
+        continue;
+      }
+
+      console.log(`\nChecking PL for ${pl.name} (${pl.regNo}):`);
+      console.log(`  - Arrival time: ${new Date(pl.arrivalDateTime).toLocaleString('en-IN')}`);
+      console.log(`  - Status: ${pl.status}`);
+      console.log(`  - Is fully used: ${pl.isFullyUsed}`);
+
       // Check if exit is logged but entry is not
       const exitLog = await EntryExitLog.findOne({
         permissionLetterId: pl._id,
@@ -1052,42 +1212,58 @@ export const getDelayedVacationStudents = async (req, res) => {
       });
 
       if (exitLog) {
-        // Get student details
-        const student = await Student.findById(pl.studentId);
-        
-        if (student && student.isOnVacation) {
-          // Calculate delay duration in minutes
-          const arrivalTime = new Date(pl.arrivalDateTime);
-          const delayInMinutes = Math.floor((currentDateTime - arrivalTime) / (1000 * 60));
-          
-          delayedVacationStudents.push({
-            _id: pl._id,
-            studentId: pl.studentId,
-            regNo: pl.regNo,
-            name: pl.name,
-            department: pl.department,
-            roomNo: pl.roomNo,
-            hostelName: pl.hostelName,
-            placeOfVisit: pl.placeOfVisit,
-            reasonOfVisit: pl.reasonOfVisit,
-            departureDateTime: pl.departureDateTime,
-            arrivalDateTime: pl.arrivalDateTime,
-            exitTime: exitLog.exitTime,
-            delayDuration: delayInMinutes,
-            isOnVacation: true
-          });
-        }
+        console.log(`  - Exit time found: ${new Date(exitLog.exitTime).toLocaleString('en-IN')}`);
+
+        // Calculate delay duration in minutes from arrival time
+        const arrivalTime = new Date(pl.arrivalDateTime);
+        const now = currentDateTime;
+        const delayInMinutes = Math.floor((now - arrivalTime) / (1000 * 60));
+
+        console.log(`  - Delay calculated: ${delayInMinutes} minutes (${Math.floor(delayInMinutes / 60)} hours ${delayInMinutes % 60} mins)`);
+
+        delayedVacationStudents.push({
+          _id: pl._id,
+          studentId: pl.studentId,
+          regNo: pl.regNo,
+          name: pl.name,
+          department: pl.department,
+          roomNo: pl.roomNo,
+          hostelName: pl.hostelName,
+          placeOfVisit: pl.placeOfVisit,
+          reasonOfVisit: pl.reasonOfVisit,
+          departureDateTime: pl.departureDateTime,
+          arrivalDateTime: pl.arrivalDateTime,
+          exitTime: exitLog.exitTime,
+          delayDuration: delayInMinutes,
+          arrivalDateTimeFormatted: arrivalTime.toLocaleString('en-IN', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          }),
+          exitTimeFormatted: new Date(exitLog.exitTime).toLocaleString('en-IN', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          })
+        });
       }
     }
+
+    console.log(`\nTotal delayed vacation students found: ${delayedVacationStudents.length}`);
+    console.log('==========================================\n');
 
     // Sort by delay duration (most delayed first)
     delayedVacationStudents.sort((a, b) => b.delayDuration - a.delayDuration);
 
     res.json(delayedVacationStudents);
   } catch (error) {
-    res.status(500).json({ 
+    res.status(500).json({
       message: 'Server error',
-      error: error.message 
+      error: error.message
     });
   }
 };

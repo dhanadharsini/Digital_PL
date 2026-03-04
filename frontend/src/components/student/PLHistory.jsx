@@ -357,41 +357,6 @@ const PLHistory = () => {
             </div>
           )}
         </div>
-
-        <div className="card" style={{ marginTop: '20px' }}>
-          <h3>Status Guide</h3>
-          <div style={{ display: 'grid', gap: '10px', marginTop: '15px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <span className="status-badge status-pending">PENDING</span>
-              <span>Waiting for parent or warden approval</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <span className="status-badge status-parent-approved">PARENT APPROVED</span>
-              <span>Approved by parent, waiting for warden</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <span className="status-badge status-approved">APPROVED</span>
-              <span>Fully approved - you can view and download your PL card until arrival time</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <span className="status-badge status-rejected">REJECTED</span>
-              <span>Request was rejected</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <span className="status-badge" style={{
-                backgroundColor: '#6c757d',
-                color: 'white',
-                padding: '5px 10px',
-                borderRadius: '4px',
-                fontSize: '12px',
-                fontWeight: '600',
-                display: 'inline-block',
-                textTransform: 'uppercase'
-              }}>EXPIRED</span>
-              <span>Arrival time has passed - No actions available</span>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );

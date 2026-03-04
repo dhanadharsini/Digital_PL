@@ -9,6 +9,7 @@ const DelayedStudents = () => {
   const [delayedVacations, setDelayedVacations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('outpass');
+  const [lastUpdated, setLastUpdated] = useState(new Date());
 
   const menuItems = [
     { label: 'Dashboard', path: '/warden' },
@@ -20,6 +21,15 @@ const DelayedStudents = () => {
 
   useEffect(() => {
     fetchDelayedData();
+
+    // Auto-refresh delay calculations every minute
+    const refreshInterval = setInterval(() => {
+      setLastUpdated(new Date());
+      // Re-fetch data to get updated delay calculations from backend
+      fetchDelayedData();
+    }, 60000); // Refresh every minute
+
+    return () => clearInterval(refreshInterval);
   }, []);
 
   const fetchDelayedData = async () => {
@@ -28,7 +38,7 @@ const DelayedStudents = () => {
         api.get('/warden/outpass/delayed'),
         api.get('/warden/vacation/delayed')
       ]);
-      
+
       setDelayedOutpasses(outpassResponse.data);
       setDelayedVacations(vacationResponse.data);
     } catch (error) {
@@ -38,7 +48,13 @@ const DelayedStudents = () => {
     }
   };
 
-  const formatDate = (date) => {
+  // Use backend-formatted timestamps when available, fallback to client-side formatting
+  const formatDate = (date, formattedValue) => {
+    // If backend provides pre-formatted value, use it
+    if (formattedValue) {
+      return formattedValue;
+    }
+    // Fallback to client-side formatting
     return new Date(date).toLocaleString('en-IN', {
       day: '2-digit',
       month: 'short',
@@ -52,7 +68,7 @@ const DelayedStudents = () => {
     const days = Math.floor(minutes / (60 * 24));
     const hours = Math.floor((minutes % (60 * 24)) / 60);
     const mins = minutes % 60;
-    
+
     if (days > 0) {
       return `${days}d ${hours}h ${mins}m`;
     } else if (hours > 0) {
@@ -75,13 +91,13 @@ const DelayedStudents = () => {
 
           {/* Tab Navigation */}
           <div className="tabs-container">
-            <button 
+            <button
               className={`tab-button ${activeTab === 'outpass' ? 'active' : ''}`}
               onClick={() => setActiveTab('outpass')}
             >
               Outpass Delays ({delayedOutpasses.length})
             </button>
-            <button 
+            <button
               className={`tab-button ${activeTab === 'vacation' ? 'active' : ''}`}
               onClick={() => setActiveTab('vacation')}
             >
@@ -92,10 +108,10 @@ const DelayedStudents = () => {
           {loading ? (
             <div className="loading">Loading delayed students...</div>
           ) : (
-            <>
+            <div className="tab-content">
               {/* Outpass Delays Tab */}
               {activeTab === 'outpass' && (
-                <div className="tab-content">
+                <div>
                   <div className="section-header">
                     <h3>🕐 Outpass Delayed Returns</h3>
                     <p>Students who exceeded their 4-hour outpass duration</p>
@@ -130,19 +146,25 @@ const DelayedStudents = () => {
                               <td>{student.name}</td>
                               <td>{student.department}</td>
                               <td>{student.roomNo}</td>
-                              <td>{student.placeOfVisit}</td>
-                              <td>{formatDate(student.exitTime)}</td>
-                              <td className="expected-time">{formatDate(student.expectedReturnTime)}</td>
-                              <td className="actual-time">
-                                {student.actualReturnTime 
-                                  ? formatDate(student.actualReturnTime)
-                                  : <span style={{ color: '#e74c3c', fontWeight: 'bold' }}>Still Out</span>
+                              <td>{student.placeVisited}</td>
+                              <td>
+                                {formatDate(student.exitTime, student.exitTimeFormatted)}
+                              </td>
+                              <td className="expected-time">
+                                {formatDate(student.expectedReturnTime, student.expectedReturnTimeFormatted)}
+                              </td>
+                              <td>
+                                {student.actualReturnTime
+                                  ? formatDate(student.actualReturnTime, student.actualReturnTimeFormatted)
+                                  : <span className="actual-time">Still Out</span>
                                 }
                               </td>
                               <td>
-                                <span className={`delay-badge ${student.isCurrentlyDelayed ? 'delay-active' : 'delay-outpass'}`}>
-                                  {student.isCurrentlyDelayed ? '🔴' : '⚠️'} {formatDuration(student.delayDuration)}
-                                </span>
+                                <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
+                                  <span className={`delay-badge ${student.isCurrentlyDelayed ? 'delay-active' : 'delay-outpass'}`}>
+                                    {student.isCurrentlyDelayed ? '🔴' : '⚠️'} {formatDuration(student.delayDuration)}
+                                  </span>
+                                </div>
                               </td>
                               <td>
                                 {student.isCurrentlyDelayed ? (
@@ -162,10 +184,13 @@ const DelayedStudents = () => {
 
               {/* Vacation Delays Tab */}
               {activeTab === 'vacation' && (
-                <div className="tab-content">
+                <div>
                   <div className="section-header">
                     <h3>🏖️ Vacation Permission Letter Delays</h3>
                     <p>Students whose PL arrival date has passed but haven't returned yet</p>
+                    <p style={{ fontSize: '14px', marginTop: '8px', opacity: 0.8 }}>
+                      Last updated: {lastUpdated.toLocaleTimeString('en-IN')}
+                    </p>
                   </div>
 
                   {delayedVacations.length === 0 ? (
@@ -191,15 +216,19 @@ const DelayedStudents = () => {
                         </thead>
                         <tbody>
                           {delayedVacations.map((student) => (
-                            <tr key={student._id} className="vacation-delay-row">
+                            <tr key={student._id} className="vacation-delay-row currently-delayed">
                               <td>{student.regNo}</td>
                               <td>{student.name}</td>
                               <td>{student.department}</td>
                               <td>{student.roomNo}</td>
                               <td>{student.placeOfVisit}</td>
                               <td>{formatDate(student.departureDateTime)}</td>
-                              <td className="expected-time">{formatDate(student.arrivalDateTime)}</td>
-                              <td>{formatDate(student.exitTime)}</td>
+                              <td className="actual-time" style={{ fontWeight: 'bold' }}>
+                                {formatDate(student.arrivalDateTime, student.arrivalDateTimeFormatted)}
+                              </td>
+                              <td>
+                                {formatDate(student.exitTime, student.exitTimeFormatted)}
+                              </td>
                               <td>
                                 <span className="delay-badge delay-vacation">
                                   🚨 {formatDuration(student.delayDuration)}
@@ -213,7 +242,7 @@ const DelayedStudents = () => {
                   )}
                 </div>
               )}
-            </>
+            </div>
           )}
         </div>
       </div>

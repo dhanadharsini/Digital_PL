@@ -401,7 +401,7 @@ const Login = () => {
             {/* Footer */}
             <div style={styles.formFooter}>
               <p style={styles.footerText}>
-                Need help? <span style={{color: currentRole.color, fontWeight: '600', cursor: 'pointer'}}>Contact Support</span>
+                Need help? <span style={{color: currentRole.color, fontWeight: '600', cursor: 'pointer'}}>dhanadharsinis@gmail.com</span>
               </p>
             </div>
           </div>

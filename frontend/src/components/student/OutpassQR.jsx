@@ -56,7 +56,7 @@ const OutpassQR = () => {
     return (
       <div className="dashboard-container">
         {/* Hamburger Button */}
-        <button 
+        <button
           className={`hamburger-btn ${isSidebarOpen ? 'active' : ''}`}
           onClick={toggleSidebar}
           aria-label="Toggle menu"
@@ -67,17 +67,17 @@ const OutpassQR = () => {
         </button>
 
         {/* Sidebar Overlay */}
-        <div 
+        <div
           className={`sidebar-overlay ${isSidebarOpen ? 'active' : ''}`}
           onClick={closeSidebar}
         ></div>
 
-        <Sidebar 
+        <Sidebar
           menuItems={menuItems}
           isOpen={isSidebarOpen}
           onClose={closeSidebar}
         />
-        
+
         <div className="main-content">
           <Navbar title="Outpass QR Code" />
           <div className="loading">Loading outpass...</div>
@@ -90,7 +90,7 @@ const OutpassQR = () => {
     return (
       <div className="dashboard-container">
         {/* Hamburger Button */}
-        <button 
+        <button
           className={`hamburger-btn ${isSidebarOpen ? 'active' : ''}`}
           onClick={toggleSidebar}
           aria-label="Toggle menu"
@@ -101,17 +101,17 @@ const OutpassQR = () => {
         </button>
 
         {/* Sidebar Overlay */}
-        <div 
+        <div
           className={`sidebar-overlay ${isSidebarOpen ? 'active' : ''}`}
           onClick={closeSidebar}
         ></div>
 
-        <Sidebar 
+        <Sidebar
           menuItems={menuItems}
           isOpen={isSidebarOpen}
           onClose={closeSidebar}
         />
-        
+
         <div className="main-content">
           <Navbar title="Outpass QR Code" />
           <div className="error-state">
@@ -126,7 +126,7 @@ const OutpassQR = () => {
   return (
     <div className="dashboard-container">
       {/* Hamburger Button */}
-      <button 
+      <button
         className={`hamburger-btn ${isSidebarOpen ? 'active' : ''}`}
         onClick={toggleSidebar}
         aria-label="Toggle menu"
@@ -137,33 +137,67 @@ const OutpassQR = () => {
       </button>
 
       {/* Sidebar Overlay */}
-      <div 
+      <div
         className={`sidebar-overlay ${isSidebarOpen ? 'active' : ''}`}
         onClick={closeSidebar}
       ></div>
 
-      <Sidebar 
+      <Sidebar
         menuItems={menuItems}
         isOpen={isSidebarOpen}
         onClose={closeSidebar}
       />
-      
+
       <div className="main-content">
         <Navbar title="Outpass QR Code" />
 
         <div className="outpass-qr-container">
           <div className="qr-card">
             <div className="qr-header">
-              <h2>4-Hour Outpass</h2>
-              <span className={`status-badge ${outpass.status}`}>
-                {outpass.status === 'active' ? 'Active' : 'Completed'}
-              </span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                {outpass.profilePhoto ? (
+                  <img
+                    src={`http://localhost:5000${outpass.profilePhoto}`}
+                    alt="Student"
+                    style={{
+                      width: '64px',
+                      height: '64px',
+                      borderRadius: '50%',
+                      objectFit: 'cover',
+                      border: '3px solid rgba(255,255,255,0.6)',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.3)'
+                    }}
+                  />
+                ) : (
+                  <div style={{
+                    width: '64px',
+                    height: '64px',
+                    borderRadius: '50%',
+                    background: 'rgba(255,255,255,0.2)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '26px',
+                    color: 'white',
+                    fontWeight: 'bold',
+                    border: '3px solid rgba(255,255,255,0.4)'
+                  }}>
+                    {outpass.name?.charAt(0)?.toUpperCase() || 'S'}
+                  </div>
+                )}
+                <div>
+                  <h2 style={{ margin: 0 }}>4-Hour Outpass</h2>
+                  <span className={`status-badge ${outpass.status}`}>
+                    {outpass.status === 'active' ? 'Active' : 'Completed'}
+                  </span>
+                </div>
+              </div>
             </div>
 
             <div className="qr-code-section">
-              <img 
-                src={outpass.qrCode} 
-                alt="Outpass QR Code" 
+              <img
+                src={outpass.qrCode}
+                alt="Outpass QR Code"
                 className="qr-code-image"
               />
               <p className="qr-instruction">

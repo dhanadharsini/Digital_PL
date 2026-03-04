@@ -24,12 +24,21 @@ const WardenDashboard = () => {
 
   useEffect(() => {
     fetchStats();
+    
+    // Auto-refresh stats every 30 seconds
+    const refreshInterval = setInterval(() => {
+      fetchStats();
+    }, 30000); // Refresh every 30 seconds
+    
+    return () => clearInterval(refreshInterval);
   }, []);
 
   const fetchStats = async () => {
     try {
       const response = await api.get('/warden/stats');
+      console.log('Received stats:', response.data);
       setStats(response.data);
+      console.log('Dashboard stats refreshed:', new Date().toLocaleString('en-IN'));
     } catch (error) {
       console.error('Error fetching stats:', error);
     }

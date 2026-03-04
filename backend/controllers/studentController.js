@@ -13,19 +13,19 @@ export const getStats = async (req, res) => {
   try {
     const studentId = req.user._id;
 
-    const pendingRequests = await PermissionLetter.countDocuments({ 
-      studentId, 
-      status: 'pending' 
+    const pendingRequests = await PermissionLetter.countDocuments({
+      studentId,
+      status: 'pending'
     });
-    
-    const approvedRequests = await PermissionLetter.countDocuments({ 
-      studentId, 
-      status: 'approved' 
+
+    const approvedRequests = await PermissionLetter.countDocuments({
+      studentId,
+      status: 'approved'
     });
-    
-    const rejectedRequests = await PermissionLetter.countDocuments({ 
-      studentId, 
-      status: 'rejected' 
+
+    const rejectedRequests = await PermissionLetter.countDocuments({
+      studentId,
+      status: 'rejected'
     });
 
     // Get student to check if on vacation
@@ -75,7 +75,7 @@ export const getStats = async (req, res) => {
 export const getStudentDetails = async (req, res) => {
   try {
     const student = await Student.findById(req.user._id).select('-password');
-    
+
     if (!student) {
       return res.status(404).json({ message: 'Student not found' });
     }
@@ -113,8 +113,8 @@ export const requestPL = async (req, res) => {
     });
 
     if (pendingRequest) {
-      return res.status(400).json({ 
-        message: 'You already have a pending permission letter request' 
+      return res.status(400).json({
+        message: 'You already have a pending permission letter request'
       });
     }
 
@@ -135,8 +135,8 @@ export const requestPL = async (req, res) => {
 
       if (!entryLog) {
         // PL is still active (not expired and not fully used)
-        return res.status(400).json({ 
-          message: 'You already have an active approved permission letter. Please wait until it expires or is completed before requesting a new one.' 
+        return res.status(400).json({
+          message: 'You already have an active approved permission letter. Please wait until it expires or is completed before requesting a new one.'
         });
       }
     }
@@ -158,7 +158,7 @@ export const requestPL = async (req, res) => {
 
     // Find parent
     const parent = await Parent.findOne({ studentRegNo: regNo });
-    
+
     if (parent) {
       // TRY to send email - but don't fail if it doesn't work
       try {
@@ -168,7 +168,7 @@ export const requestPL = async (req, res) => {
           departureDateTime,
           arrivalDateTime
         });
-        
+
         await sendEmail(
           parent.email,
           'Permission Letter Request from Your Child',
@@ -213,8 +213,8 @@ export const getPLCard = async (req, res) => {
     const { id } = req.params;
     const studentId = req.user._id;
 
-    const pl = await PermissionLetter.findOne({ 
-      _id: id, 
+    const pl = await PermissionLetter.findOne({
+      _id: id,
       studentId
     });
 
@@ -224,19 +224,25 @@ export const getPLCard = async (req, res) => {
 
     // Check if PL is expired or fully used
     if (pl.status === 'expired' || pl.isFullyUsed) {
-      return res.status(403).json({ 
-        message: 'This permission letter has expired and cannot be viewed' 
+      return res.status(403).json({
+        message: 'This permission letter has expired and cannot be viewed'
       });
     }
 
     // Check if PL is approved
     if (pl.status !== 'approved') {
-      return res.status(403).json({ 
-        message: 'Permission letter is not approved yet' 
+      return res.status(403).json({
+        message: 'Permission letter is not approved yet'
       });
     }
 
-    res.json(pl);
+    // Get student profile photo
+    const student = await Student.findById(studentId).select('profilePhoto');
+
+    res.json({
+      ...pl.toObject(),
+      profilePhoto: student?.profilePhoto || null
+    });
   } catch (error) {
     console.error('Get PL Card Error:', error);
     res.status(500).json({ message: 'Server error' });
@@ -257,14 +263,21 @@ export const requestOutpass = async (req, res) => {
       return res.status(404).json({ message: 'Student not found' });
     }
 
+    // Check if student is currently on vacation
+    if (student.isOnVacation) {
+      return res.status(400).json({ 
+        message: 'You are currently on vacation. Students on vacation cannot create outpass requests.' 
+      });
+    }
+
     const activeOutpass = await Outpass.findOne({
       studentId,
       status: 'active'
     });
 
     if (activeOutpass) {
-      return res.status(400).json({ 
-        message: 'You already have an active outpass. Please complete it before requesting a new one.' 
+      return res.status(400).json({
+        message: 'You already have an active outpass. Please complete it before requesting a new one.'
       });
     }
 
@@ -276,6 +289,7 @@ export const requestOutpass = async (req, res) => {
       yearOfStudy: student.yearOfStudy,
       roomNo: student.roomNo,
       hostelName: student.hostelName,
+      profilePhoto: student.profilePhoto || null,
       placeOfVisit,
       type: 'outpass',
       createdAt: new Date().toISOString()
@@ -333,7 +347,13 @@ export const getActiveOutpass = async (req, res) => {
       return res.status(404).json({ message: 'No active outpass found' });
     }
 
-    res.json(outpass);
+    // Fetch student's profile photo separately to include it
+    const student = await Student.findById(studentId).select('profilePhoto');
+
+    res.json({
+      ...outpass.toObject(),
+      profilePhoto: student?.profilePhoto || null
+    });
   } catch (error) {
     console.error('Get Active Outpass Error:', error);
     res.status(500).json({ message: 'Server error' });
@@ -343,9 +363,9 @@ export const getActiveOutpass = async (req, res) => {
 export const getProfile = async (req, res) => {
   try {
     const studentId = req.user._id;
-    
+
     const student = await Student.findById(studentId).select('-password');
-    
+
     if (!student) {
       return res.status(404).json({ message: 'Student not found' });
     }

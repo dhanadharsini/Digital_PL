@@ -56,6 +56,10 @@ const studentSchema = new mongoose.Schema({
   isOnVacation: {
     type: Boolean,
     default: false
+  },
+  profilePhoto: {
+    type: String,
+    default: null
   }
 }, {
   timestamps: true

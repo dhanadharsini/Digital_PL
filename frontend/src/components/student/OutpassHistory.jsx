@@ -12,6 +12,8 @@ const OutpassHistory = () => {
   const [loading, setLoading] = useState(true);
   const [downloadingId, setDownloadingId] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState(new Date());
+  const [refreshing, setRefreshing] = useState(false);
 
   const menuItems = [
     { label: 'Dashboard', path: '/student' },
@@ -26,13 +28,16 @@ const OutpassHistory = () => {
   }, []);
 
   const fetchOutpassHistory = async () => {
+    setRefreshing(true);
     try {
       const response = await api.get('/student/outpass/history');
       setOutpasses(response.data);
+      setLastUpdated(new Date());
     } catch (error) {
       console.error('Error fetching outpass history:', error);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
 
@@ -79,7 +84,7 @@ const OutpassHistory = () => {
   return (
     <div className="dashboard-container">
       {/* Hamburger Button */}
-      <button 
+      <button
         className={`hamburger-btn ${isSidebarOpen ? 'active' : ''}`}
         onClick={toggleSidebar}
         aria-label="Toggle menu"
@@ -90,28 +95,71 @@ const OutpassHistory = () => {
       </button>
 
       {/* Sidebar Overlay */}
-      <div 
+      <div
         className={`sidebar-overlay ${isSidebarOpen ? 'active' : ''}`}
         onClick={closeSidebar}
       ></div>
 
-      <Sidebar 
+      <Sidebar
         menuItems={menuItems}
         isOpen={isSidebarOpen}
         onClose={closeSidebar}
       />
-      
+
       <div className="main-content">
         <Navbar title="Outpass History" />
 
         <div className="outpass-history-container">
+          <div className="history-header-actions" style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: '24px'
+          }}>
+            <div className="last-updated" style={{ fontSize: '14px', color: '#94a3b8' }}>
+              Last updated: {lastUpdated.toLocaleTimeString('en-IN')}
+            </div>
+            <button
+              className={`btn btn-refresh ${refreshing ? 'refreshing' : ''}`}
+              onClick={fetchOutpassHistory}
+              disabled={refreshing}
+              style={{
+                width: 'auto',
+                padding: '8px 16px',
+                fontSize: '14px',
+                background: 'rgba(59, 130, 246, 0.1)',
+                color: '#3b82f6',
+                border: '1px solid #3b82f6',
+                borderRadius: '8px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                cursor: refreshing ? 'not-allowed' : 'pointer'
+              }}
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                className={refreshing ? 'spin' : ''}
+              >
+                <path d="M23 4v6h-6"></path>
+                <path d="M1 20v-6h6"></path>
+                <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+              </svg>
+              {refreshing ? 'Refreshing...' : 'Refresh'}
+            </button>
+          </div>
           {loading ? (
             <div className="loading">Loading outpass history...</div>
           ) : outpasses.length === 0 ? (
             <div className="empty-state">
               <h3>No Outpass History</h3>
               <p>You haven't requested any outpasses yet.</p>
-              <button 
+              <button
                 className="btn btn-primary"
                 onClick={() => navigate('/student/request-outpass')}
               >
@@ -128,8 +176,8 @@ const OutpassHistory = () => {
                       <span className="reg-no">{outpass.regNo}</span>
                     </div>
                     <span className={`status-badge ${outpass.status}`}>
-                      {outpass.status === 'active' ? 'Active' : 
-                       outpass.status === 'completed' ? 'Completed' : 'Delayed'}
+                      {outpass.status === 'active' ? 'Active' :
+                        outpass.status === 'completed' ? 'Completed' : 'Delayed'}
                     </span>
                   </div>
 
@@ -175,14 +223,14 @@ const OutpassHistory = () => {
                   {/* Action Buttons - Only show for ACTIVE outpasses */}
                   {outpass.status === 'active' && (
                     <div className="outpass-actions">
-                      <button 
+                      <button
                         className="btn btn-primary"
                         onClick={() => viewOutpassQR(outpass)}
                       >
                         View QR Code
                       </button>
-                      
-                      <button 
+
+                      <button
                         className="btn btn-secondary"
                         onClick={() => handleDownloadPDF(outpass)}
                         disabled={downloadingId === outpass._id}
@@ -194,12 +242,12 @@ const OutpassHistory = () => {
                           </>
                         ) : (
                           <>
-                            <svg 
-                              width="18" 
-                              height="18" 
-                              viewBox="0 0 24 24" 
-                              fill="none" 
-                              stroke="currentColor" 
+                            <svg
+                              width="18"
+                              height="18"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
                               strokeWidth="2"
                               style={{ marginRight: '6px' }}
                             >

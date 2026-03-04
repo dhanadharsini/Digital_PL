@@ -9,21 +9,31 @@
 }
 
 @keyframes float {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0);
   }
+
   50% {
     transform: translateY(-10px);
   }
 }
 
 @keyframes bounce {
-  0%, 20%, 50%, 80%, 100% {
+
+  0%,
+  20%,
+  50%,
+  80%,
+  100% {
     transform: translateY(0);
   }
+
   40% {
     transform: translateY(-20px);
   }
+
   60% {
     transform: translateY(-10px);
   }
@@ -33,15 +43,19 @@
   0% {
     background-position: -200% 0;
   }
+
   100% {
     background-position: 200% 0;
   }
 }
 
 @keyframes pulse-glow {
-  0%, 100% {
+
+  0%,
+  100% {
     box-shadow: 0 10px 28px rgba(59, 130, 246, 0.4);
   }
+
   50% {
     box-shadow: 0 14px 36px rgba(59, 130, 246, 0.6);
   }
@@ -91,6 +105,7 @@ body.light-mode {
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -119,6 +134,7 @@ body.light-mode {
     transform: translateY(60px) scale(0.95);
     opacity: 0;
   }
+
   to {
     transform: translateY(0) scale(1);
     opacity: 1;
@@ -166,6 +182,117 @@ body.light-mode {
 .reset-modal-header p {
   color: #cbd5e1;
   font-size: 14px;
+}
+
+/* ========================================
+   GENERAL MODAL STYLES
+   ======================================== */
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.75);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+  animation: fadeIn 0.3s ease;
+  backdrop-filter: blur(8px);
+}
+
+.modal-content {
+  background: #1e293b;
+  border-radius: 12px;
+  max-width: 600px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.5);
+  animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  border: 1px solid #334155;
+  padding: 20px;
+}
+
+.light-mode .modal-content {
+  background: white;
+  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.modal-content h3 {
+  margin: 0 0 20px 0;
+  color: #f1f5f9;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.light-mode .modal-content h3 {
+  color: #1e293b;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  color: #f1f5f9;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.light-mode .form-group label {
+  color: #1e293b;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #334155;
+  border-radius: 6px;
+  background-color: #334155;
+  color: #f1f5f9;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.form-group input:disabled,
+.form-group textarea:disabled {
+  background-color: #1e293b;
+  color: #f1f5f9 !important;
+  border: 1px solid #475569;
+  opacity: 1;
+  /* Override default browser opacity */
+  cursor: not-allowed;
+  font-weight: 600;
+}
+
+.light-mode .form-group input:disabled,
+.light-mode .form-group textarea:disabled {
+  background-color: #f8fafc;
+  color: #1e293b !important;
+  border: 1px solid #e2e8f0;
+}
+
+.light-mode .form-group input {
+  border: 1px solid #cbd5e1;
+  background-color: white;
+  color: #1e293b;
+}
+
+.form-actions {
+  margin-top: 20px;
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.form-actions .btn {
+  min-width: 100px;
 }
 
 .light-mode .reset-modal-header p {
@@ -886,8 +1013,13 @@ table tbody tr:last-child td {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .loading-pulse {
@@ -895,9 +1027,12 @@ table tbody tr:last-child td {
 }
 
 @keyframes pulse {
-  0%, 100% {
+
+  0%,
+  100% {
     opacity: 1;
   }
+
   50% {
     opacity: 0.5;
   }
@@ -1382,20 +1517,21 @@ table tbody tr:last-child td {
     padding: 12px 14px;
     font-size: 13px;
   }
-  
+
   .reset-modal-content {
     width: 95%;
     border-radius: 16px;
   }
-  
+
   .reset-modal-header {
     padding: 24px 20px 16px;
   }
-  
+
   .reset-modal-body {
     padding: 20px;
   }
 }
+
 /* ========================================
    HAMBURGER MENU STYLES
    ======================================== */
@@ -1476,6 +1612,7 @@ table tbody tr:last-child td {
 }
 
 @media (max-width: 768px) {
+
   /* Show hamburger button on mobile */
   .hamburger-btn {
     display: block;
@@ -1607,16 +1744,16 @@ table tbody tr:last-child td {
     padding: 12px 14px;
     font-size: 13px;
   }
-  
+
   .reset-modal-content {
     width: 95%;
     border-radius: 16px;
   }
-  
+
   .reset-modal-header {
     padding: 24px 20px 16px;
   }
-  
+
   .reset-modal-body {
     padding: 20px;
   }

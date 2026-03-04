@@ -11,12 +11,18 @@
 }
 
 .qr-card {
-  background: white;
+  background: #1e293b;
   border-radius: 20px;
   padding: 40px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
   max-width: 650px;
   width: 100%;
+  border: 1px solid #334155;
+}
+
+.light-mode .qr-card {
+  background: white;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
   border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
@@ -24,15 +30,27 @@
   text-align: center;
   margin-bottom: 32px;
   padding-bottom: 24px;
+  border-bottom: 2px solid #334155;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.light-mode .qr-header {
   border-bottom: 2px solid #f1f5f9;
 }
 
 .qr-header h2 {
-  margin: 0 0 12px 0;
-  color: #1e293b;
+  margin: 0;
+  color: #f1f5f9;
   font-size: 28px;
   font-weight: 700;
   letter-spacing: -0.5px;
+}
+
+.light-mode .qr-header h2 {
+  color: #1e293b;
 }
 
 .qr-code-section {
@@ -43,12 +61,17 @@
 .qr-code-image {
   width: 300px;
   height: 300px;
-  border: 4px solid #f1f5f9;
+  border: 4px solid #334155;
   border-radius: 16px;
   padding: 20px;
   background: white;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
   transition: transform 0.3s ease;
+}
+
+.light-mode .qr-code-image {
+  border: 4px solid #f1f5f9;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
 }
 
 .qr-code-image:hover {
@@ -64,9 +87,14 @@
 }
 
 .outpass-info {
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
   padding: 28px;
   border-radius: 16px;
+  border: 1px solid #334155;
+}
+
+.light-mode .outpass-info {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
   border: 1px solid #e2e8f0;
 }
 
@@ -97,17 +125,25 @@
 
 .info-value {
   font-size: 17px;
-  color: #1e293b;
+  color: #f1f5f9;
   font-weight: 700;
 }
 
+.light-mode .info-value {
+  color: #1e293b;
+}
+
 .timing-info {
-  border-top: 2px solid #cbd5e1;
+  border-top: 2px solid #334155;
   padding-top: 20px;
   margin-top: 20px;
   display: flex;
   flex-direction: column;
   gap: 14px;
+}
+
+.light-mode .timing-info {
+  border-top: 2px solid #cbd5e1;
 }
 
 .timing-item {
@@ -124,8 +160,12 @@
 
 .timing-value {
   font-size: 15px;
-  color: #1e293b;
+  color: #f1f5f9;
   font-weight: 700;
+}
+
+.light-mode .timing-value {
+  color: #1e293b;
 }
 
 .timing-value.expected {

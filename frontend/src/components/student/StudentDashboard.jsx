@@ -1,13 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../common/Sidebar';
 import Navbar from '../common/Navbar';
 import { useAuth } from '../../context/AuthContext';
+import { api } from '../../services/api';
 
 const StudentDashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [studentProfile, setStudentProfile] = useState(null);
 
   const menuItems = [
     { label: 'Dashboard', path: '/student' },
@@ -23,6 +25,19 @@ const StudentDashboard = () => {
 
   const closeSidebar = () => {
     setIsSidebarOpen(false);
+  };
+
+  useEffect(() => {
+    fetchStudentProfile();
+  }, []);
+
+  const fetchStudentProfile = async () => {
+    try {
+      const response = await api.get('/student/profile');
+      setStudentProfile(response.data);
+    } catch (error) {
+      console.error('Error fetching student profile:', error);
+    }
   };
 
   return (
@@ -54,8 +69,40 @@ const StudentDashboard = () => {
         <Navbar title="Student Dashboard" />
         
         <div className="welcome-message">
-          <h1>Welcome, {user?.name}!</h1>
-          <p>Manage your permission letters and outpasses</p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '20px' }}>
+            {studentProfile?.profilePhoto ? (
+              <img 
+                src={`http://localhost:5000${studentProfile.profilePhoto}`} 
+                alt="Profile" 
+                style={{ 
+                  width: '80px', 
+                  height: '80px', 
+                  borderRadius: '50%', 
+                  objectFit: 'cover',
+                  border: '3px solid #3b82f6'
+                }} 
+              />
+            ) : (
+              <div style={{ 
+                width: '80px', 
+                height: '80px', 
+                borderRadius: '50%', 
+                backgroundColor: '#3b82f6', 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center', 
+                fontSize: '32px', 
+                color: 'white',
+                fontWeight: 'bold'
+              }}>
+                {user?.name?.charAt(0)?.toUpperCase() || 'S'}
+              </div>
+            )}
+            <div>
+              <h1>Welcome, {user?.name}!</h1>
+              <p>Manage your permission letters and outpasses</p>
+            </div>
+          </div>
         </div>
 
         <div className="card" style={{ marginTop: '30px' }}>

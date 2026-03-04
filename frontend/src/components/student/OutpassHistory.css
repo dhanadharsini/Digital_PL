@@ -13,30 +13,49 @@
   text-align: center;
   padding: 80px 20px;
   font-size: 18px;
-  color: #64748b;
+  color: #94a3b8;
   font-weight: 500;
+}
+
+.light-mode .loading {
+  color: #64748b;
 }
 
 .empty-state {
   text-align: center;
   padding: 100px 40px;
-  background: white;
+  background: #1e293b;
   border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  border: 1px solid #334155;
+}
+
+.light-mode .empty-state {
+  background: white;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  border: 1px solid #e2e8f0;
 }
 
 .empty-state h3 {
   font-size: 28px;
-  color: #1e293b;
+  color: #f1f5f9;
   margin-bottom: 12px;
   font-weight: 700;
 }
 
+.light-mode .empty-state h3 {
+  color: #1e293b;
+}
+
 .empty-state p {
-  color: #64748b;
+  color: #94a3b8;
   margin-bottom: 30px;
   font-size: 16px;
   line-height: 1.6;
+}
+
+.light-mode .empty-state p {
+  color: #64748b;
 }
 
 /* Outpass Grid Layout */
@@ -49,14 +68,21 @@
 
 /* Outpass Card Styles */
 .outpass-card {
-  background: white;
+  background: #1e293b;
   border-radius: 16px;
   padding: 28px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   border-left: 5px solid #3b82f6;
   position: relative;
   overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.light-mode .outpass-card {
+  background: white;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  border: 1px solid #e2e8f0;
 }
 
 .outpass-card::before {
@@ -83,17 +109,32 @@
 /* Card Status Variations */
 .outpass-card.active {
   border-left-color: #3b82f6;
-  background: linear-gradient(to right, #eff6ff 0%, #ffffff 100%);
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+}
+
+.light-mode .outpass-card.active {
+  background: white;
+  border-left: 5px solid #3b82f6;
 }
 
 .outpass-card.completed {
   border-left-color: #10b981;
-  background: linear-gradient(to right, #ecfdf5 0%, #ffffff 100%);
+  background: linear-gradient(135deg, #064e3b 0%, #0f172a 100%);
+}
+
+.light-mode .outpass-card.completed {
+  background: white;
+  border-left: 5px solid #10b981;
 }
 
 .outpass-card.delayed {
   border-left-color: #ef4444;
-  background: linear-gradient(to right, #fef2f2 0%, #ffffff 100%);
+  background: linear-gradient(135deg, #7f1d1d 0%, #0f172a 100%);
+}
+
+.light-mode .outpass-card.delayed {
+  background: white;
+  border-left: 5px solid #ef4444;
 }
 
 /* Card Header */
@@ -103,23 +144,31 @@
   align-items: flex-start;
   margin-bottom: 24px;
   padding-bottom: 18px;
-  border-bottom: 2px solid #f1f5f9;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.1);
 }
 
 .outpass-header h3 {
   font-size: 22px;
-  color: #1e293b;
+  color: #f1f5f9;
   margin: 0 0 6px 0;
   font-weight: 700;
   letter-spacing: -0.3px;
 }
 
+.light-mode .outpass-header h3 {
+  color: #1e293b;
+}
+
 .reg-no {
   font-size: 13px;
-  color: #64748b;
+  color: #94a3b8;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+}
+
+.light-mode .reg-no {
+  color: #64748b;
 }
 
 /* Status Badge */
@@ -153,10 +202,13 @@
 }
 
 @keyframes pulse-badge {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: scale(1);
     box-shadow: 0 4px 12px rgba(239, 68, 68, 0.35);
   }
+
   50% {
     transform: scale(1.05);
     box-shadow: 0 6px 16px rgba(239, 68, 68, 0.5);
@@ -173,7 +225,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 12px 0;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .detail-row:last-child {
@@ -181,31 +233,47 @@
 }
 
 .detail-row .label {
-  font-weight: 600;
-  color: #334155;
+  font-weight: 700;
+  color: #94a3b8;
   font-size: 14px;
+}
+
+.light-mode .detail-row .label {
+  color: #64748b;
 }
 
 .detail-row .value {
-  color: #475569;
+  color: #f1f5f9;
   font-size: 14px;
   text-align: right;
-  font-weight: 500;
+  font-weight: 600;
+}
+
+.light-mode .detail-row .value {
+  color: #1e293b;
 }
 
 .detail-row.delay-info {
-  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  background: rgba(251, 191, 36, 0.1);
   padding: 14px 16px;
   border-radius: 10px;
   margin-top: 12px;
-  border: 2px solid #fbbf24;
-  border-bottom: 2px solid #fbbf24;
+  border: 1px solid rgba(251, 191, 36, 0.3);
+}
+
+.light-mode .detail-row.delay-info {
+  background: rgba(251, 191, 36, 0.05);
+  border: 1px solid rgba(251, 191, 36, 0.5);
 }
 
 .detail-row.delay-info .value.delay {
-  color: #dc2626;
+  color: #ef4444;
   font-weight: 700;
   font-size: 16px;
+}
+
+.light-mode .detail-row.delay-info .value.delay {
+  color: #dc2626;
 }
 
 /* Action Buttons */
@@ -214,7 +282,7 @@
   gap: 14px;
   margin-top: 24px;
   padding-top: 24px;
-  border-top: 2px solid #f1f5f9;
+  border-top: 2px solid rgba(255, 255, 255, 0.1);
 }
 
 .outpass-actions .btn {

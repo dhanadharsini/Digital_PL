@@ -175,8 +175,40 @@ const PLCard = () => {
           <div className="pl-card-container">
             <div className="pl-card">
               <div className="pl-card-header">
-                <h2>Permission Letter</h2>
-                <p>Hostel Management System</p>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div>
+                    <h2>Permission Letter</h2>
+                    <p>Hostel Management System</p>
+                  </div>
+                  {plData.profilePhoto ? (
+                    <img 
+                      src={`http://localhost:5000${plData.profilePhoto}`} 
+                      alt="Student" 
+                      style={{ 
+                        width: '60px', 
+                        height: '60px', 
+                        borderRadius: '50%', 
+                        objectFit: 'cover',
+                        border: '2px solid white'
+                      }} 
+                    />
+                  ) : (
+                    <div style={{ 
+                      width: '60px', 
+                      height: '60px', 
+                      borderRadius: '50%', 
+                      backgroundColor: '#3b82f6', 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      justifyContent: 'center', 
+                      fontSize: '24px', 
+                      color: 'white',
+                      fontWeight: 'bold'
+                    }}>
+                      {plData.name?.charAt(0)?.toUpperCase() || 'S'}
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div className="pl-details">

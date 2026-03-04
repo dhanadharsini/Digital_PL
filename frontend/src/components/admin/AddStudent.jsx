@@ -16,6 +16,7 @@ const AddStudent = () => {
     roomNo: '',
     parentName: ''
   });
+  const [profilePhoto, setProfilePhoto] = useState(null);
   const [message, setMessage] = useState({ type: '', text: '' });
   const [loading, setLoading] = useState(false);
 
@@ -42,7 +43,25 @@ const AddStudent = () => {
     setMessage({ type: '', text: '' });
 
     try {
-      await api.post('/admin/add-student', formData);
+      // Create FormData for file upload
+      const formDataWithPhoto = new FormData();
+      
+      // Add all text fields
+      Object.keys(formData).forEach(key => {
+        formDataWithPhoto.append(key, formData[key]);
+      });
+      
+      // Add profile photo if selected
+      if (profilePhoto) {
+        formDataWithPhoto.append('profilePhoto', profilePhoto);
+      }
+      
+      await api.post('/admin/add-student', formDataWithPhoto, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      
       setMessage({ type: 'success', text: 'Student added successfully!' });
       setFormData({
         regNo: '',
@@ -56,6 +75,7 @@ const AddStudent = () => {
         roomNo: '',
         parentName: ''
       });
+      setProfilePhoto(null);
     } catch (error) {
       setMessage({ 
         type: 'error', 
@@ -194,6 +214,18 @@ const AddStudent = () => {
                   onChange={handleChange}
                   required
                 />
+              </div>
+              
+              <div className="form-group">
+                <label>Profile Photo</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setProfilePhoto(e.target.files[0])}
+                />
+                <small style={{ color: '#666', display: 'block', marginTop: '5px' }}>
+                  Optional: JPG, PNG, GIF (max 5MB)
+                </small>
               </div>
             </div>
 
