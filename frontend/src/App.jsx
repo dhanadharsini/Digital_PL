@@ -50,7 +50,7 @@ function App() {
     // Initialize theme on app load
     const savedTheme = localStorage.getItem('theme');
     const prefersDark = savedTheme ? savedTheme === 'dark' : true;
-    
+
     if (!prefersDark) {
       document.body.classList.add('light-mode');
     } else {
@@ -258,10 +258,6 @@ function App() {
             </ProtectedRoute>
           }
         />
-        <Route path="/login" element={<Login />} />
-        <Route path="/change-password" element={<ChangePassword />} />
-        <Route path="/:role/change-password" element={<ChangePassword />} />
-        <Route path="/" element={<Navigate to="/login" />} />
       </Routes>
     </Router>
   );
