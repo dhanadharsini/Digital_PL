@@ -87,7 +87,7 @@ export const getPendingRequests = async (req, res) => {
       hostelName: warden.hostelName,
       status: 'parent-approved',
       wardenStatus: 'pending'
-    }).sort({ createdAt: -1 });
+    }).sort({ regNo: 1 });
 
     // Filter out requests for non-existent students
     const validRequests = [];
@@ -400,9 +400,33 @@ export const getStudents = async (req, res) => {
 
     const students = await Student.find(query)
       .select('-password')
-      .sort({ roomNo: 1 });
+      .sort({ regNo: 1 });
 
-    res.json(students);
+    // Get all active outpasses for this hostel where students have exited but not returned
+    // We remove status: 'active' to be more robust - if they have an exit time but no return, they are "out"
+    const activeOutpasses = await Outpass.find({
+      hostelName: warden.hostelName,
+      exitTime: { $ne: null },
+      actualReturnTime: null
+    }).select('studentId');
+
+    const outpassStudentIds = new Set(activeOutpasses.map(op => op.studentId.toString()));
+
+    // Enhance with outpass status
+    const studentsWithStatus = students.map(student => ({
+      ...student.toObject(),
+      isOnOutpass: outpassStudentIds.has(student._id.toString())
+    }));
+
+    // Filter results based on outpass status if needed
+    let finalStudents = studentsWithStatus;
+    if (filter === 'in-hostel') {
+      finalStudents = studentsWithStatus.filter(s => !s.isOnVacation && !s.isOnOutpass);
+    } else if (filter === 'on-outpass') {
+      finalStudents = studentsWithStatus.filter(s => s.isOnOutpass);
+    }
+
+    res.json(finalStudents);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server error' });
@@ -529,10 +553,24 @@ export const logEntryExit = async (req, res) => {
       });
     }
 
-    // Check if log already exists
+    // Check if already logo already exists
     let log = await EntryExitLog.findOne({ permissionLetterId: plId });
 
     if (action === 'exit') {
+      // NEW: Check if student is already out on an outpass
+      const activeOutpass = await Outpass.findOne({
+        studentId,
+        exitTime: { $ne: null },
+        actualReturnTime: null,
+        status: 'active'
+      });
+
+      if (activeOutpass) {
+        return res.status(400).json({
+          message: `Cannot log PL exit. Student is currently out on an Outpass (to ${activeOutpass.placeOfVisit}). They must return and log entry first.`
+        });
+      }
+
       if (log && log.exitTime) {
         return res.status(400).json({ message: 'Exit already logged for this permission letter' });
       }
@@ -883,6 +921,14 @@ export const logOutpassAction = async (req, res) => {
     }
 
     if (action === 'exit') {
+      // NEW: Check if student is already on vacation (out via PL)
+      const student = await Student.findById(studentId);
+      if (student && student.isOnVacation) {
+        return res.status(400).json({
+          message: 'Cannot log Outpass exit. Student is currently on vacation (Permission Letter). They must return to the hostel first.'
+        });
+      }
+
       if (outpass.exitTime) {
         return res.status(400).json({ message: 'Exit already logged for this outpass' });
       }

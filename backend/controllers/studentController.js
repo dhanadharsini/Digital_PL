@@ -103,6 +103,8 @@ export const requestPL = async (req, res) => {
       arrivalDateTime
     } = req.body;
 
+    // REMOVED cross-model blocking here. Students can have both PL and Outpass requests.
+
     console.log('Request PL - Student ID:', studentId);
     console.log('Request PL - Reg No:', regNo);
 
@@ -265,10 +267,12 @@ export const requestOutpass = async (req, res) => {
 
     // Check if student is currently on vacation
     if (student.isOnVacation) {
-      return res.status(400).json({ 
-        message: 'You are currently on vacation. Students on vacation cannot create outpass requests.' 
+      return res.status(400).json({
+        message: 'You are currently on vacation. Students on vacation cannot create outpass requests.'
       });
     }
+
+    // REMOVED cross-model blocking here. Students can have both PL and Outpass requests.
 
     const activeOutpass = await Outpass.findOne({
       studentId,

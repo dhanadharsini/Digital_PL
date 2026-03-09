@@ -7,6 +7,7 @@ const StudentsList = () => {
   const [students, setStudents] = useState([]);
   const [filter, setFilter] = useState('all');
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
 
   const menuItems = [
     { label: 'Dashboard', path: '/warden' },
@@ -33,24 +34,47 @@ const StudentsList = () => {
     }
   };
 
+  const filteredStudents = students.filter(student =>
+    student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    student.regNo.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    student.department.toLowerCase().includes(searchTerm.toLowerCase())
+  ).sort((a, b) => a.regNo.localeCompare(b.regNo, undefined, { numeric: true }));
+
   return (
     <div className="dashboard-container">
       <Sidebar menuItems={menuItems} />
       <div className="main-content">
         <Navbar title="Students List" />
-        
+
         <div className="card">
-          <div style={{ marginBottom: '20px' }}>
-            <label style={{ marginRight: '10px', fontWeight: '600' }}>Filter:</label>
-            <select 
-              value={filter} 
-              onChange={(e) => setFilter(e.target.value)}
-              style={{ padding: '8px', borderRadius: '5px', border: '1px solid #ddd' }}
-            >
-              <option value="all">All Students</option>
-              <option value="in-hostel">In Hostel</option>
-              <option value="on-vacation">On Vacation</option>
-            </select>
+          <div className="card-header-actions" style={{ marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div className="filter-box">
+              <label style={{ marginRight: '10px', fontWeight: '600' }}>Filter:</label>
+              <select
+                value={filter}
+                onChange={(e) => setFilter(e.target.value)}
+                style={{ padding: '8px', borderRadius: '5px', border: '1px solid #ddd' }}
+              >
+                <option value="all">All Students</option>
+                <option value="in-hostel">In Hostel</option>
+                <option value="on-vacation">On Vacation</option>
+                <option value="on-outpass">On Outpass</option>
+              </select>
+            </div>
+            <div className="search-box">
+              <input
+                type="text"
+                placeholder="Search by name, reg no or dept..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                style={{
+                  padding: '8px 12px',
+                  borderRadius: '4px',
+                  border: '1px solid #ddd',
+                  width: '300px'
+                }}
+              />
+            </div>
           </div>
 
           {loading ? (
@@ -72,7 +96,7 @@ const StudentsList = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {students.map((student) => (
+                  {filteredStudents.map((student) => (
                     <tr key={student._id}>
                       <td>{student.regNo}</td>
                       <td>{student.name}</td>
@@ -81,8 +105,13 @@ const StudentsList = () => {
                       <td>{student.department}</td>
                       <td>{student.mobileNo}</td>
                       <td>
-                        <span className={`status-badge ${student.isOnVacation ? 'status-pending' : 'status-approved'}`}>
-                          {student.isOnVacation ? 'ON VACATION' : 'IN HOSTEL'}
+                        <span className={`status-badge ${student.isOnVacation ? 'status-pending' :
+                          student.isOnOutpass ? 'status-parent-approved' : // Cyan for outpass
+                            'status-approved'
+                          }`}>
+                          {student.isOnVacation ? 'ON VACATION' :
+                            student.isOnOutpass ? 'ON OUTPASS' :
+                              'IN HOSTEL'}
                         </span>
                       </td>
                     </tr>

@@ -4,7 +4,6 @@ import bcrypt from 'bcryptjs';
 const parentSchema = new mongoose.Schema({
   parentId: {
     type: String,
-    required: true,
     unique: true
   },
   name: {
@@ -45,7 +44,7 @@ const parentSchema = new mongoose.Schema({
   timestamps: true
 });
 
-parentSchema.pre('save', async function() {
+parentSchema.pre('save', async function () {
   if (!this.isModified('password')) {
     return;
   }
@@ -53,18 +52,18 @@ parentSchema.pre('save', async function() {
   this.password = await bcrypt.hash(this.password, salt);
 });
 
-parentSchema.methods.matchPassword = async function(enteredPassword) {
+parentSchema.methods.matchPassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
-parentSchema.methods.generateResetToken = async function() {
+parentSchema.methods.generateResetToken = async function () {
   const tempPassword = Math.random().toString(36).slice(-12).toUpperCase();
   this.resetToken = tempPassword;
   this.resetTokenExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
   return tempPassword;
 };
 
-parentSchema.methods.resetPassword = async function(newPassword) {
+parentSchema.methods.resetPassword = async function (newPassword) {
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(newPassword, salt);
   this.resetToken = null;

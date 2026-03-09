@@ -5,7 +5,6 @@ import { api } from '../../services/api';
 
 const AddParent = () => {
   const [formData, setFormData] = useState({
-    parentId: '',
     name: '',
     email: '',
     password: '',
@@ -42,7 +41,6 @@ const AddParent = () => {
       await api.post('/admin/add-parent', formData);
       setMessage({ type: 'success', text: 'Parent added successfully!' });
       setFormData({
-        parentId: '',
         name: '',
         email: '',
         password: '',
@@ -51,9 +49,16 @@ const AddParent = () => {
         studentRegNo: ''
       });
     } catch (error) {
-      setMessage({ 
-        type: 'error', 
-        text: error.response?.data?.message || 'Failed to add parent' 
+      const errorData = error.response?.data;
+      let errorText = errorData?.message || 'Failed to add parent';
+
+      if (errorData?.missingFields) {
+        errorText += `: ${errorData.missingFields.join(', ')}`;
+      }
+
+      setMessage({
+        type: 'error',
+        text: errorText
       });
     } finally {
       setLoading(false);
@@ -65,7 +70,7 @@ const AddParent = () => {
       <Sidebar menuItems={menuItems} />
       <div className="main-content">
         <Navbar title="Add New Parent" />
-        
+
         <div className="card">
           {message.text && (
             <div className={`alert alert-${message.type}`}>
@@ -75,16 +80,6 @@ const AddParent = () => {
 
           <form onSubmit={handleSubmit}>
             <div className="form-grid">
-              <div className="form-group">
-                <label>Parent ID *</label>
-                <input
-                  type="text"
-                  name="parentId"
-                  value={formData.parentId}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
 
               <div className="form-group">
                 <label>Parent Name *</label>
@@ -153,9 +148,9 @@ const AddParent = () => {
               </div>
             </div>
 
-            <button 
-              type="submit" 
-              className="btn btn-primary" 
+            <button
+              type="submit"
+              className="btn btn-primary"
               disabled={loading}
               style={{ marginTop: '20px' }}
             >

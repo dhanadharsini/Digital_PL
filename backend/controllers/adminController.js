@@ -13,8 +13,8 @@ export const getStats = async (req, res) => {
     const students = await Student.countDocuments();
     const parents = await Parent.countDocuments();
     const wardens = await Warden.countDocuments();
-    const pendingRequests = await PermissionLetter.countDocuments({ 
-      status: { $in: ['pending', 'parent-approved'] } 
+    const pendingRequests = await PermissionLetter.countDocuments({
+      status: { $in: ['pending', 'parent-approved'] }
     });
 
     res.json({
@@ -36,7 +36,7 @@ export const addStudent = async (req, res) => {
     if (req.file) {
       profilePhotoPath = `/uploads/profile-pictures/${req.file.filename}`;
     }
-    
+
     // Handle form data - when using multipart/form-data, all fields come as strings
     const {
       regNo,
@@ -67,8 +67,8 @@ export const addStudent = async (req, res) => {
         body: req.body,
         file: req.file
       });
-      return res.status(400).json({ 
-        message: 'All fields are required', 
+      return res.status(400).json({
+        message: 'All fields are required',
         missing: {
           regNo: !regNo,
           name: !name,
@@ -91,11 +91,11 @@ export const addStudent = async (req, res) => {
       return res.status(400).json({ message: 'Student already exists with this email or registration number' });
     }
 
-    console.log('Creating student with data:', { 
-      regNo, 
-      name, 
-      email: email.toLowerCase(), 
-      mobileNo, 
+    console.log('Creating student with data:', {
+      regNo,
+      name,
+      email: email.toLowerCase(),
+      mobileNo,
       yearOfStudy,
       bodyKeys: Object.keys(req.body),
       hasFile: !!req.file
@@ -129,17 +129,17 @@ export const addStudent = async (req, res) => {
   } catch (error) {
     console.error('ERROR in addStudent:', error.message);
     console.error('Error details:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       message: error.message || 'Server error',
-      error: error.message 
+      error: error.message
     });
   }
 };
 
 export const addParent = async (req, res) => {
+  console.log('--- ENTERED UPDATED ADDPARENT CONTROLLER (v2.1) ---');
   try {
     const {
-      parentId,
       name,
       email,
       password,
@@ -149,23 +149,39 @@ export const addParent = async (req, res) => {
     } = req.body;
 
     // Validation
-    if (!parentId || !name || !email || !password || !mobileNo || !studentRegNo) {
-      console.log('Parent validation failed. Missing fields:', {
-        parentId: !parentId,
-        name: !name,
-        email: !email,
-        password: !password,
-        mobileNo: !mobileNo,
-        studentRegNo: !studentRegNo
+    const requiredFields = { name, email, password, mobileNo, studentName, studentRegNo };
+    const missing = Object.entries(requiredFields)
+      .filter(([_, value]) => !value)
+      .map(([key]) => key);
+
+    if (missing.length > 0) {
+      const timestamp = new Date().toISOString();
+      console.log(`[${timestamp}] Parent validation failed. Missing fields:`, missing);
+      return res.status(400).json({
+        message: 'All fields are required',
+        missingFields: missing,
+        serverTime: timestamp,
+        v: "2.0" // Version identification
       });
-      return res.status(400).json({ message: 'All fields are required' });
+    }
+
+    // Generate incremental Parent ID
+    const lastParent = await Parent.findOne().sort({ createdAt: -1 });
+    let newParentId = 'P1001';
+
+    if (lastParent && lastParent.parentId) {
+      const lastIdMatch = lastParent.parentId.match(/\d+/);
+      if (lastIdMatch) {
+        const lastNumber = parseInt(lastIdMatch[0]);
+        newParentId = `P${lastNumber + 1}`;
+      }
     }
 
     // Check if parent already exists
-    const parentExists = await Parent.findOne({ $or: [{ email: email.toLowerCase() }, { parentId }] });
+    const parentExists = await Parent.findOne({ email: email.toLowerCase() });
     if (parentExists) {
-      console.log('Parent already exists:', { email: email.toLowerCase(), parentId });
-      return res.status(400).json({ message: 'Parent already exists with this email or parent ID' });
+      console.log('Parent already exists:', { email: email.toLowerCase() });
+      return res.status(400).json({ message: 'Parent already exists with this email' });
     }
 
     // Verify student exists
@@ -178,7 +194,7 @@ export const addParent = async (req, res) => {
     console.log('Creating parent for student:', studentRegNo);
 
     const parent = await Parent.create({
-      parentId,
+      parentId: newParentId,
       name,
       email: email.toLowerCase(),
       password,
@@ -201,17 +217,17 @@ export const addParent = async (req, res) => {
   } catch (error) {
     console.error('ERROR in addParent:', error.message);
     console.error('Error details:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       message: error.message || 'Server error',
-      error: error.message 
+      error: error.message
     });
   }
 };
 
 export const addWarden = async (req, res) => {
+  console.log('--- ENTERED UPDATED ADDWARDEN CONTROLLER (v1.0) ---');
   try {
     const {
-      wardenId,
       name,
       email,
       password,
@@ -220,29 +236,43 @@ export const addWarden = async (req, res) => {
     } = req.body;
 
     // Validation
-    if (!wardenId || !name || !email || !password || !mobileNo || !hostelName) {
-      console.log('Warden validation failed. Missing fields:', {
-        wardenId: !wardenId,
-        name: !name,
-        email: !email,
-        password: !password,
-        mobileNo: !mobileNo,
-        hostelName: !hostelName
+    const requiredFields = { name, email, password, mobileNo, hostelName };
+    const missing = Object.entries(requiredFields)
+      .filter(([_, value]) => !value)
+      .map(([key]) => key);
+
+    if (missing.length > 0) {
+      const timestamp = new Date().toISOString();
+      console.log(`[${timestamp}] Warden validation failed. Missing fields:`, missing);
+      return res.status(400).json({
+        message: 'All fields are required',
+        missingFields: missing
       });
-      return res.status(400).json({ message: 'All fields are required' });
+    }
+
+    // Generate incremental Warden ID
+    const lastWarden = await Warden.findOne().sort({ createdAt: -1 });
+    let newWardenId = 'W1001';
+
+    if (lastWarden && lastWarden.wardenId) {
+      const lastIdMatch = lastWarden.wardenId.match(/\d+/);
+      if (lastIdMatch) {
+        const lastNumber = parseInt(lastIdMatch[0]);
+        newWardenId = `W${lastNumber + 1}`;
+      }
     }
 
     // Check if warden already exists
-    const wardenExists = await Warden.findOne({ $or: [{ email: email.toLowerCase() }, { wardenId }] });
+    const wardenExists = await Warden.findOne({ email: email.toLowerCase() });
     if (wardenExists) {
-      console.log('Warden already exists:', { email: email.toLowerCase(), wardenId });
-      return res.status(400).json({ message: 'Warden already exists with this email or warden ID' });
+      console.log('Warden already exists:', { email: email.toLowerCase() });
+      return res.status(400).json({ message: 'Warden already exists with this email' });
     }
 
     console.log('Creating warden for hostel:', hostelName);
 
     const warden = await Warden.create({
-      wardenId,
+      wardenId: newWardenId,
       name,
       email: email.toLowerCase(),
       password,
@@ -264,16 +294,16 @@ export const addWarden = async (req, res) => {
   } catch (error) {
     console.error('ERROR in addWarden:', error.message);
     console.error('Error details:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       message: error.message || 'Server error',
-      error: error.message 
+      error: error.message
     });
   }
 };
 
 export const getAllStudents = async (req, res) => {
   try {
-    const students = await Student.find().select('-password').sort({ createdAt: -1 });
+    const students = await Student.find().select('-password').sort({ regNo: 1 });
     res.json(students);
   } catch (error) {
     console.error(error);
@@ -283,7 +313,7 @@ export const getAllStudents = async (req, res) => {
 
 export const getAllParents = async (req, res) => {
   try {
-    const parents = await Parent.find().select('-password').sort({ createdAt: -1 });
+    const parents = await Parent.find().select('-password').sort({ parentId: 1 });
     res.json(parents);
   } catch (error) {
     console.error(error);
@@ -293,7 +323,7 @@ export const getAllParents = async (req, res) => {
 
 export const getAllWardens = async (req, res) => {
   try {
-    const wardens = await Warden.find().select('-password').sort({ createdAt: -1 });
+    const wardens = await Warden.find().select('-password').sort({ wardenId: 1 });
     res.json(wardens);
   } catch (error) {
     console.error(error);
@@ -315,30 +345,30 @@ export const deleteStudent = async (req, res) => {
     console.log(`Deleting student ${student.name} (${regNo}) and all related data...`);
 
     // Delete all related data in proper order
-    
+
     // 1. Delete EntryExitLogs
     const entryExitLogsDeleted = await EntryExitLog.deleteMany({ studentId });
     console.log(`Deleted ${entryExitLogsDeleted.deletedCount} entry/exit logs`);
-    
+
     // 2. Delete Outpasses
     const outpassesDeleted = await Outpass.deleteMany({ studentId });
     console.log(`Deleted ${outpassesDeleted.deletedCount} outpasses`);
-    
+
     // 3. Delete Permission Letters
     const permissionLettersDeleted = await PermissionLetter.deleteMany({ studentId });
     console.log(`Deleted ${permissionLettersDeleted.deletedCount} permission letters`);
-    
+
     // 4. Delete User document (if exists)
     const userDeleted = await User.findOneAndDelete({ regNo });
     if (userDeleted) {
       console.log(`Deleted user account for ${regNo}`);
     }
-    
+
     // 5. Delete the student
     await Student.findByIdAndDelete(studentId);
     console.log(`Deleted student record for ${student.name}`);
 
-    res.json({ 
+    res.json({
       message: 'Student and all related data deleted successfully',
       deletedData: {
         student: student.name,
@@ -351,9 +381,9 @@ export const deleteStudent = async (req, res) => {
     });
   } catch (error) {
     console.error('Error deleting student:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       message: 'Server error while deleting student and related data',
-      error: error.message 
+      error: error.message
     });
   }
 };
@@ -374,12 +404,12 @@ export const deleteParent = async (req, res) => {
 
     // Find the associated student
     const student = await Student.findOne({ regNo: studentRegNo });
-    
+
     if (!student) {
       // If student doesn't exist, just delete the parent
       await Parent.findByIdAndDelete(parentId);
       console.log(`Deleted parent ${parentName} (no associated student found)`);
-      return res.json({ 
+      return res.json({
         message: 'Parent deleted successfully',
         details: `Parent ${parentName} deleted. No associated student found.`
       });
@@ -391,34 +421,34 @@ export const deleteParent = async (req, res) => {
     console.log(`Deleting student ${studentName} (${studentRegNo}) and all related data...`);
 
     // Delete all related data in proper order
-    
+
     // 1. Delete EntryExitLogs
     const entryExitLogsDeleted = await EntryExitLog.deleteMany({ studentId });
     console.log(`Deleted ${entryExitLogsDeleted.deletedCount} entry/exit logs`);
-    
+
     // 2. Delete Outpasses
     const outpassesDeleted = await Outpass.deleteMany({ studentId });
     console.log(`Deleted ${outpassesDeleted.deletedCount} outpasses`);
-    
+
     // 3. Delete Permission Letters
     const permissionLettersDeleted = await PermissionLetter.deleteMany({ studentId });
     console.log(`Deleted ${permissionLettersDeleted.deletedCount} permission letters`);
-    
+
     // 4. Delete User document (if exists)
     const userDeleted = await User.findOneAndDelete({ regNo: studentRegNo });
     if (userDeleted) {
       console.log(`Deleted user account for ${studentRegNo}`);
     }
-    
+
     // 5. Delete the student
     await Student.findByIdAndDelete(studentId);
     console.log(`Deleted student record for ${studentName}`);
-    
+
     // 6. Delete the parent
     await Parent.findByIdAndDelete(parentId);
     console.log(`Deleted parent record for ${parentName}`);
 
-    res.json({ 
+    res.json({
       message: 'Parent, student, and all related data deleted successfully',
       deletedData: {
         parent: parentName,
@@ -432,9 +462,9 @@ export const deleteParent = async (req, res) => {
     });
   } catch (error) {
     console.error('Error deleting parent and related data:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       message: 'Server error while deleting parent and related data',
-      error: error.message 
+      error: error.message
     });
   }
 };
@@ -442,13 +472,13 @@ export const deleteParent = async (req, res) => {
 export const deleteWarden = async (req, res) => {
   try {
     const warden = await Warden.findById(req.params.id);
-    
+
     if (!warden) {
       return res.status(404).json({ message: 'Warden not found' });
     }
 
     await Warden.findByIdAndDelete(req.params.id);
-    
+
     res.json({ message: 'Warden deleted successfully' });
   } catch (error) {
     console.error(error);
@@ -460,31 +490,31 @@ export const deleteWarden = async (req, res) => {
 export const uploadStudentProfilePhoto = async (req, res) => {
   try {
     const { studentId } = req.params;
-    
+
     if (!req.file) {
       return res.status(400).json({ message: 'No file uploaded' });
     }
-    
+
     // Find the student
     const student = await Student.findById(studentId);
     if (!student) {
       return res.status(404).json({ message: 'Student not found' });
     }
-    
+
     // Update student with profile photo path
     const profilePhotoPath = `/uploads/profile-pictures/${req.file.filename}`;
     student.profilePhoto = profilePhotoPath;
     await student.save();
-    
+
     res.json({
       message: 'Profile photo uploaded successfully',
       profilePhoto: profilePhotoPath
     });
   } catch (error) {
     console.error('ERROR in uploadStudentProfilePhoto:', error.message);
-    res.status(500).json({ 
+    res.status(500).json({
       message: error.message || 'Server error',
-      error: error.message 
+      error: error.message
     });
   }
 };
@@ -494,13 +524,13 @@ export const updateStudent = async (req, res) => {
   try {
     const { id } = req.params;
     const { regNo, name, email, mobileNo, yearOfStudy, department, hostelName, roomNo, parentName } = req.body;
-    
+
     // Find the student
     const existingStudent = await Student.findById(id);
     if (!existingStudent) {
       return res.status(404).json({ message: 'Student not found' });
     }
-    
+
     // Check if email or regNo already exists for another student
     const emailConflict = await Student.findOne({
       email: email.toLowerCase(),
@@ -509,7 +539,7 @@ export const updateStudent = async (req, res) => {
     if (emailConflict) {
       return res.status(400).json({ message: 'Email already exists' });
     }
-    
+
     const regNoConflict = await Student.findOne({
       regNo,
       _id: { $ne: id }
@@ -517,7 +547,7 @@ export const updateStudent = async (req, res) => {
     if (regNoConflict) {
       return res.status(400).json({ message: 'Registration number already exists' });
     }
-    
+
     // Update student details
     existingStudent.regNo = regNo;
     existingStudent.name = name;
@@ -528,9 +558,9 @@ export const updateStudent = async (req, res) => {
     existingStudent.hostelName = hostelName;
     existingStudent.roomNo = roomNo;
     existingStudent.parentName = parentName;
-    
+
     await existingStudent.save();
-    
+
     res.json({
       message: 'Student updated successfully',
       student: {
@@ -549,9 +579,9 @@ export const updateStudent = async (req, res) => {
     });
   } catch (error) {
     console.error('ERROR in updateStudent:', error.message);
-    res.status(500).json({ 
+    res.status(500).json({
       message: error.message || 'Server error',
-      error: error.message 
+      error: error.message
     });
   }
 };
@@ -561,13 +591,13 @@ export const updateParent = async (req, res) => {
   try {
     const { id } = req.params;
     const { parentId, name, email, mobileNo, studentName, studentRegNo } = req.body;
-    
+
     // Find the parent
     const existingParent = await Parent.findById(id);
     if (!existingParent) {
       return res.status(404).json({ message: 'Parent not found' });
     }
-    
+
     // Check if email or parentId already exists for another parent
     const emailConflict = await Parent.findOne({
       email: email.toLowerCase(),
@@ -576,7 +606,7 @@ export const updateParent = async (req, res) => {
     if (emailConflict) {
       return res.status(400).json({ message: 'Email already exists' });
     }
-    
+
     const parentIdConflict = await Parent.findOne({
       parentId,
       _id: { $ne: id }
@@ -584,13 +614,13 @@ export const updateParent = async (req, res) => {
     if (parentIdConflict) {
       return res.status(400).json({ message: 'Parent ID already exists' });
     }
-    
+
     // Verify student exists
     const student = await Student.findOne({ regNo: studentRegNo });
     if (!student) {
       return res.status(400).json({ message: 'Student not found with this registration number' });
     }
-    
+
     // Update parent details
     existingParent.parentId = parentId;
     existingParent.name = name;
@@ -598,9 +628,9 @@ export const updateParent = async (req, res) => {
     existingParent.mobileNo = mobileNo;
     existingParent.studentName = studentName;
     existingParent.studentRegNo = studentRegNo;
-    
+
     await existingParent.save();
-    
+
     res.json({
       message: 'Parent updated successfully',
       parent: {
@@ -615,9 +645,9 @@ export const updateParent = async (req, res) => {
     });
   } catch (error) {
     console.error('ERROR in updateParent:', error.message);
-    res.status(500).json({ 
+    res.status(500).json({
       message: error.message || 'Server error',
-      error: error.message 
+      error: error.message
     });
   }
 };
@@ -627,13 +657,13 @@ export const updateWarden = async (req, res) => {
   try {
     const { id } = req.params;
     const { wardenId, name, email, mobileNo, hostelName } = req.body;
-    
+
     // Find the warden
     const existingWarden = await Warden.findById(id);
     if (!existingWarden) {
       return res.status(404).json({ message: 'Warden not found' });
     }
-    
+
     // Check if email or wardenId already exists for another warden
     const emailConflict = await Warden.findOne({
       email: email.toLowerCase(),
@@ -642,7 +672,7 @@ export const updateWarden = async (req, res) => {
     if (emailConflict) {
       return res.status(400).json({ message: 'Email already exists' });
     }
-    
+
     const wardenIdConflict = await Warden.findOne({
       wardenId,
       _id: { $ne: id }
@@ -650,16 +680,16 @@ export const updateWarden = async (req, res) => {
     if (wardenIdConflict) {
       return res.status(400).json({ message: 'Warden ID already exists' });
     }
-    
+
     // Update warden details
     existingWarden.wardenId = wardenId;
     existingWarden.name = name;
     existingWarden.email = email.toLowerCase();
     existingWarden.mobileNo = mobileNo;
     existingWarden.hostelName = hostelName;
-    
+
     await existingWarden.save();
-    
+
     res.json({
       message: 'Warden updated successfully',
       warden: {
@@ -673,9 +703,9 @@ export const updateWarden = async (req, res) => {
     });
   } catch (error) {
     console.error('ERROR in updateWarden:', error.message);
-    res.status(500).json({ 
+    res.status(500).json({
       message: error.message || 'Server error',
-      error: error.message 
+      error: error.message
     });
   }
 };

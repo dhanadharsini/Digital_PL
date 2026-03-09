@@ -6,6 +6,7 @@ import { api } from '../../services/api';
 const PendingRequests = () => {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
 
   const menuItems = [
     { label: 'Dashboard', path: '/warden' },
@@ -30,13 +31,19 @@ const PendingRequests = () => {
     }
   };
 
+  const filteredRequests = requests.filter(request =>
+    request.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    request.regNo.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    request.placeOfVisit.toLowerCase().includes(searchTerm.toLowerCase())
+  ).sort((a, b) => a.regNo.localeCompare(b.regNo, undefined, { numeric: true }));
+
   const handleApprove = async (id) => {
     if (window.confirm('Are you sure you want to approve this request?')) {
       try {
         // FIXED: Changed from /approve-request/ to /approve/
         const response = await api.post(`/warden/approve/${id}`);
         console.log('Approve response:', response.data);
-        
+
         fetchRequests(); // Refresh the list
         alert('Request approved successfully!');
       } catch (error) {
@@ -54,7 +61,7 @@ const PendingRequests = () => {
         // FIXED: Changed from /reject-request/ to /reject/
         const response = await api.post(`/warden/reject/${id}`, { reason });
         console.log('Reject response:', response.data);
-        
+
         fetchRequests(); // Refresh the list
         alert('Request rejected successfully!');
       } catch (error) {
@@ -70,8 +77,25 @@ const PendingRequests = () => {
       <Sidebar menuItems={menuItems} />
       <div className="main-content">
         <Navbar title="Pending PL Requests" />
-        
+
         <div className="card">
+          <div className="card-header-actions" style={{ marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <h2 style={{ margin: 0 }}>Pending Lists</h2>
+            <div className="search-box">
+              <input
+                type="text"
+                placeholder="Search by name, reg no or place..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                style={{
+                  padding: '8px 12px',
+                  borderRadius: '4px',
+                  border: '1px solid #ddd',
+                  width: '300px'
+                }}
+              />
+            </div>
+          </div>
           {loading ? (
             <div className="loading-spinner">
               <div className="spinner"></div>
@@ -96,7 +120,7 @@ const PendingRequests = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {requests.map((request) => (
+                  {filteredRequests.map((request) => (
                     <tr key={request._id}>
                       <td>{request.name}</td>
                       <td>{request.regNo}</td>
@@ -107,13 +131,13 @@ const PendingRequests = () => {
                       <td>{new Date(request.arrivalDateTime).toLocaleString()}</td>
                       <td>
                         <div className="action-buttons">
-                          <button 
+                          <button
                             className="btn btn-success"
                             onClick={() => handleApprove(request._id)}
                           >
                             Approve
                           </button>
-                          <button 
+                          <button
                             className="btn btn-danger"
                             onClick={() => handleReject(request._id)}
                           >

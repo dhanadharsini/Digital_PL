@@ -9,6 +9,7 @@ const ParentList = () => {
   const [editingParent, setEditingParent] = useState(null);
   const [editForm, setEditForm] = useState({});
   const [showEditModal, setShowEditModal] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
 
   const menuItems = [
     { label: 'Dashboard', path: '/admin' },
@@ -81,13 +82,37 @@ const ParentList = () => {
     }
   };
 
+  const filteredParents = parents.filter(parent =>
+    parent.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    parent.parentId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    parent.studentRegNo.toLowerCase().includes(searchTerm.toLowerCase())
+  ).sort((a, b) => a.parentId.localeCompare(b.parentId, undefined, { numeric: true }));
+
   return (
     <div className="dashboard-container">
       <Sidebar menuItems={menuItems} />
       <div className="main-content">
         <Navbar title="Parents List" />
-        
+
         <div className="card">
+          <div className="card-header-actions" style={{ marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <h2 style={{ margin: 0 }}>Registered Parents</h2>
+            <div className="search-box">
+              <input
+                type="text"
+                placeholder="Search by name, ID or student reg..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                style={{
+                  padding: '8px 12px',
+                  borderRadius: '4px',
+                  border: '1px solid #ddd',
+                  width: '300px'
+                }}
+              />
+            </div>
+          </div>
+
           {loading ? (
             <div className="loading-spinner">
               <div className="spinner"></div>
@@ -107,7 +132,7 @@ const ParentList = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {parents.map((parent) => (
+                  {filteredParents.map((parent) => (
                     <tr key={parent._id}>
                       <td>{parent.parentId}</td>
                       <td>{parent.name}</td>
@@ -117,14 +142,14 @@ const ParentList = () => {
                       <td>{parent.studentRegNo}</td>
                       <td>
                         <div className="action-buttons">
-                          <button 
+                          <button
                             className="btn btn-primary"
                             onClick={() => handleEditClick(parent)}
                             style={{ marginRight: '8px' }}
                           >
                             Edit
                           </button>
-                          <button 
+                          <button
                             className="btn btn-danger"
                             onClick={() => handleDelete(parent._id)}
                           >
@@ -140,7 +165,7 @@ const ParentList = () => {
           )}
         </div>
       </div>
-      
+
       {/* Edit Modal */}
       {showEditModal && (
         <div className="modal-overlay" onClick={() => setShowEditModal(false)}>
@@ -159,8 +184,9 @@ const ParentList = () => {
                   type="text"
                   name="parentId"
                   value={editForm.parentId}
-                  onChange={handleEditChange}
-                  required
+                  readOnly
+                  disabled
+                  className="readonly-input"
                 />
               </div>
               <div className="form-group">
@@ -215,9 +241,9 @@ const ParentList = () => {
               </div>
               <div className="form-actions" style={{ marginTop: '20px', display: 'flex', gap: '10px' }}>
                 <button type="submit" className="btn btn-primary">Save Changes</button>
-                <button 
-                  type="button" 
-                  className="btn btn-secondary" 
+                <button
+                  type="button"
+                  className="btn btn-secondary"
                   onClick={() => setShowEditModal(false)}
                 >
                   Cancel

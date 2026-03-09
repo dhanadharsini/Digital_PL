@@ -10,6 +10,7 @@ const StudentList = () => {
   const [editForm, setEditForm] = useState({});
   const [showEditModal, setShowEditModal] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
 
   const menuItems = [
     { label: 'Dashboard', path: '/admin' },
@@ -88,10 +89,10 @@ const StudentList = () => {
   const handlePhotoUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    
+
     const formData = new FormData();
     formData.append('profilePhoto', file);
-    
+
     setUploadingPhoto(true);
     try {
       await api.post(`/admin/student/${editingStudent._id}/upload-photo`, formData, {
@@ -109,13 +110,37 @@ const StudentList = () => {
     }
   };
 
+  const filteredStudents = students.filter(student =>
+    student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    student.regNo.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    student.department.toLowerCase().includes(searchTerm.toLowerCase())
+  ).sort((a, b) => a.regNo.localeCompare(b.regNo, undefined, { numeric: true }));
+
   return (
     <div className="dashboard-container">
       <Sidebar menuItems={menuItems} />
       <div className="main-content">
         <Navbar title="Students List" />
-        
+
         <div className="card">
+          <div className="card-header-actions" style={{ marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <h2 style={{ margin: 0 }}>Registered Students</h2>
+            <div className="search-box">
+              <input
+                type="text"
+                placeholder="Search by name, reg no or dept..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                style={{
+                  padding: '8px 12px',
+                  borderRadius: '4px',
+                  border: '1px solid #ddd',
+                  width: '300px'
+                }}
+              />
+            </div>
+          </div>
+
           {loading ? (
             <div className="loading-spinner">
               <div className="spinner"></div>
@@ -137,7 +162,7 @@ const StudentList = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {students.map((student) => (
+                  {filteredStudents.map((student, index) => (
                     <tr key={student._id}>
                       <td>{student.regNo}</td>
                       <td>{student.name}</td>
@@ -149,14 +174,14 @@ const StudentList = () => {
                       <td>{student.roomNo}</td>
                       <td>
                         <div className="action-buttons">
-                          <button 
+                          <button
                             className="btn btn-primary"
                             onClick={() => handleEditClick(student)}
                             style={{ marginRight: '8px' }}
                           >
                             Edit
                           </button>
-                          <button 
+                          <button
                             className="btn btn-danger"
                             onClick={() => handleDelete(student._id)}
                           >
@@ -172,7 +197,7 @@ const StudentList = () => {
           )}
         </div>
       </div>
-      
+
       {/* Edit Modal */}
       {showEditModal && (
         <div className="modal-overlay" onClick={() => setShowEditModal(false)}>
@@ -287,9 +312,9 @@ const StudentList = () => {
                 {editingStudent?.profilePhoto && (
                   <div style={{ marginTop: '10px' }}>
                     <p>Current Photo:</p>
-                    <img 
-                      src={`http://localhost:5000${editingStudent.profilePhoto}`} 
-                      alt="Current" 
+                    <img
+                      src={`http://localhost:5000${editingStudent.profilePhoto}`}
+                      alt="Current"
                       style={{ width: '100px', height: '100px', borderRadius: '50%', objectFit: 'cover' }}
                     />
                   </div>
@@ -297,9 +322,9 @@ const StudentList = () => {
               </div>
               <div className="form-actions" style={{ marginTop: '20px', display: 'flex', gap: '10px' }}>
                 <button type="submit" className="btn btn-primary">Save Changes</button>
-                <button 
-                  type="button" 
-                  className="btn btn-secondary" 
+                <button
+                  type="button"
+                  className="btn btn-secondary"
                   onClick={() => setShowEditModal(false)}
                 >
                   Cancel
