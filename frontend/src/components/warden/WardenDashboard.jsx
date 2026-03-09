@@ -12,6 +12,7 @@ const WardenDashboard = () => {
     pendingRequests: 0,
     delayedStudents: 0
   });
+  const [error, setError] = useState(null);
 
   const menuItems = [
     { label: 'Dashboard', path: '/warden' },
@@ -37,20 +38,32 @@ const WardenDashboard = () => {
     try {
       const response = await api.get('/warden/stats');
       console.log('Received stats:', response.data);
-      // Assuming the API now returns delayedStudents and potentially fewer other stats
       setStats({
         totalStudents: response.data.totalStudents || 0,
         pendingRequests: response.data.pendingRequests || 0,
         delayedStudents: response.data.delayedStudents || 0
       });
+      setError(null);
       console.log('Dashboard stats refreshed:', new Date().toLocaleString('en-IN'));
     } catch (error) {
       console.error('Error fetching stats:', error);
+      setError('Failed to load dashboard stats. Please refresh the page.');
+      setStats({
+        totalStudents: 0,
+        pendingRequests: 0,
+        delayedStudents: 0
+      });
     }
   };
 
   return (
     <DashboardLayout title="Warden Dashboard" menuItems={menuItems}>
+      {error && (
+        <div style={{ padding: '20px', backgroundColor: '#fee', color: '#c00', borderRadius: '8px', marginBottom: '20px' }}>
+          ⚠️ {error}
+        </div>
+      )}
+      
       <div className="welcome-message">
         <h1>Welcome, Warden!</h1>
         <p>Hostel Management System</p>
