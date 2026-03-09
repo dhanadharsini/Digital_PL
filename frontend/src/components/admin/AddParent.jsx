@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import Sidebar from '../common/Sidebar';
-import Navbar from '../common/Navbar';
 import { api } from '../../services/api';
+import DashboardLayout from '../common/DashboardLayout';
 
 const AddParent = () => {
+  // ... existing state ...
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -66,100 +66,95 @@ const AddParent = () => {
   };
 
   return (
-    <div className="dashboard-container">
-      <Sidebar menuItems={menuItems} />
-      <div className="main-content">
-        <Navbar title="Add New Parent" />
+    <DashboardLayout title="Add New Parent" menuItems={menuItems}>
+      <div className="card">
+        {message.text && (
+          <div className={`alert alert-${message.type}`}>
+            {message.text}
+          </div>
+        )}
 
-        <div className="card">
-          {message.text && (
-            <div className={`alert alert-${message.type}`}>
-              {message.text}
-            </div>
-          )}
+        <form onSubmit={handleSubmit}>
+          <div className="form-grid">
 
-          <form onSubmit={handleSubmit}>
-            <div className="form-grid">
-
-              <div className="form-group">
-                <label>Parent Name *</label>
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Email *</label>
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Password *</label>
-                <input
-                  type="password"
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Mobile Number *</label>
-                <input
-                  type="tel"
-                  name="mobileNo"
-                  value={formData.mobileNo}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Student Name *</label>
-                <input
-                  type="text"
-                  name="studentName"
-                  value={formData.studentName}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Student Registration Number *</label>
-                <input
-                  type="text"
-                  name="studentRegNo"
-                  value={formData.studentRegNo}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
+            <div className="form-group">
+              <label>Parent Name *</label>
+              <input
+                type="text"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                required
+              />
             </div>
 
-            <button
-              type="submit"
-              className="btn btn-primary"
-              disabled={loading}
-              style={{ marginTop: '20px' }}
-            >
-              {loading ? 'Adding Parent...' : 'Add Parent'}
-            </button>
-          </form>
-        </div>
+            <div className="form-group">
+              <label>Email *</label>
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Password *</label>
+              <input
+                type="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Mobile Number *</label>
+              <input
+                type="tel"
+                name="mobileNo"
+                value={formData.mobileNo}
+                onChange={handleChange}
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Student Name *</label>
+              <input
+                type="text"
+                name="studentName"
+                value={formData.studentName}
+                onChange={handleChange}
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Student Registration Number *</label>
+              <input
+                type="text"
+                name="studentRegNo"
+                value={formData.studentRegNo}
+                onChange={handleChange}
+                required
+              />
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            className="btn btn-primary"
+            disabled={loading}
+            style={{ marginTop: '20px' }}
+          >
+            {loading ? 'Adding Parent...' : 'Add Parent'}
+          </button>
+        </form>
       </div>
-    </div>
+    </DashboardLayout>
   );
 };
 

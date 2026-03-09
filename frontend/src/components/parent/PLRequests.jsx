@@ -1,18 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import Sidebar from '../common/Sidebar';
-import Navbar from '../common/Navbar';
 import { api } from '../../services/api';
+import DashboardLayout from '../common/DashboardLayout';
 
 const PLRequests = () => {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  const menuItems = [
-    { label: 'Dashboard', path: '/parent' },
-    { label: 'PL Requests', path: '/parent/pl-requests' },
-    { label: 'Request History', path: '/parent/request-history' }
-  ];
+
 
   useEffect(() => {
     fetchRequests();
@@ -54,97 +48,72 @@ const PLRequests = () => {
     }
   };
 
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
 
-  const closeSidebar = () => {
-    setIsSidebarOpen(false);
-  };
+
+  const menuItems = [
+    { label: 'Dashboard', path: '/parent' },
+    { label: 'PL Requests', path: '/parent/pl-requests' },
+    { label: 'Request History', path: '/parent/request-history' }
+  ];
 
   return (
-    <div className="dashboard-container">
-      {/* Hamburger Button */}
-      <button 
-        className={`hamburger-btn ${isSidebarOpen ? 'active' : ''}`}
-        onClick={toggleSidebar}
-        aria-label="Toggle menu"
-      >
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
-
-      {/* Sidebar Overlay */}
-      <div 
-        className={`sidebar-overlay ${isSidebarOpen ? 'active' : ''}`}
-        onClick={closeSidebar}
-      ></div>
-
-      <Sidebar 
-        menuItems={menuItems}
-        isOpen={isSidebarOpen}
-        onClose={closeSidebar}
-      />
-      
-      <div className="main-content">
-        <Navbar title="Pending PL Requests" />
-        
-        <div className="card">
-          {loading ? (
-            <div className="loading-spinner">
-              <div className="spinner"></div>
-            </div>
-          ) : requests.length === 0 ? (
-            <p>No pending requests</p>
-          ) : (
-            <div className="table-container">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Student Name</th>
-                    <th>Reg No</th>
-                    <th>Place of Visit</th>
-                    <th>Reason</th>
-                    <th>Departure</th>
-                    <th>Arrival</th>
-                    <th>Actions</th>
+    <DashboardLayout title="Pending PL Requests" menuItems={menuItems}>
+      <div className="card">
+        {loading ? (
+          <div className="loading-spinner">
+            <div className="spinner"></div>
+          </div>
+        ) : requests.length === 0 ? (
+          <p style={{ textAlign: 'center', padding: '40px', color: '#666' }}>
+            No pending requests
+          </p>
+        ) : (
+          <div className="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Student Name</th>
+                  <th>Reg No</th>
+                  <th>Place of Visit</th>
+                  <th>Reason</th>
+                  <th>Departure</th>
+                  <th>Arrival</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {requests.map((request) => (
+                  <tr key={request._id}>
+                    <td>{request.name}</td>
+                    <td>{request.regNo}</td>
+                    <td>{request.placeOfVisit}</td>
+                    <td>{request.reasonOfVisit}</td>
+                    <td>{new Date(request.departureDateTime).toLocaleString()}</td>
+                    <td>{new Date(request.arrivalDateTime).toLocaleString()}</td>
+                    <td>
+                      <div className="action-buttons">
+                        <button
+                          className="btn btn-success"
+                          onClick={() => handleApprove(request._id)}
+                        >
+                          Approve
+                        </button>
+                        <button
+                          className="btn btn-danger"
+                          onClick={() => handleReject(request._id)}
+                        >
+                          Reject
+                        </button>
+                      </div>
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {requests.map((request) => (
-                    <tr key={request._id}>
-                      <td>{request.name}</td>
-                      <td>{request.regNo}</td>
-                      <td>{request.placeOfVisit}</td>
-                      <td>{request.reasonOfVisit}</td>
-                      <td>{new Date(request.departureDateTime).toLocaleString()}</td>
-                      <td>{new Date(request.arrivalDateTime).toLocaleString()}</td>
-                      <td>
-                        <div className="action-buttons">
-                          <button 
-                            className="btn btn-success"
-                            onClick={() => handleApprove(request._id)}
-                          >
-                            Approve
-                          </button>
-                          <button 
-                            className="btn btn-danger"
-                            onClick={() => handleReject(request._id)}
-                          >
-                            Reject
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
-    </div>
+    </DashboardLayout>
   );
 };
 

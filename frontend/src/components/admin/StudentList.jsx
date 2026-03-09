@@ -1,7 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import Sidebar from '../common/Sidebar';
-import Navbar from '../common/Navbar';
 import { api, BASE_URL } from '../../services/api';
+import DashboardLayout from '../common/DashboardLayout';
 
 const StudentList = () => {
   const [students, setStudents] = useState([]);
@@ -12,15 +10,7 @@ const StudentList = () => {
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
 
-  const menuItems = [
-    { label: 'Dashboard', path: '/admin' },
-    { label: 'Add Student', path: '/admin/add-student' },
-    { label: 'Add Parent', path: '/admin/add-parent' },
-    { label: 'Add Warden', path: '/admin/add-warden' },
-    { label: 'Students List', path: '/admin/students' },
-    { label: 'Parents List', path: '/admin/parents' },
-    { label: 'Wardens List', path: '/admin/wardens' }
-  ];
+
 
   useEffect(() => {
     fetchStudents();
@@ -116,86 +106,91 @@ const StudentList = () => {
     student.department.toLowerCase().includes(searchTerm.toLowerCase())
   ).sort((a, b) => a.regNo.localeCompare(b.regNo, undefined, { numeric: true }));
 
+  const menuItems = [
+    { label: 'Dashboard', path: '/admin' },
+    { label: 'Add Student', path: '/admin/add-student' },
+    { label: 'Add Parent', path: '/admin/add-parent' },
+    { label: 'Add Warden', path: '/admin/add-warden' },
+    { label: 'Students List', path: '/admin/students' },
+    { label: 'Parents List', path: '/admin/parents' },
+    { label: 'Wardens List', path: '/admin/wardens' }
+  ];
+
   return (
-    <div className="dashboard-container">
-      <Sidebar menuItems={menuItems} />
-      <div className="main-content">
-        <Navbar title="Students List" />
-
-        <div className="card">
-          <div className="card-header-actions" style={{ marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <h2 style={{ margin: 0 }}>Registered Students</h2>
-            <div className="search-box">
-              <input
-                type="text"
-                placeholder="Search by name, reg no or dept..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                style={{
-                  padding: '8px 12px',
-                  borderRadius: '4px',
-                  border: '1px solid #ddd',
-                  width: '300px'
-                }}
-              />
-            </div>
+    <DashboardLayout title="Students List" menuItems={menuItems}>
+      <div className="card">
+        <div className="card-header-actions" style={{ marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+          <h2 style={{ margin: 0 }}>Registered Students</h2>
+          <div className="search-box">
+            <input
+              type="text"
+              placeholder="Search by name, reg no or dept..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              style={{
+                padding: '8px 12px',
+                borderRadius: '8px',
+                border: '1px solid #ddd',
+                width: '100%',
+                maxWidth: '300px'
+              }}
+            />
           </div>
-
-          {loading ? (
-            <div className="loading-spinner">
-              <div className="spinner"></div>
-            </div>
-          ) : (
-            <div className="table-container">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Reg No</th>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Mobile</th>
-                    <th>Year</th>
-                    <th>Department</th>
-                    <th>Hostel</th>
-                    <th>Room No</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredStudents.map((student, index) => (
-                    <tr key={student._id}>
-                      <td>{student.regNo}</td>
-                      <td>{student.name}</td>
-                      <td>{student.email}</td>
-                      <td>{student.mobileNo}</td>
-                      <td>{student.yearOfStudy}</td>
-                      <td>{student.department}</td>
-                      <td>{student.hostelName}</td>
-                      <td>{student.roomNo}</td>
-                      <td>
-                        <div className="action-buttons">
-                          <button
-                            className="btn btn-primary"
-                            onClick={() => handleEditClick(student)}
-                            style={{ marginRight: '8px' }}
-                          >
-                            Edit
-                          </button>
-                          <button
-                            className="btn btn-danger"
-                            onClick={() => handleDelete(student._id)}
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
         </div>
+
+        {loading ? (
+          <div className="loading-spinner">
+            <div className="spinner"></div>
+          </div>
+        ) : (
+          <div className="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Reg No</th>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Mobile</th>
+                  <th>Year</th>
+                  <th>Department</th>
+                  <th>Hostel</th>
+                  <th>Room No</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredStudents.map((student, index) => (
+                  <tr key={student._id}>
+                    <td>{student.regNo}</td>
+                    <td>{student.name}</td>
+                    <td>{student.email}</td>
+                    <td>{student.mobileNo}</td>
+                    <td>{student.yearOfStudy}</td>
+                    <td>{student.department}</td>
+                    <td>{student.hostelName}</td>
+                    <td>{student.roomNo}</td>
+                    <td>
+                      <div className="action-buttons">
+                        <button
+                          className="btn btn-primary"
+                          onClick={() => handleEditClick(student)}
+                        >
+                          Edit
+                        </button>
+                        <button
+                          className="btn btn-danger"
+                          onClick={() => handleDelete(student._id)}
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
       {/* Edit Modal */}
@@ -334,7 +329,7 @@ const StudentList = () => {
           </div>
         </div>
       )}
-    </div>
+    </DashboardLayout>
   );
 };
 

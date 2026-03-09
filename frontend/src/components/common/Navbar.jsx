@@ -63,17 +63,19 @@ const Navbar = ({ title }) => {
 
   return (
     <div className="navbar">
-      <div style={{
+      <div className="navbar-inner" style={{
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        width: '100%'
+        gap: '15px',
+        flexWrap: 'wrap'
       }}>
-        <h2 style={{ margin: 0 }}>{title}</h2>
-        <div style={{
+        <h2 className="navbar-title">{title}</h2>
+        <div className="navbar-actions" style={{
           display: 'flex',
           gap: '12px',
-          alignItems: 'center'
+          alignItems: 'center',
+          marginLeft: 'auto'
         }}>
           <button
             onClick={toggleTheme}
@@ -169,7 +171,7 @@ const Navbar = ({ title }) => {
                   }}>
                     {user?.email}
                   </div>
-                  
+
                   <button
                     onClick={handleChangePassword}
                     style={{

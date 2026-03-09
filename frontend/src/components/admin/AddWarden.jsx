@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import Sidebar from '../common/Sidebar';
-import Navbar from '../common/Navbar';
 import { api } from '../../services/api';
+import DashboardLayout from '../common/DashboardLayout';
 
 const AddWarden = () => {
   const [formData, setFormData] = useState({
@@ -64,89 +63,84 @@ const AddWarden = () => {
   };
 
   return (
-    <div className="dashboard-container">
-      <Sidebar menuItems={menuItems} />
-      <div className="main-content">
-        <Navbar title="Add New Warden" />
+    <DashboardLayout title="Add New Warden" menuItems={menuItems}>
+      <div className="card">
+        {message.text && (
+          <div className={`alert alert-${message.type}`}>
+            {message.text}
+          </div>
+        )}
 
-        <div className="card">
-          {message.text && (
-            <div className={`alert alert-${message.type}`}>
-              {message.text}
-            </div>
-          )}
+        <form onSubmit={handleSubmit}>
+          <div className="form-grid">
 
-          <form onSubmit={handleSubmit}>
-            <div className="form-grid">
-
-              <div className="form-group">
-                <label>Warden Name *</label>
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Email *</label>
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Password *</label>
-                <input
-                  type="password"
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Mobile Number *</label>
-                <input
-                  type="tel"
-                  name="mobileNo"
-                  value={formData.mobileNo}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Hostel Name *</label>
-                <input
-                  type="text"
-                  name="hostelName"
-                  value={formData.hostelName}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
+            <div className="form-group">
+              <label>Warden Name *</label>
+              <input
+                type="text"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                required
+              />
             </div>
 
-            <button
-              type="submit"
-              className="btn btn-primary"
-              disabled={loading}
-              style={{ marginTop: '20px' }}
-            >
-              {loading ? 'Adding Warden...' : 'Add Warden'}
-            </button>
-          </form>
-        </div>
+            <div className="form-group">
+              <label>Email *</label>
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Password *</label>
+              <input
+                type="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Mobile Number *</label>
+              <input
+                type="tel"
+                name="mobileNo"
+                value={formData.mobileNo}
+                onChange={handleChange}
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Hostel Name *</label>
+              <input
+                type="text"
+                name="hostelName"
+                value={formData.hostelName}
+                onChange={handleChange}
+                required
+              />
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            className="btn btn-primary"
+            disabled={loading}
+            style={{ marginTop: '20px' }}
+          >
+            {loading ? 'Adding Warden...' : 'Add Warden'}
+          </button>
+        </form>
       </div>
-    </div>
+    </DashboardLayout>
   );
 };
 

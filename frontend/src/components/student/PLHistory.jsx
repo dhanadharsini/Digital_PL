@@ -1,24 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import Sidebar from '../common/Sidebar';
-import Navbar from '../common/Navbar';
 import { api } from '../../services/api';
 import { generatePLPDF } from '../../utils/pdfGenerator';
+import DashboardLayout from '../common/DashboardLayout';
 
 const PLHistory = () => {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [downloadingId, setDownloadingId] = useState(null);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const navigate = useNavigate();
 
-  const menuItems = [
-    { label: 'Dashboard', path: '/student' },
-    { label: 'Request PL', path: '/student/request-pl' },
-    { label: 'Request Outpass', path: '/student/request-outpass' },
-    { label: 'PL History', path: '/student/pl-history' },
-    { label: 'Outpass History', path: '/student/outpass-history' }
-  ];
+
 
   useEffect(() => {
     fetchRequests();
@@ -26,11 +16,11 @@ const PLHistory = () => {
 
   const formatDateTime = (dateString) => {
     if (!dateString) return 'N/A';
-    
+
     try {
       const date = new Date(dateString);
       if (isNaN(date.getTime())) return 'Invalid Date';
-      
+
       return date.toLocaleString('en-IN', {
         day: '2-digit',
         month: 'short',
@@ -101,7 +91,7 @@ const PLHistory = () => {
     };
 
     const config = statusConfig[status] || statusConfig.pending;
-    
+
     return (
       <span className={`status-badge ${config.className}`} style={config.style}>
         {status.toUpperCase().replace('-', ' ')}
@@ -120,7 +110,7 @@ const PLHistory = () => {
 
     const currentDateTime = new Date();
     const arrivalDateTime = new Date(request.arrivalDateTime);
-    
+
     if (arrivalDateTime < currentDateTime) {
       return false;
     }
@@ -143,7 +133,7 @@ const PLHistory = () => {
 
     const currentDateTime = new Date();
     const arrivalDateTime = new Date(request.arrivalDateTime);
-    
+
     if (arrivalDateTime < currentDateTime) {
       return false;
     }
@@ -158,20 +148,20 @@ const PLHistory = () => {
   const getActionButtons = (request) => {
     const hasViewButton = canViewPLCard(request);
     const hasPDFButton = canDownloadPDF(request);
-    
+
     if (!hasViewButton && !hasPDFButton) {
       return <span style={{ color: '#999' }}>-</span>;
     }
-    
+
     return (
-      <div style={{ 
-        display: 'flex', 
+      <div style={{
+        display: 'flex',
         gap: '8px',
         justifyContent: 'flex-start',
         alignItems: 'center'
       }}>
         {hasViewButton && (
-          <button 
+          <button
             className="btn btn-primary"
             onClick={() => viewPLCard(request._id)}
             style={{
@@ -184,9 +174,9 @@ const PLHistory = () => {
             View PL Card
           </button>
         )}
-        
+
         {hasPDFButton && (
-          <button 
+          <button
             className="btn"
             onClick={() => handleDownloadPDF(request)}
             disabled={downloadingId === request._id}
@@ -232,12 +222,12 @@ const PLHistory = () => {
               </>
             ) : (
               <>
-                <svg 
-                  width="16" 
-                  height="16" 
-                  viewBox="0 0 24 24" 
-                  fill="none" 
-                  stroke="currentColor" 
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
                   strokeWidth="2"
                 >
                   <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
@@ -257,108 +247,83 @@ const PLHistory = () => {
     if (request.status === 'approved') {
       const currentDateTime = new Date();
       const arrivalDateTime = new Date(request.arrivalDateTime);
-      
+
       if (arrivalDateTime < currentDateTime) {
         return 'expired';
       }
-      
+
       if (request.isFullyUsed) {
         return 'completed';
       }
     }
-    
+
     return request.status;
   };
 
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
 
-  const closeSidebar = () => {
-    setIsSidebarOpen(false);
-  };
+
+  const menuItems = [
+    { label: 'Dashboard', path: '/student' },
+    { label: 'Request PL', path: '/student/request-pl' },
+    { label: 'Request Outpass', path: '/student/request-outpass' },
+    { label: 'PL History', path: '/student/pl-history' },
+    { label: 'Outpass History', path: '/student/outpass-history' }
+  ];
 
   return (
-    <div className="dashboard-container">
-      {/* Hamburger Button */}
-      <button 
-        className={`hamburger-btn ${isSidebarOpen ? 'active' : ''}`}
-        onClick={toggleSidebar}
-        aria-label="Toggle menu"
-      >
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
+    <DashboardLayout title="Permission Letter History" menuItems={menuItems}>
+      {/* Add keyframe animation for spinner */}
+      <style>{`
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
 
-      {/* Sidebar Overlay */}
-      <div 
-        className={`sidebar-overlay ${isSidebarOpen ? 'active' : ''}`}
-        onClick={closeSidebar}
-      ></div>
-
-      <Sidebar 
-        menuItems={menuItems}
-        isOpen={isSidebarOpen}
-        onClose={closeSidebar}
-      />
-      
-      <div className="main-content">
-        <Navbar title="Permission Letter History" />
-        
-        {/* Add keyframe animation for spinner */}
-        <style>{`
-          @keyframes spin {
-            to { transform: rotate(360deg); }
-          }
-        `}</style>
-        
-        <div className="card">
-          {loading ? (
-            <div className="loading-spinner">
-              <div className="spinner"></div>
-            </div>
-          ) : (
-            <div className="table-container">
-              <table>
-                <thead>
+      <div className="card">
+        {loading ? (
+          <div className="loading-spinner">
+            <div className="spinner"></div>
+          </div>
+        ) : (
+          <div className="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Place of Visit</th>
+                  <th>Reason</th>
+                  <th>Departure</th>
+                  <th>Arrival</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {requests.length === 0 ? (
                   <tr>
-                    <th>Place of Visit</th>
-                    <th>Reason</th>
-                    <th>Departure</th>
-                    <th>Arrival</th>
-                    <th>Status</th>
-                    <th>Actions</th>
+                    <td colSpan="6" style={{ textAlign: 'center', padding: '20px' }}>
+                      No permission letters found
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {requests.length === 0 ? (
-                    <tr>
-                      <td colSpan="6" style={{ textAlign: 'center', padding: '20px' }}>
-                        No permission letters found
+                ) : (
+                  requests.map((request) => (
+                    <tr key={request._id}>
+                      <td>{request.placeOfVisit}</td>
+                      <td>{request.reasonOfVisit}</td>
+                      <td>{formatDateTime(request.departureDateTime)}</td>
+                      <td>{formatDateTime(request.arrivalDateTime)}</td>
+                      <td>{getStatusBadge(getDisplayStatus(request))}</td>
+                      <td>
+                        {getActionButtons(request)}
                       </td>
                     </tr>
-                  ) : (
-                    requests.map((request) => (
-                      <tr key={request._id}>
-                        <td>{request.placeOfVisit}</td>
-                        <td>{request.reasonOfVisit}</td>
-                        <td>{formatDateTime(request.departureDateTime)}</td>
-                        <td>{formatDateTime(request.arrivalDateTime)}</td>
-                        <td>{getStatusBadge(getDisplayStatus(request))}</td>
-                        <td>
-                          {getActionButtons(request)}
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
-    </div>
+    </DashboardLayout>
   );
 };
 

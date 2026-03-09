@@ -2,9 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Html5Qrcode, Html5QrcodeScanner } from 'html5-qrcode';
 import jsQR from 'jsqr';
-import Sidebar from '../common/Sidebar';
-import Navbar from '../common/Navbar';
 import { api, BASE_URL } from '../../services/api';
+import DashboardLayout from '../common/DashboardLayout';
 import './QRScanner.css';
 
 const QRScanner = () => {
@@ -22,13 +21,7 @@ const QRScanner = () => {
   const scannerRef = useRef(null);
   const qrRegionRef = useRef(null);
 
-  const menuItems = [
-    { label: 'Dashboard', path: '/warden' },
-    { label: 'Pending Requests', path: '/warden/pending-requests' },
-    { label: 'Students List', path: '/warden/students' },
-    { label: 'Delayed Students', path: '/warden/delayed-students' },
-    { label: 'QR Scanner', path: '/warden/qr-scanner' }
-  ];
+
 
   // Reset state only on mount
   useEffect(() => {
@@ -431,349 +424,352 @@ const QRScanner = () => {
     }
   };
 
+  const menuItems = [
+    { label: 'Dashboard', path: '/warden' },
+    { label: 'Pending Requests', path: '/warden/pending-requests' },
+    { label: 'Students List', path: '/warden/students' },
+    { label: 'Delayed Students', path: '/warden/delayed-students' },
+    { label: 'QR Scanner', path: '/warden/qr-scanner' }
+  ];
+
   return (
-    <div className="dashboard-container">
-      <Sidebar menuItems={menuItems} />
-      <div className="main-content">
-        <Navbar title="QR Code Scanner" />
+    <DashboardLayout title="QR Code Scanner" menuItems={menuItems}>
+      <div className="qr-scanner-container">
+        <div className="scanner-card">
+          {/* Hidden element for image scanning - positioned off-screen but still in layout */}
+          <div id="temp-qr-reader" style={{
+            position: 'absolute',
+            left: '-9999px',
+            top: '0',
+            width: '300px',
+            height: '300px',
+            visibility: 'hidden'
+          }}></div>
 
-        <div className="qr-scanner-container">
-          <div className="scanner-card">
-            {/* Hidden element for image scanning - positioned off-screen but still in layout */}
-            <div id="temp-qr-reader" style={{
-              position: 'absolute',
-              left: '-9999px',
-              top: '0',
-              width: '300px',
-              height: '300px',
-              visibility: 'hidden'
-            }}></div>
+          {message.text && (
+            <div className={`message ${message.type}`}>
+              {message.text}
+            </div>
+          )}
 
-            {message.text && (
-              <div className={`message ${message.type}`}>
-                {message.text}
-              </div>
-            )}
+          {!scanning && !verificationData && (
+            <div className="scanner-start">
+              <h2>Scan Student QR Code</h2>
+              <p>Choose scanning method for Permission Letter or Outpass</p>
 
-            {!scanning && !verificationData && (
-              <div className="scanner-start">
-                <h2>Scan Student QR Code</h2>
-                <p>Choose scanning method for Permission Letter or Outpass</p>
+              <div className="scan-options">
+                <button
+                  className="btn btn-primary camera-scan-btn"
+                  onClick={startCameraScanning}
+                >
+                  <span>📷 Scan with Camera</span>
+                </button>
 
-                <div className="scan-options">
+                <div className="or-divider">OR</div>
+
+                <div className="scan-mode-buttons">
                   <button
-                    className="btn btn-primary camera-scan-btn"
-                    onClick={startCameraScanning}
+                    className="btn btn-secondary mode-btn"
+                    onClick={startImageUploadMode}
                   >
-                    <span>📷 Scan with Camera</span>
+                    📁 Upload Image
                   </button>
-
-                  <div className="or-divider">OR</div>
-
-                  <div className="scan-mode-buttons">
-                    <button
-                      className="btn btn-secondary mode-btn"
-                      onClick={startImageUploadMode}
-                    >
-                      📁 Upload Image
-                    </button>
-                    <button
-                      className="btn btn-secondary mode-btn"
-                      onClick={startManualMode}
-                    >
-                      ⌨️ Enter Manually
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {scanning && !manualMode && !imageUploadMode && (
-              <div className="scanner-active">
-                {cameraStarting && (
-                  <div className="camera-loading">
-                    <p className="loading-text-glow">Starting Camera...</p>
-                  </div>
-                )}
-                {loading && !cameraStarting && (
-                  <div className="camera-loading">
-                    <p className="loading-text-glow">Verifying Student...</p>
-                  </div>
-                )}
-                <div id="qr-reader" ref={qrRegionRef} style={{ width: '100%', minHeight: '300px', backgroundColor: '#000' }}></div>
-                <div className="scanner-actions">
                   <button
-                    className="btn btn-secondary"
-                    onClick={stopScanning}
+                    className="btn btn-secondary mode-btn"
+                    onClick={startManualMode}
                   >
-                    Cancel Scanning
+                    ⌨️ Enter Manually
                   </button>
                 </div>
               </div>
-            )}
+            </div>
+          )}
 
-            {scanning && imageUploadMode && (
-              <div className="image-upload-section">
-                <div className="upload-header">
-                  <h3>Upload QR Code Image</h3>
-                  <p>Upload an image containing a QR code to scan</p>
+          {scanning && !manualMode && !imageUploadMode && (
+            <div className="scanner-active">
+              {cameraStarting && (
+                <div className="camera-loading">
+                  <p className="loading-text-glow">Starting Camera...</p>
                 </div>
-                <div className="upload-container">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    disabled={loading}
-                    className="file-input"
-                    id="qr-image-upload"
-                  />
-                  <label htmlFor="qr-image-upload" className="file-upload-label">
-                    {loading ? (
-                      <div className="upload-loading">
-                        <div className="loading-dots">
-                          <div className="loading-dot"></div>
-                          <div className="loading-dot"></div>
-                          <div className="loading-dot"></div>
-                        </div>
-                        <span>Scanning image...</span>
+              )}
+              {loading && !cameraStarting && (
+                <div className="camera-loading">
+                  <p className="loading-text-glow">Verifying Student...</p>
+                </div>
+              )}
+              <div id="qr-reader" ref={qrRegionRef} style={{ width: '100%', minHeight: '300px', backgroundColor: '#000' }}></div>
+              <div className="scanner-actions">
+                <button
+                  className="btn btn-secondary"
+                  onClick={stopScanning}
+                >
+                  Cancel Scanning
+                </button>
+              </div>
+            </div>
+          )}
+
+          {scanning && imageUploadMode && (
+            <div className="image-upload-section">
+              <div className="upload-header">
+                <h3>Upload QR Code Image</h3>
+                <p>Upload an image containing a QR code to scan</p>
+              </div>
+              <div className="upload-container">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  disabled={loading}
+                  className="file-input"
+                  id="qr-image-upload"
+                />
+                <label htmlFor="qr-image-upload" className="file-upload-label">
+                  {loading ? (
+                    <div className="upload-loading">
+                      <div className="loading-dots">
+                        <div className="loading-dot"></div>
+                        <div className="loading-dot"></div>
+                        <div className="loading-dot"></div>
                       </div>
-                    ) : (
-                      <>
-                        <span className="upload-icon">📁</span>
-                        <span>Click to upload QR code image</span>
-                        <span className="upload-subtext">Supports JPG, PNG, GIF formats</span>
-                      </>
-                    )}
-                  </label>
+                      <span>Scanning image...</span>
+                    </div>
+                  ) : (
+                    <>
+                      <span className="upload-icon">📁</span>
+                      <span>Click to upload QR code image</span>
+                      <span className="upload-subtext">Supports JPG, PNG, GIF formats</span>
+                    </>
+                  )}
+                </label>
 
-                  {uploadedImage && verificationData && (
-                    <div className="upload-success">
-                      <div className="success-icon">✓</div>
-                      <h4>QR Code Scanned Successfully!</h4>
-                      <p>Student details loaded. Please confirm the action below.</p>
+                {uploadedImage && verificationData && (
+                  <div className="upload-success">
+                    <div className="success-icon">✓</div>
+                    <h4>QR Code Scanned Successfully!</h4>
+                    <p>Student details loaded. Please confirm the action below.</p>
+                  </div>
+                )}
+              </div>
+
+              <div className="upload-actions">
+                <button
+                  className="btn btn-secondary"
+                  onClick={resetImageUpload}
+                  disabled={loading}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
+
+          {scanning && manualMode && (
+            <div className="manual-entry-container">
+              <div className="manual-entry-card">
+                <div className="manual-header">
+                  <div className="header-icon">⌨️</div>
+                  <div>
+                    <h2>Manual Entry</h2>
+                    <p className="header-subtitle">Enter QR code data manually</p>
+                  </div>
+                </div>
+
+                <div className="entry-instructions">
+                  <div className="instruction-step">
+                    <div className="step-number">1</div>
+                    <div className="step-content">
+                      <h4>Get QR Data</h4>
+                      <p>Copy the complete QR code JSON data from your source</p>
+                    </div>
+                  </div>
+                  <div className="instruction-step">
+                    <div className="step-number">2</div>
+                    <div className="step-content">
+                      <h4>Paste Below</h4>
+                      <p>Enter the JSON data in the text area below</p>
+                    </div>
+                  </div>
+                  <div className="instruction-step">
+                    <div className="step-number">3</div>
+                    <div className="step-content">
+                      <h4>Verify</h4>
+                      <p>Click verify to check the student details</p>
+                    </div>
+                  </div>
+                </div>
+
+                <form onSubmit={handleManualSubmit} className="manual-form">
+                  <div className="form-field">
+                    <label htmlFor="qr-data-input">
+                      <span className="label-text">QR Code JSON Data</span>
+                      <span className="label-required">*</span>
+                    </label>
+                    <textarea
+                      id="qr-data-input"
+                      value={manualInput}
+                      onChange={(e) => setManualInput(e.target.value)}
+                      placeholder='Paste your QR code JSON data here...\n\nExample:\n{\n  "plId": "PL001",\n  "studentId": "STU001",\n  "regNo": "21CS001",\n  "name": "John Doe",\n  "roomNo": "A-101",\n  "hostelName": "Boys Hostel",\n  "placeOfVisit": "City Center",\n  "arrivalDateTime": "2024-01-15T18:00:00Z",\n  "type": "permission-letter"\n}'
+                      rows="12"
+                      className="data-input"
+                      disabled={loading}
+                      required
+                    />
+                    <div className="field-hint">
+                      <span>💡 Tip: The data should be in valid JSON format</span>
+                    </div>
+                  </div>
+
+                  <div className="form-actions">
+                    <button
+                      type="submit"
+                      className="btn btn-primary verify-btn"
+                      disabled={loading || !manualInput.trim()}
+                    >
+                      {loading ? (
+                        <>
+                          <div className="btn-loading-dots">
+                            <div className="btn-loading-dot"></div>
+                            <div className="btn-loading-dot"></div>
+                            <div className="btn-loading-dot"></div>
+                          </div>
+                          <span>Verifying Data...</span>
+                        </>
+                      ) : (
+                        <>
+                          <span className="btn-icon">✓</span>
+                          <span>Verify QR Code</span>
+                        </>
+                      )}
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-secondary cancel-btn"
+                      onClick={stopScanning}
+                      disabled={loading}
+                    >
+                      <span className="btn-icon">✕</span>
+                      <span>Cancel Entry</span>
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+
+          {verificationData && (
+            <div className="verification-result">
+              <div className="result-header">
+                <h3>{qrType === 'outpass' ? '🎫 Outpass Details' : '📋 Permission Letter Details'}</h3>
+                <span className={`type-badge ${qrType}`}>
+                  {qrType === 'outpass' ? '4-Hour Pass' : 'Permission Letter'}
+                </span>
+              </div>
+
+              <div className="student-details">
+                {/* Profile Photo */}
+                <div className="detail-row" style={{ justifyContent: 'center', paddingBottom: '12px', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                  {verificationData.profilePhoto ? (
+                    <img
+                      src={`${BASE_URL}${verificationData.profilePhoto}`}
+                      alt="Student"
+                      style={{
+                        width: '90px',
+                        height: '90px',
+                        borderRadius: '50%',
+                        objectFit: 'cover',
+                        border: '3px solid #4ade80',
+                        boxShadow: '0 4px 12px rgba(74, 222, 128, 0.3)'
+                      }}
+                    />
+                  ) : (
+                    <div style={{
+                      width: '90px',
+                      height: '90px',
+                      borderRadius: '50%',
+                      background: 'linear-gradient(135deg, #667eea, #764ba2)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '36px',
+                      color: 'white',
+                      fontWeight: 'bold',
+                      border: '3px solid #667eea',
+                      boxShadow: '0 4px 12px rgba(102, 126, 234, 0.3)'
+                    }}>
+                      {verificationData.studentName?.charAt(0)?.toUpperCase() || 'S'}
                     </div>
                   )}
                 </div>
 
-                <div className="upload-actions">
+                <div className="detail-row">
+                  <span className="label">Student Name:</span>
+                  <span className="value">{verificationData.studentName}</span>
+                </div>
+                <div className="detail-row">
+                  <span className="label">Registration No:</span>
+                  <span className="value">{verificationData.regNo}</span>
+                </div>
+                <div className="detail-row">
+                  <span className="label">Room No:</span>
+                  <span className="value">{verificationData.roomNo}</span>
+                </div>
+                <div className="detail-row">
+                  <span className="label">Place of Visit:</span>
+                  <span className="value">{verificationData.placeOfVisit}</span>
+                </div>
+                <div className="detail-row">
+                  <span className="label">Current Status:</span>
+                  <span className={`value status ${verificationData.currentStatus.toLowerCase().replace(' ', '-')}`}>
+                    {verificationData.currentStatus}
+                  </span>
+                </div>
+
+                {qrType === 'outpass' && verificationData.exitTime && (
+                  <>
+                    <div className="detail-row">
+                      <span className="label">Exit Time:</span>
+                      <span className="value">{formatDateTime(verificationData.exitTime)}</span>
+                    </div>
+                    <div className="detail-row">
+                      <span className="label">Expected Return:</span>
+                      <span className="value">{formatDateTime(verificationData.expectedReturnTime)}</span>
+                    </div>
+                  </>
+                )}
+
+                {qrType === 'pl' && verificationData.arrivalDateTime && (
+                  <div className="detail-row">
+                    <span className="label">Expected Arrival:</span>
+                    <span className="value">{formatDateTime(verificationData.arrivalDateTime)}</span>
+                  </div>
+                )}
+              </div>
+
+              <div className="action-section">
+                <h4>Confirm Action:</h4>
+                <div className="action-buttons">
                   <button
-                    className="btn btn-secondary"
-                    onClick={resetImageUpload}
+                    className="btn btn-success action-btn"
+                    onClick={() => handleAction(verificationData.action)}
+                    disabled={loading}
+                  >
+                    ✓ Confirm {verificationData.action === 'exit' ? 'Exit' : 'Entry'}
+                  </button>
+                  <button
+                    className="btn btn-secondary action-btn"
+                    onClick={resetScanner}
                     disabled={loading}
                   >
                     Cancel
                   </button>
                 </div>
               </div>
-            )}
-
-            {scanning && manualMode && (
-              <div className="manual-entry-container">
-                <div className="manual-entry-card">
-                  <div className="manual-header">
-                    <div className="header-icon">⌨️</div>
-                    <div>
-                      <h2>Manual Entry</h2>
-                      <p className="header-subtitle">Enter QR code data manually</p>
-                    </div>
-                  </div>
-
-                  <div className="entry-instructions">
-                    <div className="instruction-step">
-                      <div className="step-number">1</div>
-                      <div className="step-content">
-                        <h4>Get QR Data</h4>
-                        <p>Copy the complete QR code JSON data from your source</p>
-                      </div>
-                    </div>
-                    <div className="instruction-step">
-                      <div className="step-number">2</div>
-                      <div className="step-content">
-                        <h4>Paste Below</h4>
-                        <p>Enter the JSON data in the text area below</p>
-                      </div>
-                    </div>
-                    <div className="instruction-step">
-                      <div className="step-number">3</div>
-                      <div className="step-content">
-                        <h4>Verify</h4>
-                        <p>Click verify to check the student details</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <form onSubmit={handleManualSubmit} className="manual-form">
-                    <div className="form-field">
-                      <label htmlFor="qr-data-input">
-                        <span className="label-text">QR Code JSON Data</span>
-                        <span className="label-required">*</span>
-                      </label>
-                      <textarea
-                        id="qr-data-input"
-                        value={manualInput}
-                        onChange={(e) => setManualInput(e.target.value)}
-                        placeholder='Paste your QR code JSON data here...\n\nExample:\n{\n  "plId": "PL001",\n  "studentId": "STU001",\n  "regNo": "21CS001",\n  "name": "John Doe",\n  "roomNo": "A-101",\n  "hostelName": "Boys Hostel",\n  "placeOfVisit": "City Center",\n  "arrivalDateTime": "2024-01-15T18:00:00Z",\n  "type": "permission-letter"\n}'
-                        rows="12"
-                        className="data-input"
-                        disabled={loading}
-                        required
-                      />
-                      <div className="field-hint">
-                        <span>💡 Tip: The data should be in valid JSON format</span>
-                      </div>
-                    </div>
-
-                    <div className="form-actions">
-                      <button
-                        type="submit"
-                        className="btn btn-primary verify-btn"
-                        disabled={loading || !manualInput.trim()}
-                      >
-                        {loading ? (
-                          <>
-                            <div className="btn-loading-dots">
-                              <div className="btn-loading-dot"></div>
-                              <div className="btn-loading-dot"></div>
-                              <div className="btn-loading-dot"></div>
-                            </div>
-                            <span>Verifying Data...</span>
-                          </>
-                        ) : (
-                          <>
-                            <span className="btn-icon">✓</span>
-                            <span>Verify QR Code</span>
-                          </>
-                        )}
-                      </button>
-                      <button
-                        type="button"
-                        className="btn btn-secondary cancel-btn"
-                        onClick={stopScanning}
-                        disabled={loading}
-                      >
-                        <span className="btn-icon">✕</span>
-                        <span>Cancel Entry</span>
-                      </button>
-                    </div>
-                  </form>
-                </div>
-              </div>
-            )}
-
-            {verificationData && (
-              <div className="verification-result">
-                <div className="result-header">
-                  <h3>{qrType === 'outpass' ? '🎫 Outpass Details' : '📋 Permission Letter Details'}</h3>
-                  <span className={`type-badge ${qrType}`}>
-                    {qrType === 'outpass' ? '4-Hour Pass' : 'Permission Letter'}
-                  </span>
-                </div>
-
-                <div className="student-details">
-                  {/* Profile Photo */}
-                  <div className="detail-row" style={{ justifyContent: 'center', paddingBottom: '12px', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-                    {verificationData.profilePhoto ? (
-                      <img
-                        src={`${BASE_URL}${verificationData.profilePhoto}`}
-                        alt="Student"
-                        style={{
-                          width: '90px',
-                          height: '90px',
-                          borderRadius: '50%',
-                          objectFit: 'cover',
-                          border: '3px solid #4ade80',
-                          boxShadow: '0 4px 12px rgba(74, 222, 128, 0.3)'
-                        }}
-                      />
-                    ) : (
-                      <div style={{
-                        width: '90px',
-                        height: '90px',
-                        borderRadius: '50%',
-                        background: 'linear-gradient(135deg, #667eea, #764ba2)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: '36px',
-                        color: 'white',
-                        fontWeight: 'bold',
-                        border: '3px solid #667eea',
-                        boxShadow: '0 4px 12px rgba(102, 126, 234, 0.3)'
-                      }}>
-                        {verificationData.studentName?.charAt(0)?.toUpperCase() || 'S'}
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="detail-row">
-                    <span className="label">Student Name:</span>
-                    <span className="value">{verificationData.studentName}</span>
-                  </div>
-                  <div className="detail-row">
-                    <span className="label">Registration No:</span>
-                    <span className="value">{verificationData.regNo}</span>
-                  </div>
-                  <div className="detail-row">
-                    <span className="label">Room No:</span>
-                    <span className="value">{verificationData.roomNo}</span>
-                  </div>
-                  <div className="detail-row">
-                    <span className="label">Place of Visit:</span>
-                    <span className="value">{verificationData.placeOfVisit}</span>
-                  </div>
-                  <div className="detail-row">
-                    <span className="label">Current Status:</span>
-                    <span className={`value status ${verificationData.currentStatus.toLowerCase().replace(' ', '-')}`}>
-                      {verificationData.currentStatus}
-                    </span>
-                  </div>
-
-                  {qrType === 'outpass' && verificationData.exitTime && (
-                    <>
-                      <div className="detail-row">
-                        <span className="label">Exit Time:</span>
-                        <span className="value">{formatDateTime(verificationData.exitTime)}</span>
-                      </div>
-                      <div className="detail-row">
-                        <span className="label">Expected Return:</span>
-                        <span className="value">{formatDateTime(verificationData.expectedReturnTime)}</span>
-                      </div>
-                    </>
-                  )}
-
-                  {qrType === 'pl' && verificationData.arrivalDateTime && (
-                    <div className="detail-row">
-                      <span className="label">Expected Arrival:</span>
-                      <span className="value">{formatDateTime(verificationData.arrivalDateTime)}</span>
-                    </div>
-                  )}
-                </div>
-
-                <div className="action-section">
-                  <h4>Confirm Action:</h4>
-                  <div className="action-buttons">
-                    <button
-                      className="btn btn-success action-btn"
-                      onClick={() => handleAction(verificationData.action)}
-                      disabled={loading}
-                    >
-                      ✓ Confirm {verificationData.action === 'exit' ? 'Exit' : 'Entry'}
-                    </button>
-                    <button
-                      className="btn btn-secondary action-btn"
-                      onClick={resetScanner}
-                      disabled={loading}
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </div>
-    </div>
+    </DashboardLayout>
   );
 };
 
