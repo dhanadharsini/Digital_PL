@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Sidebar from '../common/Sidebar';
 import Navbar from '../common/Navbar';
-import { api } from '../../services/api';
+import { api, BASE_URL } from '../../services/api';
 import { generatePLPDF } from '../../utils/pdfGenerator';
 
 const PLCard = () => {
@@ -40,7 +40,7 @@ const PLCard = () => {
 
   const handleDownloadPDF = async () => {
     if (!plData) return;
-    
+
     setDownloading(true);
     try {
       await generatePLPDF(plData);
@@ -65,7 +65,7 @@ const PLCard = () => {
     return (
       <div className="dashboard-container">
         {/* Hamburger Button */}
-        <button 
+        <button
           className={`hamburger-btn ${isSidebarOpen ? 'active' : ''}`}
           onClick={toggleSidebar}
           aria-label="Toggle menu"
@@ -76,17 +76,17 @@ const PLCard = () => {
         </button>
 
         {/* Sidebar Overlay */}
-        <div 
+        <div
           className={`sidebar-overlay ${isSidebarOpen ? 'active' : ''}`}
           onClick={closeSidebar}
         ></div>
 
-        <Sidebar 
+        <Sidebar
           menuItems={menuItems}
           isOpen={isSidebarOpen}
           onClose={closeSidebar}
         />
-        
+
         <div className="main-content">
           <Navbar title="Permission Letter Card" />
           <div className="loading-spinner">
@@ -101,7 +101,7 @@ const PLCard = () => {
     return (
       <div className="dashboard-container">
         {/* Hamburger Button */}
-        <button 
+        <button
           className={`hamburger-btn ${isSidebarOpen ? 'active' : ''}`}
           onClick={toggleSidebar}
           aria-label="Toggle menu"
@@ -112,25 +112,25 @@ const PLCard = () => {
         </button>
 
         {/* Sidebar Overlay */}
-        <div 
+        <div
           className={`sidebar-overlay ${isSidebarOpen ? 'active' : ''}`}
           onClick={closeSidebar}
         ></div>
 
-        <Sidebar 
+        <Sidebar
           menuItems={menuItems}
           isOpen={isSidebarOpen}
           onClose={closeSidebar}
         />
-        
+
         <div className="main-content">
           <Navbar title="Permission Letter Card" />
           <div className="card">
             <div className="alert alert-error">
               <h3>⚠️ Cannot Display PL Card</h3>
               <p>{error}</p>
-              <button 
-                className="btn btn-primary" 
+              <button
+                className="btn btn-primary"
                 onClick={() => navigate('/student/pl-history')}
                 style={{ marginTop: '20px' }}
               >
@@ -146,7 +146,7 @@ const PLCard = () => {
   return (
     <div className="dashboard-container">
       {/* Hamburger Button */}
-      <button 
+      <button
         className={`hamburger-btn ${isSidebarOpen ? 'active' : ''}`}
         onClick={toggleSidebar}
         aria-label="Toggle menu"
@@ -157,20 +157,20 @@ const PLCard = () => {
       </button>
 
       {/* Sidebar Overlay */}
-      <div 
+      <div
         className={`sidebar-overlay ${isSidebarOpen ? 'active' : ''}`}
         onClick={closeSidebar}
       ></div>
 
-      <Sidebar 
+      <Sidebar
         menuItems={menuItems}
         isOpen={isSidebarOpen}
         onClose={closeSidebar}
       />
-      
+
       <div className="main-content">
         <Navbar title="Permission Letter Card" />
-        
+
         {plData ? (
           <div className="pl-card-container">
             <div className="pl-card">
@@ -181,27 +181,27 @@ const PLCard = () => {
                     <p>Hostel Management System</p>
                   </div>
                   {plData.profilePhoto ? (
-                    <img 
-                      src={`http://localhost:5000${plData.profilePhoto}`} 
-                      alt="Student" 
-                      style={{ 
-                        width: '60px', 
-                        height: '60px', 
-                        borderRadius: '50%', 
+                    <img
+                      src={`${BASE_URL}${plData.profilePhoto}`}
+                      alt="Student"
+                      style={{
+                        width: '60px',
+                        height: '60px',
+                        borderRadius: '50%',
                         objectFit: 'cover',
                         border: '2px solid white'
-                      }} 
+                      }}
                     />
                   ) : (
-                    <div style={{ 
-                      width: '60px', 
-                      height: '60px', 
-                      borderRadius: '50%', 
-                      backgroundColor: '#3b82f6', 
-                      display: 'flex', 
-                      alignItems: 'center', 
-                      justifyContent: 'center', 
-                      fontSize: '24px', 
+                    <div style={{
+                      width: '60px',
+                      height: '60px',
+                      borderRadius: '50%',
+                      backgroundColor: '#3b82f6',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '24px',
                       color: 'white',
                       fontWeight: 'bold'
                     }}>
@@ -252,10 +252,10 @@ const PLCard = () => {
                 <p style={{ marginTop: '10px', fontSize: '14px', color: '#666' }}>
                   Show this QR code to warden at entry/exit
                 </p>
-                <div style={{ 
-                  marginTop: '15px', 
-                  padding: '10px', 
-                  backgroundColor: '#fff3cd', 
+                <div style={{
+                  marginTop: '15px',
+                  padding: '10px',
+                  backgroundColor: '#fff3cd',
                   borderRadius: '5px',
                   border: '1px solid #ffc107'
                 }}>
@@ -273,7 +273,7 @@ const PLCard = () => {
                 display: 'flex',
                 justifyContent: 'center'
               }}>
-                <button 
+                <button
                   className="btn"
                   onClick={handleDownloadPDF}
                   disabled={downloading}
@@ -283,8 +283,8 @@ const PLCard = () => {
                     padding: '14px 24px',
                     fontSize: '16px',
                     fontWeight: '600',
-                    background: downloading 
-                      ? '#95a5a6' 
+                    background: downloading
+                      ? '#95a5a6'
                       : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                     color: 'white',
                     border: 'none',
@@ -295,8 +295,8 @@ const PLCard = () => {
                     justifyContent: 'center',
                     gap: '10px',
                     transition: 'all 0.3s ease',
-                    boxShadow: downloading 
-                      ? 'none' 
+                    boxShadow: downloading
+                      ? 'none'
                       : '0 4px 12px rgba(102, 126, 234, 0.3)'
                   }}
                   onMouseOver={(e) => {
@@ -327,12 +327,12 @@ const PLCard = () => {
                     </>
                   ) : (
                     <>
-                      <svg 
-                        width="20" 
-                        height="20" 
-                        viewBox="0 0 24 24" 
-                        fill="none" 
-                        stroke="currentColor" 
+                      <svg
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
                         strokeWidth="2.5"
                       >
                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>

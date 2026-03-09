@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Sidebar from '../common/Sidebar';
 import Navbar from '../common/Navbar';
-import { api } from '../../services/api';
+import { api, BASE_URL } from '../../services/api';
 
 const StudentList = () => {
   const [students, setStudents] = useState([]);
@@ -313,7 +313,7 @@ const StudentList = () => {
                   <div style={{ marginTop: '10px' }}>
                     <p>Current Photo:</p>
                     <img
-                      src={`http://localhost:5000${editingStudent.profilePhoto}`}
+                      src={`${BASE_URL}${editingStudent.profilePhoto}`}
                       alt="Current"
                       style={{ width: '100px', height: '100px', borderRadius: '50%', objectFit: 'cover' }}
                     />

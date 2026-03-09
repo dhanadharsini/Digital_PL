@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import Sidebar from '../common/Sidebar';
 import Navbar from '../common/Navbar';
-import { api } from '../../services/api';
+import { api, BASE_URL } from '../../services/api';
 import './OutpassQR.css';
 
 const OutpassQR = () => {
@@ -157,7 +157,7 @@ const OutpassQR = () => {
               <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                 {outpass.profilePhoto ? (
                   <img
-                    src={`http://localhost:5000${outpass.profilePhoto}`}
+                    src={`${BASE_URL}${outpass.profilePhoto}`}
                     alt="Student"
                     style={{
                       width: '64px',

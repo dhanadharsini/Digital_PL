@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Sidebar from '../common/Sidebar';
 import Navbar from '../common/Navbar';
 import { useAuth } from '../../context/AuthContext';
-import { api } from '../../services/api';
+import { api, BASE_URL } from '../../services/api';
 
 const StudentDashboard = () => {
   const { user } = useAuth();
@@ -43,7 +43,7 @@ const StudentDashboard = () => {
   return (
     <div className="dashboard-container">
       {/* Hamburger Button */}
-      <button 
+      <button
         className={`hamburger-btn ${isSidebarOpen ? 'active' : ''}`}
         onClick={toggleSidebar}
         aria-label="Toggle menu"
@@ -54,44 +54,44 @@ const StudentDashboard = () => {
       </button>
 
       {/* Sidebar Overlay */}
-      <div 
+      <div
         className={`sidebar-overlay ${isSidebarOpen ? 'active' : ''}`}
         onClick={closeSidebar}
       ></div>
 
-      <Sidebar 
+      <Sidebar
         menuItems={menuItems}
         isOpen={isSidebarOpen}
         onClose={closeSidebar}
       />
-      
+
       <div className="main-content">
         <Navbar title="Student Dashboard" />
-        
+
         <div className="welcome-message">
           <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '20px' }}>
             {studentProfile?.profilePhoto ? (
-              <img 
-                src={`http://localhost:5000${studentProfile.profilePhoto}`} 
-                alt="Profile" 
-                style={{ 
-                  width: '80px', 
-                  height: '80px', 
-                  borderRadius: '50%', 
+              <img
+                src={`${BASE_URL}${studentProfile.profilePhoto}`}
+                alt="Profile"
+                style={{
+                  width: '80px',
+                  height: '80px',
+                  borderRadius: '50%',
                   objectFit: 'cover',
                   border: '3px solid #3b82f6'
-                }} 
+                }}
               />
             ) : (
-              <div style={{ 
-                width: '80px', 
-                height: '80px', 
-                borderRadius: '50%', 
-                backgroundColor: '#3b82f6', 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'center', 
-                fontSize: '32px', 
+              <div style={{
+                width: '80px',
+                height: '80px',
+                borderRadius: '50%',
+                backgroundColor: '#3b82f6',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '32px',
                 color: 'white',
                 fontWeight: 'bold'
               }}>
@@ -107,32 +107,32 @@ const StudentDashboard = () => {
 
         <div className="card" style={{ marginTop: '30px' }}>
           <h3>Quick Actions</h3>
-          <div style={{ 
-            display: 'grid', 
-            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
-            gap: '15px', 
-            marginTop: '20px' 
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+            gap: '15px',
+            marginTop: '20px'
           }}>
-            <button 
-              className="btn btn-primary" 
+            <button
+              className="btn btn-primary"
               onClick={() => navigate('/student/request-pl')}
             >
               Request Permission Letter
             </button>
-            <button 
-              className="btn btn-secondary" 
+            <button
+              className="btn btn-secondary"
               onClick={() => navigate('/student/request-outpass')}
             >
               Request Outpass (4hrs)
             </button>
-            <button 
-              className="btn btn-primary" 
+            <button
+              className="btn btn-primary"
               onClick={() => navigate('/student/pl-history')}
             >
               View PL History
             </button>
-            <button 
-              className="btn btn-secondary" 
+            <button
+              className="btn btn-secondary"
               onClick={() => navigate('/student/outpass-history')}
             >
               View Outpass History

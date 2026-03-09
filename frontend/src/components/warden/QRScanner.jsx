@@ -4,7 +4,7 @@ import { Html5Qrcode, Html5QrcodeScanner } from 'html5-qrcode';
 import jsQR from 'jsqr';
 import Sidebar from '../common/Sidebar';
 import Navbar from '../common/Navbar';
-import { api } from '../../services/api';
+import { api, BASE_URL } from '../../services/api';
 import './QRScanner.css';
 
 const QRScanner = () => {
@@ -674,7 +674,7 @@ const QRScanner = () => {
                   <div className="detail-row" style={{ justifyContent: 'center', paddingBottom: '12px', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
                     {verificationData.profilePhoto ? (
                       <img
-                        src={`http://localhost:5000${verificationData.profilePhoto}`}
+                        src={`${BASE_URL}${verificationData.profilePhoto}`}
                         alt="Student"
                         style={{
                           width: '90px',
