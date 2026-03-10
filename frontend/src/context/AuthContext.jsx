@@ -21,22 +21,30 @@ export const AuthProvider = ({ children }) => {
     const token = localStorage.getItem('token');
     const userData = localStorage.getItem('user');
     const tempPassword = localStorage.getItem('isTempPassword');
-    
-    if (token && userData) {
-      setUser(JSON.parse(userData));
-      if (tempPassword) {
-        setIsTempPassword(JSON.parse(tempPassword));
+
+    try {
+      if (token && userData) {
+        setUser(JSON.parse(userData));
+        if (tempPassword) {
+          setIsTempPassword(JSON.parse(tempPassword));
+        }
+        api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       }
-      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    } catch (e) {
+      console.error("Error parsing user data", e);
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      localStorage.removeItem('isTempPassword');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }, []);
 
   const login = async (email, password, role) => {
     try {
       const response = await api.post('/auth/login', { email, password, role });
       const { token, user: userData, isTempPassword } = response.data;
-      
+
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(userData));
       if (isTempPassword) {
@@ -47,13 +55,13 @@ export const AuthProvider = ({ children }) => {
         setIsTempPassword(false);
       }
       api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      
+
       setUser(userData);
       return { success: true, isTempPassword };
     } catch (error) {
-      return { 
-        success: false, 
-        message: error.response?.data?.message || 'Login failed' 
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Login failed'
       };
     }
   };
