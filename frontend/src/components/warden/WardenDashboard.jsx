@@ -65,7 +65,7 @@ const WardenDashboard = () => {
       )}
       
       <div className="welcome-message">
-        <h1>Welcome, Warden!</h1>
+        <h1>Welcome, {user?.name || 'Warden'}!</h1>
         <p>Hostel Management System</p>
       </div>
 
