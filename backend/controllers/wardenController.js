@@ -1386,8 +1386,8 @@ export const getDelayedVacationStudents = async (req, res) => {
 export const getYearlyLogs = async (req, res) => {
   try {
     const { year, month } = req.query;
-    console.log(`\n--- getYearlyLogs Debug ---`);
-    console.log(`Year: ${year}, Month: ${month || 'All'}, UserID: ${req.user._id}`);
+    console.log('\n--- getYearlyLogs Debug ---');
+    console.log(`Year: ${year}, Month: ${month || 'All'}, UserID: ${req.user?._id}`);
 
     const warden = await Warden.findById(req.user._id);
     if (!warden) {
@@ -1401,38 +1401,56 @@ export const getYearlyLogs = async (req, res) => {
     }
 
     let startDate, endDate;
+    const yearNum = parseInt(year);
+    if (isNaN(yearNum)) {
+      return res.status(400).json({ message: 'Invalid year format' });
+    }
+
     if (month && month !== 'all') {
       const monthIdx = parseInt(month) - 1; // 0-indexed month
-      startDate = new Date(parseInt(year), monthIdx, 1);
-      endDate = new Date(parseInt(year), monthIdx + 1, 0, 23, 59, 59, 999);
+      if (isNaN(monthIdx) || monthIdx < 0 || monthIdx > 11) {
+        return res.status(400).json({ message: 'Invalid month format' });
+      }
+      startDate = new Date(yearNum, monthIdx, 1);
+      endDate = new Date(yearNum, monthIdx + 1, 0, 23, 59, 59, 999);
     } else {
-      startDate = new Date(parseInt(year), 0, 1);
-      endDate = new Date(parseInt(year), 11, 31, 23, 59, 59, 999);
+      startDate = new Date(yearNum, 0, 1);
+      endDate = new Date(yearNum, 11, 31, 23, 59, 59, 999);
     }
+
+    // Defensive check for invalid dates before toISOString()
+    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+      console.error('Invalid Date range calculated:', { year, month });
+      return res.status(400).json({ message: 'Invalid date range' });
+    }
+
     console.log(`Query Range: ${startDate.toISOString()} to ${endDate.toISOString()}`);
 
     // Get student IDs for this hostel to filter PL logs
     const studentsInHostel = await Student.find({ hostelName: warden.hostelName }).select('_id');
     const studentIds = studentsInHostel.map(s => s._id);
-    console.log(`Found ${studentIds.length} students in hostel:`, studentIds);
+    console.log(`Found ${studentIds.length} students in hostel: ${studentIds.length}`);
 
     // 1. Fetch EntryExitLogs (PL logs) filtered by students in this hostel
     console.log('Attempting to fetch PL logs...');
     let plLogs = [];
     try {
-      plLogs = await EntryExitLog.find({
-        studentId: { $in: studentIds },
-        $or: [
-          { exitTime: { $gte: startDate, $lte: endDate } },
-          { entryTime: { $gte: startDate, $lte: endDate } }
-        ]
-      }).populate('permissionLetterId')
-        .populate('studentId', 'roomNo department')
-        .populate('loggedBy', 'name');
+      if (studentIds.length > 0) {
+        plLogs = await EntryExitLog.find({
+          studentId: { $in: studentIds },
+          $or: [
+            { exitTime: { $gte: startDate, $lte: endDate } },
+            { entryTime: { $gte: startDate, $lte: endDate } }
+          ]
+        }).populate('permissionLetterId')
+          .populate('studentId', 'roomNo department')
+          .populate('loggedBy', 'name')
+          .lean();
+      }
       console.log(`Success: Found ${plLogs.length} PL logs`);
     } catch (plErr) {
-      console.error('CRITICAL: EntryExitLog.find failed:', plErr.message);
-      throw plErr;
+      console.error('EntryExitLog.find failed:', plErr.message);
+      // Don't throw, just log and keep plLogs empty
     }
 
     // 2. Fetch Outpasses
@@ -1447,19 +1465,19 @@ export const getYearlyLogs = async (req, res) => {
         ]
       }).populate('studentId', 'roomNo department')
         .populate('exitApprovedBy', 'name')
-        .populate('entryApprovedBy', 'name');
+        .populate('entryApprovedBy', 'name')
+        .lean();
       console.log(`Success: Found ${outpassLogs.length} Outpass logs`);
     } catch (opErr) {
-      console.error('CRITICAL: Outpass.find failed:', opErr.message);
-      throw opErr;
+      console.error('Outpass.find failed:', opErr.message);
+      // Don't throw
     }
 
     // 3. Format and Combine
     const reportData = [];
 
     // Process PL Logs
-    console.log(`Processing ${plLogs.length} PL logs...`);
-    plLogs.forEach((log, index) => {
+    plLogs.forEach((log) => {
       try {
         reportData.push({
           _id: log._id,
@@ -1476,13 +1494,12 @@ export const getYearlyLogs = async (req, res) => {
           processedBy: log.loggedBy?.name || 'Warden'
         });
       } catch (err) {
-        console.error(`Error processing PL log at index ${index}:`, err);
+        console.error(`Error processing PL log ${log._id}:`, err);
       }
     });
 
     // Process Outpass Logs
-    console.log(`Processing ${outpassLogs.length} Outpass logs...`);
-    outpassLogs.forEach((op, index) => {
+    outpassLogs.forEach((op) => {
       try {
         reportData.push({
           _id: op._id,
@@ -1499,18 +1516,19 @@ export const getYearlyLogs = async (req, res) => {
           processedBy: op.entryApprovedBy?.name || op.exitApprovedBy?.name || 'Warden'
         });
       } catch (err) {
-        console.error(`Error processing Outpass log at index ${index}:`, err);
+        console.error(`Error processing Outpass log ${op._id}:`, err);
       }
     });
 
     // Sort by outTime descending
-    console.log('Sorting report data...');
     reportData.sort((a, b) => new Date(b.outTime || 0) - new Date(a.outTime || 0));
-    console.log('Successfully formatted and sorted logs');
-
+    
     res.json(reportData);
   } catch (error) {
-    console.error('Get Yearly Logs Error:', error);
-    res.status(500).json({ message: 'Server error', error: error.message });
+    console.error('getYearlyLogs Critical Error:', error);
+    res.status(500).json({ 
+      message: 'Server error loading logs', 
+      error: error.message 
+    });
   }
-};
+};;
