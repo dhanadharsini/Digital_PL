@@ -238,8 +238,8 @@ const Reports = () => {
                                             </td>
 
                                             <td>
-                                                <span className={`status-text ${log.status.toLowerCase().replace(' ', '-')}`}>
-                                                    {log.status}
+                                                <span className={`status-text ${(log.status || 'unknown').toLowerCase().replace(/ /g, '-')}`}>
+                                                    {log.status || 'Unknown'}
                                                 </span>
                                             </td>
                                         </tr>

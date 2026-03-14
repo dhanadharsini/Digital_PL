@@ -1479,19 +1479,27 @@ export const getYearlyLogs = async (req, res) => {
     // Process PL Logs
     plLogs.forEach((log) => {
       try {
+        const entryTime = log.entryTime || null;
+        const exitTime = log.exitTime || null;
+        const roomNo = (log.studentId && log.studentId.roomNo) ? log.studentId.roomNo : 'N/A';
+        const department = (log.studentId && log.studentId.department) ? log.studentId.department : 'N/A';
+        const reason = (log.permissionLetterId && log.permissionLetterId.reasonOfVisit) ? log.permissionLetterId.reasonOfVisit : 'N/A';
+        const place = (log.permissionLetterId && log.permissionLetterId.placeOfVisit) ? log.permissionLetterId.placeOfVisit : 'N/A';
+        const status = entryTime ? 'Completed' : (exitTime ? 'Still Out' : 'Pending');
+
         reportData.push({
           _id: log._id,
           type: 'PL (Vacation)',
-          studentName: log.studentName,
-          regNo: log.regNo,
-          roomNo: log.studentId?.roomNo || 'N/A',
-          department: log.studentId?.department || 'N/A',
-          reason: log.permissionLetterId?.reasonOfVisit || 'N/A',
-          place: log.permissionLetterId?.placeOfVisit || 'N/A',
-          outTime: log.exitTime,
-          inTime: log.entryTime,
-          status: log.entryTime ? 'Completed' : 'Still Out',
-          processedBy: log.loggedBy?.name || 'Warden'
+          studentName: log.studentName || 'N/A',
+          regNo: log.regNo || 'N/A',
+          roomNo,
+          department,
+          reason,
+          place,
+          outTime: exitTime,
+          inTime: entryTime,
+          status,
+          processedBy: (log.loggedBy && log.loggedBy.name) ? log.loggedBy.name : 'Warden'
         });
       } catch (err) {
         console.error(`Error processing PL log ${log._id}:`, err);
@@ -1501,19 +1509,29 @@ export const getYearlyLogs = async (req, res) => {
     // Process Outpass Logs
     outpassLogs.forEach((op) => {
       try {
+        const exitTime = op.exitTime || null;
+        const inTime = op.actualReturnTime || null;
+        const roomNo = op.roomNo || (op.studentId && op.studentId.roomNo) || 'N/A';
+        const department = op.department || (op.studentId && op.studentId.department) || 'N/A';
+        const status = inTime ? 'Completed' : (exitTime ? 'Still Out' : 'Approved');
+
         reportData.push({
           _id: op._id,
           type: 'Outpass',
-          studentName: op.name,
-          regNo: op.regNo,
-          roomNo: op.roomNo || op.studentId?.roomNo || 'N/A',
-          department: op.department || op.studentId?.department || 'N/A',
+          studentName: op.name || 'N/A',
+          regNo: op.regNo || 'N/A',
+          roomNo,
+          department,
           reason: 'Short Visit',
-          place: op.placeOfVisit,
-          outTime: op.exitTime,
-          inTime: op.actualReturnTime,
-          status: op.actualReturnTime ? 'Completed' : (op.exitTime ? 'Still Out' : 'Approved'),
-          processedBy: op.entryApprovedBy?.name || op.exitApprovedBy?.name || 'Warden'
+          place: op.placeOfVisit || 'N/A',
+          outTime: exitTime,
+          inTime,
+          status,
+          processedBy: (op.entryApprovedBy && op.entryApprovedBy.name)
+            ? op.entryApprovedBy.name
+            : (op.exitApprovedBy && op.exitApprovedBy.name)
+              ? op.exitApprovedBy.name
+              : 'Warden'
         });
       } catch (err) {
         console.error(`Error processing Outpass log ${op._id}:`, err);
