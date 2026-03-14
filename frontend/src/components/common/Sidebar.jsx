@@ -24,7 +24,7 @@ const Sidebar = ({ menuItems, isOpen, onClose }) => {
   return (
     <div className={`sidebar ${isOpen ? 'active' : ''}`}>
       <div className="sidebar-header">
-        <h3>Hostel Management</h3>
+        <h3>Digital PL</h3>
         <p>{user?.name}</p>
         <p style={{ fontSize: '12px', textTransform: 'capitalize' }}>
           {user?.role}
