@@ -573,3 +573,59 @@ export const outpassOverdueParentEmail = (studentName, parentName, details) => {
     </html>
   `;
 };
+
+export const otpVerificationEmail = (parentName, otp) => {
+  return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background-color: #667eea; color: white; padding: 20px; text-align: center; }
+        .content { background-color: #f9f9f9; padding: 20px; margin-top: 20px; }
+        .otp-box { background-color: white; padding: 20px; margin-top: 20px; border: 2px solid #667eea; border-radius: 8px; text-align: center; }
+        .otp-display { font-size: 32px; font-weight: bold; color: #667eea; font-family: monospace; letter-spacing: 5px; margin: 15px 0; padding: 15px; background-color: #f0f4ff; border-radius: 5px; }
+        .warning { background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin-top: 15px; border-radius: 4px; }
+        .info { background-color: #e7f3ff; border-left: 4px solid #3b82f6; padding: 15px; margin-top: 15px; border-radius: 4px; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h2>🔐 OTP Verification Required</h2>
+        </div>
+        <div class="content">
+          <p>Dear ${parentName},</p>
+          <p>You are attempting to approve/reject a permission letter request for your ward. For security purposes, please verify your identity using the OTP below.</p>
+          
+          <div class="otp-box">
+            <p style="margin: 0 0 10px 0; color: #666; font-size: 14px;">Your One-Time Password (OTP):</p>
+            <div class="otp-display">${otp}</div>
+            <p style="margin: 10px 0 0 0; color: #999; font-size: 12px;">Please enter this OTP in the verification field</p>
+          </div>
+          
+          <div class="warning">
+            <p><strong>⚠️ Important Security Notice:</strong></p>
+            <ul>
+              <li>This OTP is valid for <strong>5 minutes</strong> only</li>
+              <li>Do not share this OTP with anyone</li>
+              <li>If you did not request this, please contact support immediately</li>
+              <li>Each OTP can only be used once</li>
+            </ul>
+          </div>
+          
+          <div class="info">
+            <p><strong>ℹ️ What happens next:</strong></p>
+            <p>After entering the correct OTP, your approval or rejection decision will be processed and the student will be notified accordingly.</p>
+          </div>
+          
+          <p style="margin-top: 20px; font-size: 12px; color: #999;">
+            This is an automated security notification from Hostel Portal. Please do not reply to this email.
+          </p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+};

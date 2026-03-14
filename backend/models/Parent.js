@@ -71,5 +71,10 @@ parentSchema.methods.resetPassword = async function (newPassword) {
   return await this.save();
 };
 
+// Method to generate 6-digit OTP
+parentSchema.methods.generateOTP = function () {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+};
+
 const Parent = mongoose.model('Parent', parentSchema);
 export default Parent;

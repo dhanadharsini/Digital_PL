@@ -4,7 +4,9 @@ import {
   getPendingRequests,
   approveRequest,
   rejectRequest,
-  getRequestHistory
+  getRequestHistory,
+  sendOTPForAction,
+  verifyOTPAndPerformAction
 } from '../controllers/parentController.js';
 import { protect, authorize } from '../middleware/auth.js';
 
@@ -19,6 +21,10 @@ router.get('/pending-requests', protect, parentAuth, getPendingRequests);
 router.post('/approve-request/:id', protect, parentAuth, approveRequest);
 router.post('/reject-request/:id', protect, parentAuth, rejectRequest);
 router.get('/request-history', protect, parentAuth, getRequestHistory);
+
+// OTP verification endpoints
+router.post('/send-otp', protect, parentAuth, sendOTPForAction);
+router.post('/verify-otp', protect, parentAuth, verifyOTPAndPerformAction);
 
 // Debug endpoint
 router.get('/debug-info', protect, parentAuth, async (req, res) => {

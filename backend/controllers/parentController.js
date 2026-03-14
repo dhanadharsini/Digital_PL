@@ -1,10 +1,11 @@
 import Parent from '../models/Parent.js';
 import Student from '../models/Student.js';
 import PermissionLetter from '../models/PermissionLetter.js';
-import { sendEmail } from '../config/email.js';
+import OTP from '../models/OTP.js';
+import smsService from '../utils/smsService.js';
 import { 
   plApprovedByParentEmail, 
-  plRejectedByParentEmail 
+  plRejectedByParentEmail
 } from '../utils/emailTemplates.js';
 
 export const getStats = async (req, res) => {
@@ -292,3 +293,186 @@ export const getRequestHistory = async (req, res) => {
   }
 };
 
+// Send OTP for approval/rejection
+export const sendOTPForAction = async (req, res) => {
+  try {
+    const { plId, action } = req.body;
+    
+    if (!plId || !action) {
+      return res.status(400).json({ message: 'PL ID and action are required' });
+    }
+
+    if (!['approve', 'reject'].includes(action)) {
+      return res.status(400).json({ message: 'Invalid action' });
+    }
+
+    const parent = await Parent.findById(req.user._id);
+    if (!parent) {
+      return res.status(404).json({ message: 'Parent not found' });
+    }
+
+    const pl = await PermissionLetter.findById(plId);
+    if (!pl) {
+      return res.status(404).json({ message: 'Permission letter not found' });
+    }
+
+    // Verify authorization
+    if (pl.regNo !== parent.studentRegNo) {
+      return res.status(403).json({ message: 'Not authorized' });
+    }
+
+    // Generate OTP
+    const otp = parent.generateOTP();
+    const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
+
+    // Delete any existing OTPs for this user and PL
+    await OTP.deleteMany({ userId: req.user._id, plId });
+
+    // Save new OTP
+    const otpRecord = new OTP({
+      userId: req.user._id,
+      userModel: 'Parent',
+      phoneNumber: parent.mobileNo,
+      otp,
+      action,
+      plId,
+      expiresAt
+    });
+
+    await otpRecord.save();
+
+    // Send OTP via SMS only (no email)
+    const smsProvider = process.env.SMS_PROVIDER || 'twilio';
+    let smsSent = false;
+    
+    console.log(`\n--- OTP Sending Process ---`);
+    console.log(`Provider: ${smsProvider}`);
+    console.log(`To: ${parent.mobileNo}`);
+    console.log(`OTP: ${otp}`);
+    
+    try {
+      // Send SMS
+      smsSent = await smsService.sendOTP(parent.mobileNo, otp, smsProvider);
+      console.log(`Result: ${smsSent ? '✅ SUCCESS' : '❌ FAILED'}`);
+    } catch (smsError) {
+      console.error('❌ SMS sending failed:', smsError.message);
+    }
+    console.log(`---------------------------\n`);
+
+    res.json({ 
+      message: `OTP sent successfully to your registered phone number${smsSent ? '' : '. Please check if SMS service is configured.'}`,
+      otpSent: true,
+      smsSent
+    });
+  } catch (error) {
+    console.error('Send OTP error:', error);
+    res.status(500).json({ message: 'Failed to send OTP' });
+  }
+};
+
+// Verify OTP and perform action
+export const verifyOTPAndPerformAction = async (req, res) => {
+  try {
+    const { plId, action, otp } = req.body;
+
+    if (!plId || !action || !otp) {
+      return res.status(400).json({ message: 'PL ID, action, and OTP are required' });
+    }
+
+    // Find OTP record
+    const otpRecord = await OTP.findOne({
+      userId: req.user._id,
+      plId,
+      action,
+      otp,
+      isUsed: false
+    }).populate('userId');
+
+    if (!otpRecord) {
+      return res.status(400).json({ message: 'Invalid or expired OTP' });
+    }
+
+    // Check if OTP is expired
+    if (otpRecord.expiresAt < new Date()) {
+      await OTP.deleteOne({ _id: otpRecord._id });
+      return res.status(400).json({ message: 'OTP has expired' });
+    }
+
+    // Mark OTP as used
+    otpRecord.isUsed = true;
+    await otpRecord.save();
+
+    // Perform the actual action based on type
+    if (action === 'approve') {
+      // Approve logic from approveRequest
+      const parent = await Parent.findById(req.user._id);
+      const pl = await PermissionLetter.findById(plId);
+
+      if (!pl || pl.regNo !== parent.studentRegNo) {
+        return res.status(403).json({ message: 'Not authorized' });
+      }
+
+      if (pl.parentStatus !== 'pending') {
+        return res.status(400).json({ message: 'Request already processed' });
+      }
+
+      pl.parentStatus = 'approved';
+      pl.status = 'parent-approved';
+      await pl.save();
+
+      // Send confirmation email
+      const student = await Student.findOne({ regNo: pl.regNo });
+      if (student) {
+        try {
+          const emailHtml = plApprovedByParentEmail(student.name, {
+            placeOfVisit: pl.placeOfVisit,
+            departureDateTime: pl.departureDateTime,
+            arrivalDateTime: pl.arrivalDateTime
+          });
+          await sendEmail(student.email, 'Permission Approved by Parent', emailHtml);
+        } catch (emailError) {
+          console.log('Email failed:', emailError.message);
+        }
+      }
+
+      return res.json({ message: 'Request approved successfully' });
+    } else if (action === 'reject') {
+      // Reject logic from rejectRequest (without reason since it's after OTP)
+      const parent = await Parent.findById(req.user._id);
+      const pl = await PermissionLetter.findById(plId);
+
+      if (!pl || pl.regNo !== parent.studentRegNo) {
+        return res.status(403).json({ message: 'Not authorized' });
+      }
+
+      if (pl.parentStatus !== 'pending') {
+        return res.status(400).json({ message: 'Request already processed' });
+      }
+
+      pl.parentStatus = 'rejected';
+      pl.status = 'rejected';
+      pl.rejectionReason = pl.rejectionReason || 'Rejected by parent';
+      pl.emailApprovalTokens = {};
+      await pl.save();
+
+      const student = await Student.findOne({ regNo: pl.regNo });
+      if (student) {
+        try {
+          const emailHtml = plRejectedByParentEmail(student.name, {
+            placeOfVisit: pl.placeOfVisit,
+            departureDateTime: pl.departureDateTime,
+            arrivalDateTime: pl.arrivalDateTime
+          }, pl.rejectionReason);
+          await sendEmail(student.email, 'Permission Rejected by Parent', emailHtml);
+        } catch (emailError) {
+          console.log('Email failed:', emailError.message);
+        }
+      }
+
+      return res.json({ message: 'Request rejected successfully' });
+    }
+  } catch (error) {
+    console.error('Verify OTP error:', error);
+    res.status(500).json({ message: 'Failed to verify OTP' });
+  }
+};

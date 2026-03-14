@@ -1,6 +1,6 @@
+import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
 import connectDB from './config/db.js';
 import errorHandler from './middleware/errorHandler.js';
 import path from 'path';
@@ -14,14 +14,13 @@ import parentRoutes from './routes/parent.js';
 import wardenRoutes from './routes/warden.js';
 import { startPLExpiryScheduler } from './utils/plExpiryScheduler.js';
 
-// Load environment variables
-dotenv.config();
-startPLExpiryScheduler();
+// Keep scheduler start (moved inside startServer)
+// startPLExpiryScheduler();
 
 const app = express();
 
-// Connect to MongoDB
-connectDB();
+// Connect to MongoDB (moved inside startServer)
+// connectDB();
 
 // Middleware
 const allowedOrigins = [
@@ -108,18 +107,36 @@ app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
-  console.log(`
+// Connect to DB and Start Server
+const startServer = async () => {
+  try {
+    console.log('--- Starting Hostel Management System ---');
+    console.log('Version: 2.1 (WhatsApp Debug Enabled)');
+    
+    await connectDB();
+    console.log('✓ Database Connected');
+    
+    // Start scheduler after DB connection
+    startPLExpiryScheduler();
+    console.log('✓ Scheduler Started');
+
+    app.listen(PORT, () => {
+      console.log(`
 ╔════════════════════════════════════════════╗
 ║   Hostel Management System - Backend      ║
 ║   Server running on port ${PORT}            ║
 ║   Environment: ${process.env.NODE_ENV || 'development'}              ║
 ╚════════════════════════════════════════════╝
-  `);
-  console.log(`API available at: http://localhost:${PORT}`);
-  console.log(`Health check: http://localhost:${PORT}/api/health`);
-  console.log(`Static files served from: http://localhost:${PORT}/uploads`);
-});
+      `);
+      console.log(`API available at: http://localhost:${PORT}`);
+    });
+  } catch (error) {
+    console.error('❌ Failed to start server:', error.message);
+    process.exit(1);
+  }
+};
+
+startServer();
 
 // Handle unhandled promise rejections
 process.on('unhandledRejection', (err) => {
