@@ -11,7 +11,8 @@ import {
   outpassCreatedEmail,
   outpassCompletedEmail,
   plApprovedByWardenEmailToParent,
-  plRejectedByWardenEmailToParent
+  plRejectedByWardenEmailToParent,
+  studentDelayParentEmail
 } from '../utils/emailTemplates.js';
 import Outpass from '../models/Outpass.js';
 
@@ -614,11 +615,41 @@ export const logEntryExit = async (req, res) => {
       }
 
       // Update with entry time
-      log.entryTime = new Date();
+      const actualReturnTime = new Date();
+      log.entryTime = actualReturnTime;
       await log.save();
+
+      // Check for delay
+      const arrivalDateTime = new Date(pl.arrivalDateTime);
+      const delayInMinutes = Math.floor((actualReturnTime - arrivalDateTime) / (1000 * 60));
+      const isDelayed = delayInMinutes > 0;
 
       // Update student vacation status to false (in hostel)
       await Student.findById(studentId).updateOne({ isOnVacation: false });
+
+      // Send delay notification email to parent
+      if (isDelayed) {
+        try {
+          const student = await Student.findById(studentId);
+          const parent = await Parent.findOne({ studentRegNo: regNo });
+          if (student && parent && parent.email) {
+            const emailHtml = studentDelayParentEmail(student.name, parent.name, {
+              delayDuration: delayInMinutes,
+              placeOfVisit: pl.placeOfVisit,
+              expectedReturnTime: arrivalDateTime,
+              actualReturnTime: actualReturnTime
+            });
+            await sendEmail(
+              parent.email,
+              '⚠️ Student Delay Notification - Hostel Portal',
+              emailHtml
+            );
+            console.log(`   ✓ Parent delay notification sent for student ${student.name}`);
+          }
+        } catch (emailError) {
+          console.log('Parent delay notification failed (non-critical):', emailError.message);
+        }
+      }
 
       // Mark permission letter as EXPIRED (fully used)
       pl.status = 'expired';
@@ -626,14 +657,21 @@ export const logEntryExit = async (req, res) => {
       pl.usedAt = new Date();
       await pl.save();
 
+      let message = `✓ Entry logged successfully. ${name} has returned to the hostel`;
+      if (isDelayed) {
+        message += ` (Delayed by ${delayInMinutes} minutes)`;
+      }
+
       return res.json({
         success: true,
-        message: `✓ Entry logged successfully. ${name} has returned to the hostel`,
+        message,
         data: {
           action: 'ENTRY',
           studentName: name,
           regNo,
-          timestamp: log.entryTime
+          timestamp: log.entryTime,
+          isDelayed,
+          delayDuration: delayInMinutes
         }
       });
     } else {
@@ -1001,6 +1039,25 @@ export const logOutpassAction = async (req, res) => {
             emailHtml
           );
         }
+
+        // Send delay notification to parent if delayed
+        if (isDelayed) {
+          const parent = await Parent.findOne({ studentRegNo: regNo });
+          if (student && parent && parent.email) {
+            const delayEmailHtml = studentDelayParentEmail(student.name, parent.name, {
+              delayDuration: delayInMinutes,
+              placeOfVisit: outpass.placeOfVisit,
+              expectedReturnTime: expectedReturnTime,
+              actualReturnTime: actualReturnTime
+            });
+            await sendEmail(
+              parent.email,
+              '⚠️ Student Delay Notification (Outpass) - Hostel Portal',
+              delayEmailHtml
+            );
+            console.log(`   ✓ Parent delay notification sent (Outpass) for student ${student.name}`);
+          }
+        }
       } catch (emailError) {
         console.log('Email notification failed (non-critical):', emailError.message);
       }
@@ -1218,22 +1275,18 @@ export const getDelayedVacationStudents = async (req, res) => {
     console.log('Current time:', currentDateTime.toLocaleString('en-IN'));
 
     // Find PLs where:
-    // 1. Arrival date has passed
-    // 2. Status is 'approved' OR (status is 'expired' but not fully used)
+    // 1. Arrival date has passed (for currently out students)
+    // 2. Or if returned late (we fetch expired/completed ones too)
     // 3. Belongs to warden's hostel
     const expiredPLs = await PermissionLetter.find({
       hostelName: warden.hostelName,
-      arrivalDateTime: { $lt: currentDateTime },
       $or: [
-        { status: 'approved' },
-        {
-          status: 'expired',
-          isFullyUsed: { $ne: true }
-        }
+        { status: 'approved', arrivalDateTime: { $lt: currentDateTime } }, // Still out and late
+        { status: 'expired', isFullyUsed: true } // Checked later to see IF they arrived late
       ]
     });
 
-    console.log(`Found ${expiredPLs.length} expired PLs in database`);
+    console.log(`Found ${expiredPLs.length} PLs to check for delays`);
 
     const delayedVacationStudents = [];
 
@@ -1245,57 +1298,73 @@ export const getDelayedVacationStudents = async (req, res) => {
         continue;
       }
 
-      console.log(`\nChecking PL for ${pl.name} (${pl.regNo}):`);
-      console.log(`  - Arrival time: ${new Date(pl.arrivalDateTime).toLocaleString('en-IN')}`);
-      console.log(`  - Status: ${pl.status}`);
-      console.log(`  - Is fully used: ${pl.isFullyUsed}`);
-
-      // Check if exit is logged but entry is not
-      const exitLog = await EntryExitLog.findOne({
+      // We need to find the entry/exit log to determine if they actually returned delayed
+      const log = await EntryExitLog.findOne({
         permissionLetterId: pl._id,
-        exitTime: { $ne: null },
-        entryTime: null
+        exitTime: { $ne: null }
       });
 
-      if (exitLog) {
-        console.log(`  - Exit time found: ${new Date(exitLog.exitTime).toLocaleString('en-IN')}`);
-
-        // Calculate delay duration in minutes from arrival time
+      if (log) {
         const arrivalTime = new Date(pl.arrivalDateTime);
-        const now = currentDateTime;
-        const delayInMinutes = Math.floor((now - arrivalTime) / (1000 * 60));
+        let delayInMinutes = 0;
+        let isCurrentlyDelayed = false;
 
-        console.log(`  - Delay calculated: ${delayInMinutes} minutes (${Math.floor(delayInMinutes / 60)} hours ${delayInMinutes % 60} mins)`);
+        if (log.entryTime) {
+          // They have returned, check if they returned late
+          const actualReturnTime = new Date(log.entryTime);
+          if (actualReturnTime > arrivalTime) {
+            delayInMinutes = Math.floor((actualReturnTime - arrivalTime) / (1000 * 60));
+          }
+        } else {
+          // They have NOT returned yet, check if currently late
+          const now = currentDateTime;
+          if (now > arrivalTime) {
+            delayInMinutes = Math.floor((now - arrivalTime) / (1000 * 60));
+            isCurrentlyDelayed = true;
+          }
+        }
 
-        delayedVacationStudents.push({
-          _id: pl._id,
-          studentId: pl.studentId,
-          regNo: pl.regNo,
-          name: pl.name,
-          department: pl.department,
-          roomNo: pl.roomNo,
-          hostelName: pl.hostelName,
-          placeOfVisit: pl.placeOfVisit,
-          reasonOfVisit: pl.reasonOfVisit,
-          departureDateTime: pl.departureDateTime,
-          arrivalDateTime: pl.arrivalDateTime,
-          exitTime: exitLog.exitTime,
-          delayDuration: delayInMinutes,
-          arrivalDateTimeFormatted: arrivalTime.toLocaleString('en-IN', {
-            day: '2-digit',
-            month: 'short',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-          }),
-          exitTimeFormatted: new Date(exitLog.exitTime).toLocaleString('en-IN', {
-            day: '2-digit',
-            month: 'short',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-          })
-        });
+        // Only add to delayed list if delayInMinutes > 0
+        if (delayInMinutes > 0) {
+          delayedVacationStudents.push({
+            _id: pl._id,
+            studentId: pl.studentId,
+            regNo: pl.regNo,
+            name: pl.name,
+            department: pl.department,
+            roomNo: pl.roomNo,
+            hostelName: pl.hostelName,
+            placeOfVisit: pl.placeOfVisit,
+            reasonOfVisit: pl.reasonOfVisit,
+            departureDateTime: pl.departureDateTime,
+            arrivalDateTime: pl.arrivalDateTime,
+            exitTime: log.exitTime,
+            actualReturnTime: log.entryTime, // will be null if still out
+            isCurrentlyDelayed,
+            delayDuration: delayInMinutes,
+            arrivalDateTimeFormatted: arrivalTime.toLocaleString('en-IN', {
+              day: '2-digit',
+              month: 'short',
+              year: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit'
+            }),
+            exitTimeFormatted: new Date(log.exitTime).toLocaleString('en-IN', {
+              day: '2-digit',
+              month: 'short',
+              year: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit'
+            }),
+            actualReturnTimeFormatted: log.entryTime ? new Date(log.entryTime).toLocaleString('en-IN', {
+              day: '2-digit',
+              month: 'short',
+              year: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit'
+            }) : null
+          });
+        }
       }
     }
 
@@ -1311,5 +1380,137 @@ export const getDelayedVacationStudents = async (req, res) => {
       message: 'Server error',
       error: error.message
     });
+  }
+};
+
+export const getYearlyLogs = async (req, res) => {
+  try {
+    const { year, month } = req.query;
+    console.log(`\n--- getYearlyLogs Debug ---`);
+    console.log(`Year: ${year}, Month: ${month || 'All'}, UserID: ${req.user._id}`);
+
+    const warden = await Warden.findById(req.user._id);
+    if (!warden) {
+      console.log('Error: Warden not found for ID:', req.user._id);
+      return res.status(404).json({ message: 'Warden record not found' });
+    }
+    console.log(`Warden found: ${warden.name}, Hostel: ${warden.hostelName}`);
+
+    if (!year) {
+      return res.status(400).json({ message: 'Year is required' });
+    }
+
+    let startDate, endDate;
+    if (month && month !== 'all') {
+      const monthIdx = parseInt(month) - 1; // 0-indexed month
+      startDate = new Date(parseInt(year), monthIdx, 1);
+      endDate = new Date(parseInt(year), monthIdx + 1, 0, 23, 59, 59, 999);
+    } else {
+      startDate = new Date(parseInt(year), 0, 1);
+      endDate = new Date(parseInt(year), 11, 31, 23, 59, 59, 999);
+    }
+    console.log(`Query Range: ${startDate.toISOString()} to ${endDate.toISOString()}`);
+
+    // Get student IDs for this hostel to filter PL logs
+    const studentsInHostel = await Student.find({ hostelName: warden.hostelName }).select('_id');
+    const studentIds = studentsInHostel.map(s => s._id);
+    console.log(`Found ${studentIds.length} students in hostel:`, studentIds);
+
+    // 1. Fetch EntryExitLogs (PL logs) filtered by students in this hostel
+    console.log('Attempting to fetch PL logs...');
+    let plLogs = [];
+    try {
+      plLogs = await EntryExitLog.find({
+        studentId: { $in: studentIds },
+        $or: [
+          { exitTime: { $gte: startDate, $lte: endDate } },
+          { entryTime: { $gte: startDate, $lte: endDate } }
+        ]
+      }).populate('permissionLetterId')
+        .populate('studentId', 'roomNo department')
+        .populate('loggedBy', 'name');
+      console.log(`Success: Found ${plLogs.length} PL logs`);
+    } catch (plErr) {
+      console.error('CRITICAL: EntryExitLog.find failed:', plErr.message);
+      throw plErr;
+    }
+
+    // 2. Fetch Outpasses
+    console.log('Attempting to fetch Outpass logs...');
+    let outpassLogs = [];
+    try {
+      outpassLogs = await Outpass.find({
+        hostelName: warden.hostelName,
+        $or: [
+          { exitTime: { $gte: startDate, $lte: endDate } },
+          { actualReturnTime: { $gte: startDate, $lte: endDate } }
+        ]
+      }).populate('studentId', 'roomNo department')
+        .populate('exitApprovedBy', 'name')
+        .populate('entryApprovedBy', 'name');
+      console.log(`Success: Found ${outpassLogs.length} Outpass logs`);
+    } catch (opErr) {
+      console.error('CRITICAL: Outpass.find failed:', opErr.message);
+      throw opErr;
+    }
+
+    // 3. Format and Combine
+    const reportData = [];
+
+    // Process PL Logs
+    console.log(`Processing ${plLogs.length} PL logs...`);
+    plLogs.forEach((log, index) => {
+      try {
+        reportData.push({
+          _id: log._id,
+          type: 'PL (Vacation)',
+          studentName: log.studentName,
+          regNo: log.regNo,
+          roomNo: log.studentId?.roomNo || 'N/A',
+          department: log.studentId?.department || 'N/A',
+          reason: log.permissionLetterId?.reasonOfVisit || 'N/A',
+          place: log.permissionLetterId?.placeOfVisit || 'N/A',
+          outTime: log.exitTime,
+          inTime: log.entryTime,
+          status: log.entryTime ? 'Completed' : 'Still Out',
+          processedBy: log.loggedBy?.name || 'Warden'
+        });
+      } catch (err) {
+        console.error(`Error processing PL log at index ${index}:`, err);
+      }
+    });
+
+    // Process Outpass Logs
+    console.log(`Processing ${outpassLogs.length} Outpass logs...`);
+    outpassLogs.forEach((op, index) => {
+      try {
+        reportData.push({
+          _id: op._id,
+          type: 'Outpass',
+          studentName: op.name,
+          regNo: op.regNo,
+          roomNo: op.roomNo || op.studentId?.roomNo || 'N/A',
+          department: op.department || op.studentId?.department || 'N/A',
+          reason: 'Short Visit',
+          place: op.placeOfVisit,
+          outTime: op.exitTime,
+          inTime: op.actualReturnTime,
+          status: op.actualReturnTime ? 'Completed' : (op.exitTime ? 'Still Out' : 'Approved'),
+          processedBy: op.entryApprovedBy?.name || op.exitApprovedBy?.name || 'Warden'
+        });
+      } catch (err) {
+        console.error(`Error processing Outpass log at index ${index}:`, err);
+      }
+    });
+
+    // Sort by outTime descending
+    console.log('Sorting report data...');
+    reportData.sort((a, b) => new Date(b.outTime || 0) - new Date(a.outTime || 0));
+    console.log('Successfully formatted and sorted logs');
+
+    res.json(reportData);
+  } catch (error) {
+    console.error('Get Yearly Logs Error:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
 };

@@ -10,7 +10,7 @@ const WardenDashboard = () => {
   const [stats, setStats] = useState({
     totalStudents: 0,
     pendingRequests: 0,
-    delayedStudents: 0
+    studentsOnVacation: 0
   });
   const [error, setError] = useState(null);
 
@@ -19,7 +19,8 @@ const WardenDashboard = () => {
     { label: 'Pending Requests', path: '/warden/pending-requests' },
     { label: 'Delayed Students', path: '/warden/delayed-students' },
     { label: 'QR Scanner', path: '/warden/qr-scanner' },
-    { label: 'Students List', path: '/warden/students' }
+    { label: 'Students List', path: '/warden/students' },
+    { label: 'Reports', path: '/warden/reports' }
   ];
 
 
@@ -41,7 +42,7 @@ const WardenDashboard = () => {
       setStats({
         totalStudents: response.data.totalStudents || 0,
         pendingRequests: response.data.pendingRequests || 0,
-        delayedStudents: response.data.delayedStudents || 0
+        studentsOnVacation: response.data.studentsOnVacation || 0
       });
       setError(null);
       console.log('Dashboard stats refreshed:', new Date().toLocaleString('en-IN'));
@@ -51,7 +52,7 @@ const WardenDashboard = () => {
       setStats({
         totalStudents: 0,
         pendingRequests: 0,
-        delayedStudents: 0
+        studentsOnVacation: 0
       });
     }
   };
@@ -63,7 +64,7 @@ const WardenDashboard = () => {
           ⚠️ {error}
         </div>
       )}
-      
+
       <div className="welcome-message">
         <h1>Welcome, {user?.name || 'Warden'}!</h1>
         <p>Hostel Management System</p>
@@ -79,8 +80,8 @@ const WardenDashboard = () => {
           <p>Pending Requests</p>
         </div>
         <div className="stat-card">
-          <h3>{stats.delayedStudents}</h3>
-          <p>Delayed Students</p>
+          <h3>{stats.studentsOnVacation}</h3>
+          <p>Students on Vacation</p>
         </div>
       </div>
 
@@ -90,14 +91,17 @@ const WardenDashboard = () => {
           <button className="btn btn-primary" onClick={() => window.location.href = '/warden/qr-scanner'}>
             Open QR Scanner
           </button>
-          <button className="btn btn-primary" onClick={() => window.location.href = '/warden/pending-requests'}>
-            Manage Requests
+          <button className="btn btn-secondary" onClick={() => window.location.href = '/warden/pending-requests'}>
+            PL Requests
           </button>
-          <button className="btn btn-secondary" onClick={() => window.location.href = '/warden/delayed-students'}>
-            View Delayed Students
+          <button className="btn btn-primary" onClick={() => window.location.href = '/warden/delayed-students'}>
+           Delayed Students
           </button>
           <button className="btn btn-secondary" onClick={() => window.location.href = '/warden/students'}>
             All Students
+          </button>
+          <button className="btn btn-primary" onClick={() => window.location.href = '/warden/reports'} style={{ background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+           View Reports
           </button>
         </div>
       </div>

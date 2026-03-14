@@ -259,11 +259,11 @@
 }
 
 .delayed-table tbody tr.vacation-delay-row:hover {
-  background-color: #451a03;
+  background-color: #334155;
 }
 
 .light-mode .delayed-table tbody tr.vacation-delay-row:hover {
-  background-color: #fef2f2;
+  background-color: #f8fafc;
 }
 
 .delayed-table td {

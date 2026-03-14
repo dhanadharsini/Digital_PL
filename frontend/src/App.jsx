@@ -42,6 +42,7 @@ import PendingRequests from "./components/warden/PendingRequests.jsx";
 import StudentsList from "./components/warden/StudentsList.jsx";
 import DelayedStudents from "./components/warden/DelayedStudents.jsx";
 import QRScanner from "./components/warden/QRScanner.jsx";
+import Reports from "./components/warden/Reports.jsx";
 
 function App() {
   const { user, isTempPassword } = useAuth();
@@ -255,6 +256,14 @@ function App() {
           element={
             <ProtectedRoute allowedRoles={["warden"]}>
               <QRScanner />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/warden/reports"
+          element={
+            <ProtectedRoute allowedRoles={["warden"]}>
+              <Reports />
             </ProtectedRoute>
           }
         />

@@ -420,3 +420,156 @@ export const plRejectedByWardenEmailToParent = (studentName, parentName, plDetai
     </html>
   `;
 };
+
+export const studentDelayParentEmail = (studentName, parentName, details) => {
+  const delayHours = Math.floor(details.delayDuration / 60);
+  const delayMins = details.delayDuration % 60;
+  const delayText = delayHours > 0
+    ? `${delayHours} hour(s) and ${delayMins} minute(s)`
+    : `${delayMins} minute(s)`;
+
+  return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background-color: #f59e0b; color: white; padding: 20px; text-align: center; }
+        .content { background-color: #fffbeb; padding: 20px; margin-top: 20px; }
+        .details { background-color: white; padding: 15px; margin-top: 15px; border-left: 4px solid #f59e0b; }
+        .warning-box { background-color: #fef3c7; border: 1px solid #f59e0b; padding: 15px; border-radius: 8px; margin: 15px 0; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h2>⚠️ Student Delay Notification</h2>
+        </div>
+        <div class="content">
+          <p>Dear ${parentName},</p>
+          <p>This is to inform you that your ward <strong>${studentName}</strong> has returned to the hostel after the expected return time.</p>
+          
+          <div class="warning-box">
+            <p style="margin: 0; color: #92400e;"><strong>Delay Details:</strong></p>
+            <p style="margin: 10px 0 0 0; color: #b45309;">
+              The student was delayed by <strong>${delayText}</strong>.
+            </p>
+          </div>
+
+          <div class="details">
+            <h3>Trip Summary:</h3>
+            <p><strong>Place of Visit:</strong> ${details.placeOfVisit}</p>
+            <p><strong>Expected Return:</strong> ${new Date(details.expectedReturnTime).toLocaleString('en-IN')}</p>
+            <p><strong>Actual Return:</strong> ${new Date(details.actualReturnTime).toLocaleString('en-IN')}</p>
+          </div>
+          
+          <p style="margin-top: 20px;">Please check with your ward regarding the reason for this delay.</p>
+          
+          <p style="margin-top: 20px; font-size: 12px; color: #999;">
+            This is an automated security notification from Hostel Portal. Please do not reply to this email.
+          </p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+};
+
+export const studentOverdueParentEmail = (studentName, parentName, details) => {
+  return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background-color: #ef4444; color: white; padding: 20px; text-align: center; }
+        .content { background-color: #fef2f2; padding: 20px; margin-top: 20px; }
+        .warning-box { background-color: #fee2e2; border: 1px solid #ef4444; padding: 15px; border-radius: 8px; margin: 15px 0; }
+        .details { background-color: white; padding: 15px; margin-top: 15px; border-left: 4px solid #ef4444; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h2>🚨 OVERDUE: Student Return Alert</h2>
+        </div>
+        <div class="content">
+          <p>Dear ${parentName},</p>
+          <p>This is an <strong>urgent notification</strong> regarding your ward, <strong>${studentName}</strong>.</p>
+          
+          <div class="warning-box">
+            <p style="margin: 0; color: #b91c1c;"><strong>Status: Overdue</strong></p>
+            <p style="margin: 10px 0 0 0; color: #7f1d1d;">
+              Your ward was expected to return to the hostel by <strong>${new Date(details.expectedReturnTime).toLocaleString('en-IN')}</strong>, but has not yet checked in.
+            </p>
+          </div>
+
+          <div class="details">
+            <h3>Trip Details:</h3>
+            <p><strong>Place of Visit:</strong> ${details.placeOfVisit}</p>
+            <p><strong>Actual Departure:</strong> ${new Date(details.exitTime).toLocaleString('en-IN')}</p>
+            <p><strong>Required Return:</strong> ${new Date(details.expectedReturnTime).toLocaleString('en-IN')}</p>
+          </div>
+          
+          <p style="margin-top: 20px;">Please contact your ward immediately to ensure their safety and find out the reason for the delay. You may also contact the hostel warden for assistance.</p>
+          
+          <p style="margin-top: 20px; font-size: 12px; color: #999;">
+            This is an automated safety alert from Hostel Portal. Please do not reply to this email.
+          </p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+};
+
+export const outpassOverdueParentEmail = (studentName, parentName, details) => {
+  return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background-color: #ef4444; color: white; padding: 20px; text-align: center; }
+        .content { background-color: #fef2f2; padding: 20px; margin-top: 20px; }
+        .warning-box { background-color: #fee2e2; border: 1px solid #ef4444; padding: 15px; border-radius: 8px; margin: 15px 0; }
+        .details { background-color: white; padding: 15px; margin-top: 15px; border-left: 4px solid #ef4444; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h2>🚨 OVERDUE: Student Outpass Return Alert</h2>
+        </div>
+        <div class="content">
+          <p>Dear ${parentName},</p>
+          <p>This is an <strong>urgent notification</strong> regarding your ward, <strong>${studentName}</strong>.</p>
+          
+          <div class="warning-box">
+            <p style="margin: 0; color: #b91c1c;"><strong>Status: Overdue from Outpass</strong></p>
+            <p style="margin: 10px 0 0 0; color: #7f1d1d;">
+              Your ward was expected to return to the hostel by <strong>${new Date(details.expectedReturnTime).toLocaleString('en-IN')}</strong> from their short outpass, but has not yet checked in.
+            </p>
+          </div>
+
+          <div class="details">
+            <h3>Outpass Details:</h3>
+            <p><strong>Place of Visit:</strong> ${details.placeOfVisit}</p>
+            <p><strong>Actual Departure:</strong> ${new Date(details.exitTime).toLocaleString('en-IN')}</p>
+            <p><strong>Required Return:</strong> ${new Date(details.expectedReturnTime).toLocaleString('en-IN')}</p>
+          </div>
+          
+          <p style="margin-top: 20px;">Please contact your ward immediately to ensure their safety and find out the reason for the delay. You may also contact the hostel warden for assistance.</p>
+          
+          <p style="margin-top: 20px; font-size: 12px; color: #999;">
+            This is an automated safety alert from Hostel Portal. Please do not reply to this email.
+          </p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+};

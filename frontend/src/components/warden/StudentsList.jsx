@@ -36,9 +36,10 @@ const StudentsList = () => {
   const menuItems = [
     { label: 'Dashboard', path: '/warden' },
     { label: 'Pending Requests', path: '/warden/pending-requests' },
-    { label: 'Students List', path: '/warden/students' },
     { label: 'Delayed Students', path: '/warden/delayed-students' },
-    { label: 'QR Scanner', path: '/warden/qr-scanner' }
+    { label: 'QR Scanner', path: '/warden/qr-scanner' },
+    { label: 'Students List', path: '/warden/students' },
+    { label: 'Reports', path: '/warden/reports' }
   ];
 
   return (

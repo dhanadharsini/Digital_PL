@@ -76,6 +76,10 @@ const permissionLetterSchema = new mongoose.Schema({
   usedAt: {
     type: Date,
     default: null
+  },
+  isOverdueNotificationSent: {
+    type: Boolean,
+    default: false
   }
 }, {
   timestamps: true

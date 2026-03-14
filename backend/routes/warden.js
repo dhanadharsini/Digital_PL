@@ -12,7 +12,8 @@ import {
   logOutpassAction,
   getDelayedStudents,
   getActiveOutpasses,
-  getDelayedVacationStudents
+  getDelayedVacationStudents,
+  getYearlyLogs
 } from '../controllers/wardenController.js';
 
 const router = express.Router();
@@ -43,5 +44,8 @@ router.get('/outpass/active', protect, wardenAuth, getActiveOutpasses);
 
 // Vacation Delayed Students
 router.get('/vacation/delayed', protect, wardenAuth, getDelayedVacationStudents);
+
+// Yearly Logs
+router.get('/logs/yearly', protect, wardenAuth, getYearlyLogs);
 
 export default router;

@@ -1,0 +1,456 @@
+/* Tabs Styling */
+.reports-tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 28px;
+    background: rgba(15, 23, 42, 0.4);
+    padding: 6px;
+    border-radius: 16px;
+    width: fit-content;
+    border: 1px solid rgba(248, 250, 252, 0.05);
+    backdrop-filter: blur(12px);
+}
+
+.light-mode .reports-tabs {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+}
+
+.report-tab {
+    padding: 10px 24px;
+    border-radius: 12px;
+    border: none;
+    background: transparent;
+    color: #94a3b8;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    letter-spacing: 0.01em;
+}
+
+.report-tab:hover {
+    color: #f1f5f9;
+}
+
+.light-mode .report-tab:hover {
+    color: #1e293b;
+    background: rgba(0, 0, 0, 0.03);
+}
+
+.report-tab.active {
+    background: rgba(59, 130, 246, 0.9);
+    color: white;
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+}
+
+.light-mode .report-tab.active {
+    background: white;
+    color: #2563eb;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+/* Light Mode Visibility Improvements */
+.light-mode .reports-header-text h2 {
+    background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+}
+
+.light-mode .reports-header-text p {
+    color: #64748b;
+    font-weight: 500;
+}
+
+.light-mode .year-select {
+    background: #f8fafc;
+    color: #1e293b;
+    border: 1.5px solid #e2e8f0;
+}
+
+.light-mode .year-select:hover {
+    border-color: #3b82f6;
+    background: white;
+}
+
+.light-mode .year-select option {
+    background: white;
+    color: #1e293b;
+}
+
+.light-mode .select-arrow {
+    color: #64748b;
+}
+
+.light-mode .type-badge.outpass {
+    background: rgba(37, 99, 235, 0.08);
+    color: #1d4ed8;
+    border: 1px solid rgba(37, 99, 235, 0.2);
+}
+
+.light-mode .type-badge.pl {
+    background: rgba(124, 58, 237, 0.08);
+    color: #6d28d9;
+    border: 1px solid rgba(124, 58, 237, 0.2);
+}
+
+.light-mode .status-text.completed {
+    color: #059669;
+}
+
+.light-mode .status-text.still-out {
+    color: #b45309;
+}
+
+.light-mode .time-label {
+    color: #475569;
+}
+
+.light-mode .time-value {
+    color: #334155;
+}
+
+/* Base Styles */
+.reports-container {
+    padding: 24px;
+    animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    max-width: 1440px;
+    margin: 0 auto;
+}
+
+.reports-header {
+    margin-bottom: 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 24px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.light-mode .reports-header {
+    border-bottom-color: #f1f5f9;
+}
+
+.reports-header-text h2 {
+    font-size: 32px;
+    font-weight: 800;
+    margin: 0 0 8px 0;
+    background: linear-gradient(135deg, #93c5fd 0%, #3b82f6 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: -0.02em;
+}
+
+.reports-header-text p {
+    color: #94a3b8;
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+.report-controls {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+}
+
+.year-select-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.year-select {
+    padding: 12px 44px 12px 18px;
+    border-radius: 14px;
+    border: 1.5px solid rgba(255, 255, 255, 0.1);
+    background: rgba(30, 41, 59, 0.6);
+    color: #f1f5f9;
+    font-size: 15px;
+    font-weight: 600;
+    outline: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    appearance: none;
+    backdrop-filter: blur(8px);
+}
+
+.year-select option {
+    background: #0f172a;
+    color: #f1f5f9;
+}
+
+.year-select:hover {
+    border-color: #3b82f6;
+    background: rgba(30, 41, 59, 0.8);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.select-arrow {
+    position: absolute;
+    right: 18px;
+    color: #94a3b8;
+    pointer-events: none;
+    font-size: 10px;
+}
+
+.export-btn {
+    background: #059669;
+    color: white;
+    border: none;
+    border-radius: 14px;
+    padding: 12px 28px;
+    font-size: 15px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 14px rgba(5, 150, 105, 0.2);
+}
+
+.export-btn:hover:not(:disabled) {
+    background: #10b981;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.3);
+}
+
+.export-btn:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.export-btn:disabled {
+    opacity: 0.5;
+    background: #94a3b8;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.table-wrapper {
+    background: rgba(30, 41, 59, 0.4);
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    overflow: hidden;
+    box-shadow: 0 12px 48px rgba(0, 0, 0, 0.25);
+    margin-top: 12px;
+    backdrop-filter: blur(10px);
+}
+
+.light-mode .table-wrapper {
+    background: white;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.04);
+    border: 1px solid #e2e8f0;
+}
+
+.reports-table-container {
+    overflow-x: auto;
+    width: 100%;
+}
+
+.reports-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    text-align: left;
+}
+
+.reports-table th {
+    background: rgba(15, 23, 42, 0.3);
+    padding: 20px 24px;
+    font-weight: 700;
+    color: #94a3b8;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.light-mode .reports-table th {
+    background: #f8fafc;
+    color: #64748b;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.reports-table td {
+    padding: 18px 24px;
+    font-size: 14px;
+    color: #cbd5e1;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.light-mode .reports-table td {
+    color: #334155;
+    border-bottom: 1px solid #f8fafc;
+}
+
+.reports-table tr:hover td {
+    background: rgba(255, 255, 255, 0.015);
+}
+
+.light-mode .reports-table tr:hover td {
+    background: #fcfdfe;
+}
+
+/* Badge & Status Styles */
+.type-badge {
+    padding: 6px 14px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    display: inline-block;
+}
+
+.type-badge.outpass {
+    background: rgba(59, 130, 246, 0.12);
+    color: #93c5fd;
+    border: 1px solid rgba(59, 130, 246, 0.15);
+}
+
+.type-badge.pl {
+    background: rgba(139, 92, 246, 0.12);
+    color: #c4b5fd;
+    border: 1px solid rgba(139, 92, 246, 0.15);
+}
+
+.status-text {
+    font-weight: 700;
+    padding: 4px 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.status-text.completed::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    background: #10b981;
+    border-radius: 50%;
+    box-shadow: 0 0 12px #10b981;
+}
+
+.status-text.still-out::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    background: #f59e0b;
+    border-radius: 50%;
+    box-shadow: 0 0 12px #f59e0b;
+}
+
+.status-text.completed {
+    color: #34d399;
+}
+
+.status-text.still-out {
+    color: #fbbf24;
+}
+
+/* Student & Info Styles */
+.student-name {
+    font-weight: 750;
+    color: #f8fafc;
+    font-size: 15px;
+    margin-bottom: 4px;
+}
+
+.student-meta {
+    font-size: 12px;
+    color: #94a3b8;
+    font-family: inherit;
+    margin-bottom: 2px;
+}
+
+.student-dept {
+    font-size: 11px;
+    color: #60a5fa;
+    font-weight: 700;
+}
+
+.reason-text {
+    font-weight: 500;
+    color: #cbd5e1;
+    font-style: italic;
+    font-size: 14px;
+    margin-bottom: 6px;
+}
+
+.place-text {
+    font-size: 13px;
+    color: #94a3b8;
+}
+
+.warden-info {
+    font-weight: 600;
+    color: #94a3b8;
+    font-size: 13px;
+    background: rgba(255, 255, 255, 0.04);
+    padding: 6px 14px;
+    border-radius: 10px;
+}
+
+.light-mode .student-name {
+    color: #0f172a;
+}
+
+.light-mode .student-meta {
+    color: #64748b;
+}
+
+.light-mode .reason-text {
+    color: #475569;
+}
+
+.light-mode .warden-info {
+    background: #f1f5f9;
+    color: #475569;
+}
+
+.empty-state {
+    padding: 120px 48px;
+    text-align: center;
+}
+
+.empty-state-icon {
+    font-size: 64px;
+    margin-bottom: 24px;
+    opacity: 0.6;
+}
+
+@media (max-width: 1024px) {
+    .reports-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .report-controls {
+        width: 100%;
+    }
+}
+
+@media (max-width: 640px) {
+    .reports-tabs {
+        width: 100%;
+        overflow-x: auto;
+    }
+
+    .report-tab {
+        flex: 1;
+        white-space: nowrap;
+    }
+
+    .report-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .year-select {
+        width: 100%;
+    }
+}

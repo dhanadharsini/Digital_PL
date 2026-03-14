@@ -7,7 +7,6 @@ const AdminDashboard = () => {
     students: 0,
     parents: 0,
     wardens: 0,
-    pendingRequests: 0
   });
 
 
@@ -54,10 +53,6 @@ const AdminDashboard = () => {
         <div className="stat-card">
           <h3>{stats.wardens}</h3>
           <p>Total Wardens</p>
-        </div>
-        <div className="stat-card">
-          <h3>{stats.pendingRequests}</h3>
-          <p>Pending PL Requests</p>
         </div>
       </div>
 

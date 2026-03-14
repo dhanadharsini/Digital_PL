@@ -61,6 +61,10 @@ const outpassSchema = new mongoose.Schema({
     type: Number, // in minutes
     default: 0
   },
+  isOverdueNotificationSent: {
+    type: Boolean,
+    default: false
+  },
   qrCode: {
     type: String,
     required: true
