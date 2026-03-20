@@ -281,22 +281,99 @@ const PLHistory = () => {
         }
       `}</style>
 
-      <div className="card">
+      <div className="card" style={{
+        padding: 'clamp(16px, 4vw, 24px)',
+        borderRadius: '12px',
+        background: 'linear-gradient(135deg, #334155 0%, #1e293b 100%)',
+        border: '1px solid #334155'
+      }}>
         {loading ? (
-          <div className="loading-spinner">
-            <div className="spinner"></div>
+          <div className="loading-spinner" style={{
+            textAlign: 'center',
+            padding: 'clamp(40px, 10vw, 60px)',
+            fontSize: 'clamp(0.875rem, 2.5vw, 1rem)',
+            color: '#e2e8f0'
+          }}>
+            <div className="spinner" style={{
+              width: '40px',
+              height: '40px',
+              border: '4px solid #334155',
+              borderTop: '4px solid #3b82f6',
+              borderRadius: '50%',
+              animation: 'spin 1s linear infinite',
+              margin: '0 auto 16px'
+            }}></div>
+            Loading permission letters...
           </div>
         ) : (
-          <div className="table-container">
-            <table>
+          <div className="table-container" style={{
+            overflowX: 'auto',
+            borderRadius: '8px'
+          }}>
+            <table style={{
+              width: '100%',
+              borderCollapse: 'collapse',
+              fontSize: 'clamp(0.75rem, 2vw, 0.875rem)'
+            }}>
               <thead>
-                <tr>
-                  <th>Place of Visit</th>
-                  <th>Reason</th>
-                  <th>Departure</th>
-                  <th>Arrival</th>
-                  <th>Status</th>
-                  <th>Actions</th>
+                <tr style={{
+                  background: 'linear-gradient(135deg, #1e40af 0%, #1d4ed8 100%)',
+                  color: 'white'
+                }}>
+                  <th style={{
+                    padding: 'clamp(12px, 3vw, 16px)',
+                    textAlign: 'left',
+                    fontWeight: '800',
+                    fontSize: 'clamp(0.625rem, 1.5vw, 0.75rem)',
+                    textTransform: 'uppercase',
+                    letterSpacing: '1px',
+                    border: 'none'
+                  }}>Place of Visit</th>
+                  <th style={{
+                    padding: 'clamp(12px, 3vw, 16px)',
+                    textAlign: 'left',
+                    fontWeight: '800',
+                    fontSize: 'clamp(0.625rem, 1.5vw, 0.75rem)',
+                    textTransform: 'uppercase',
+                    letterSpacing: '1px',
+                    border: 'none'
+                  }}>Reason</th>
+                  <th style={{
+                    padding: 'clamp(12px, 3vw, 16px)',
+                    textAlign: 'left',
+                    fontWeight: '800',
+                    fontSize: 'clamp(0.625rem, 1.5vw, 0.75rem)',
+                    textTransform: 'uppercase',
+                    letterSpacing: '1px',
+                    border: 'none'
+                  }}>Departure</th>
+                  <th style={{
+                    padding: 'clamp(12px, 3vw, 16px)',
+                    textAlign: 'left',
+                    fontWeight: '800',
+                    fontSize: 'clamp(0.625rem, 1.5vw, 0.75rem)',
+                    textTransform: 'uppercase',
+                    letterSpacing: '1px',
+                    border: 'none'
+                  }}>Arrival</th>
+                  <th style={{
+                    padding: 'clamp(12px, 3vw, 16px)',
+                    textAlign: 'left',
+                    fontWeight: '800',
+                    fontSize: 'clamp(0.625rem, 1.5vw, 0.75rem)',
+                    textTransform: 'uppercase',
+                    letterSpacing: '1px',
+                    border: 'none'
+                  }}>Status</th>
+                  <th style={{
+                    padding: 'clamp(12px, 3vw, 16px)',
+                    textAlign: 'left',
+                    fontWeight: '800',
+                    fontSize: 'clamp(0.625rem, 1.5vw, 0.75rem)',
+                    textTransform: 'uppercase',
+                    letterSpacing: '1px',
+                    border: 'none'
+                  }}>Actions</th>
                 </tr>
               </thead>
               <tbody>

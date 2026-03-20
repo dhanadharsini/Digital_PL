@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '../common/DashboardLayout';
 import { useAuth } from '../../context/AuthContext';
@@ -11,6 +11,11 @@ const RequestOutpass = () => {
   const [placeOfVisit, setPlaceOfVisit] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [studentInfo, setStudentInfo] = useState({
+    name: user?.name || '',
+    regNo: 'Loading...',
+    roomNo: 'Loading...'
+  });
 
   const menuItems = [
     { label: 'Dashboard', path: '/student' },
@@ -19,6 +24,30 @@ const RequestOutpass = () => {
     { label: 'PL History', path: '/student/pl-history' },
     { label: 'Outpass History', path: '/student/outpass-history' }
   ];
+
+  useEffect(() => {
+    const fetchStudentInfo = async () => {
+      try {
+        const response = await api.get('/student/details');
+        const student = response.data;
+        setStudentInfo({
+          name: student.name,
+          regNo: student.regNo,
+          roomNo: student.roomNo
+        });
+      } catch (error) {
+        console.error('Error fetching student info:', error);
+        // Set fallback values
+        setStudentInfo({
+          name: user?.name || 'Student',
+          regNo: 'N/A',
+          roomNo: 'N/A'
+        });
+      }
+    };
+
+    fetchStudentInfo();
+  }, [user?.name]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -50,16 +79,27 @@ const RequestOutpass = () => {
   return (
     <DashboardLayout title="Request Outpass" menuItems={menuItems}>
       <div className="request-outpass-container">
-        <div className="card" style={{ padding: 'clamp(20px, 5vw, 28px)' }}>
+        <div className="card" style={{
+          padding: 'clamp(20px, 5vw, 32px)',
+          borderRadius: '12px',
+          background: 'linear-gradient(135deg, #334155 0%, #1e293b 100%)',
+          border: '1px solid #334155',
+          maxWidth: '600px',
+          margin: '0 auto'
+        }}>
           <h2 style={{ 
             fontSize: 'clamp(1.5rem, 4vw, 2rem)',
             marginBottom: 'clamp(16px, 4vw, 20px)',
-            textAlign: 'center'
-          }}>Request Outpass (4 Hours)</h2>
+            textAlign: 'center',
+            color: '#e2e8f0',
+            fontWeight: '700'
+          }}>Request Outpass</h2>
           <p className="info-text" style={{ 
             fontSize: 'clamp(0.875rem, 2.5vw, 1rem)',
             textAlign: 'center',
-            marginBottom: 'clamp(16px, 4vw, 20px)'
+            marginBottom: 'clamp(20px, 5vw, 24px)',
+            color: '#94a3b8',
+            lineHeight: '1.6'
           }}>
             Submit an outpass request for a 4-hour leave. A QR code will be generated immediately with all your details.
           </p>
@@ -68,22 +108,30 @@ const RequestOutpass = () => {
             <div className="error-message" style={{
               marginBottom: 'clamp(16px, 4vw, 20px)',
               fontSize: 'clamp(0.875rem, 2.5vw, 1rem)',
-              padding: 'clamp(12px, 3vw, 16px)'
+              padding: 'clamp(12px, 3vw, 16px)',
+              borderRadius: '8px',
+              background: 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)',
+              color: 'white',
+              fontWeight: '600',
+              border: '1px solid #ef4444',
+              textAlign: 'center'
             }}>{error}</div>
           )}
 
           <form onSubmit={handleSubmit} className="outpass-form-simple">
             <div className="student-info-display" style={{
-              marginBottom: 'clamp(20px, 5vw, 24px)',
+              marginBottom: 'clamp(24px, 6vw, 28px)',
               padding: 'clamp(16px, 4vw, 20px)',
               borderRadius: '12px',
-              background: 'linear-gradient(135deg, #334155 0%, #1e293b 100%)'
+              background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)',
+              border: '1px solid #334155'
             }}>
               <h3 style={{ 
                 fontSize: 'clamp(1.125rem, 3vw, 1.25rem)',
                 marginBottom: 'clamp(12px, 3vw, 16px)',
                 textAlign: 'center',
-                color: '#cbd5e1'
+                color: '#cbd5e1',
+                fontWeight: '600'
               }}>Your Details</h3>
               <div className="info-grid" style={{
                 display: 'grid',
@@ -93,12 +141,47 @@ const RequestOutpass = () => {
                 <div className="info-item">
                   <span className="info-label" style={{
                     fontSize: 'clamp(0.875rem, 2.5vw, 1rem)',
-                    fontWeight: '600'
+                    fontWeight: '600',
+                    color: '#64748b',
+                    display: 'block',
+                    marginBottom: '4px'
                   }}>Name:</span>
                   <span className="info-value" style={{
                     fontSize: 'clamp(0.875rem, 2.5vw, 1rem)',
-                    wordBreak: 'break-word'
-                  }}>{user?.name || 'Loading...'}</span>
+                    wordBreak: 'break-word',
+                    color: '#e2e8f0',
+                    fontWeight: '500'
+                  }}>{studentInfo.name}</span>
+                </div>
+                <div className="info-item">
+                  <span className="info-label" style={{
+                    fontSize: 'clamp(0.875rem, 2.5vw, 1rem)',
+                    fontWeight: '600',
+                    color: '#64748b',
+                    display: 'block',
+                    marginBottom: '4px'
+                  }}>Reg No:</span>
+                  <span className="info-value" style={{
+                    fontSize: 'clamp(0.875rem, 2.5vw, 1rem)',
+                    wordBreak: 'break-word',
+                    color: '#e2e8f0',
+                    fontWeight: '500'
+                  }}>{studentInfo.regNo}</span>
+                </div>
+                <div className="info-item">
+                  <span className="info-label" style={{
+                    fontSize: 'clamp(0.875rem, 2.5vw, 1rem)',
+                    fontWeight: '600',
+                    color: '#64748b',
+                    display: 'block',
+                    marginBottom: '4px'
+                  }}>Room No:</span>
+                  <span className="info-value" style={{
+                    fontSize: 'clamp(0.875rem, 2.5vw, 1rem)',
+                    wordBreak: 'break-word',
+                    color: '#e2e8f0',
+                    fontWeight: '500'
+                  }}>{studentInfo.roomNo}</span>
                 </div>
               </div>
             </div>
@@ -108,7 +191,8 @@ const RequestOutpass = () => {
                 fontSize: 'clamp(0.875rem, 2.5vw, 1rem)',
                 marginBottom: '8px',
                 fontWeight: '600',
-                display: 'block'
+                display: 'block',
+                color: '#e2e8f0'
               }}>
                 Where are you going? <span className="required" style={{ color: '#ef4444' }}>*</span>
               </label>
@@ -122,10 +206,24 @@ const RequestOutpass = () => {
                 className="place-input"
                 style={{
                   fontSize: '16px', /* Prevents zoom on iOS */
-                  padding: 'clamp(12px, 3vw, 16px)',
+                  padding: 'clamp(14px, 3.5vw, 18px) clamp(16px, 4vw, 20px)',
                   width: '100%',
-                  borderRadius: '8px',
-                  border: '2px solid #334155'
+                  borderRadius: '12px',
+                  border: '2px solid #334155',
+                  backgroundColor: '#0f172a',
+                  color: '#e2e8f0',
+                  fontWeight: '500',
+                  transition: 'all 0.3s ease',
+                  outline: 'none',
+                  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = '#3b82f6';
+                  e.target.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.1)';
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = '#334155';
+                  e.target.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.1)';
                 }}
               />
             </div>
@@ -136,14 +234,39 @@ const RequestOutpass = () => {
               disabled={loading}
               style={{
                 fontSize: 'clamp(0.875rem, 2.5vw, 1rem)',
-                padding: 'clamp(12px, 3vw, 16px) clamp(16px, 4vw, 24px)',
-                minHeight: '48px',
+                padding: 'clamp(14px, 3.5vw, 18px) clamp(16px, 4vw, 24px)',
+                minHeight: '52px',
                 width: '100%',
-                marginTop: 'clamp(20px, 5vw, 24px)'
+                marginTop: 'clamp(24px, 6vw, 28px)',
+                borderRadius: '12px',
+                fontWeight: '600',
+                border: 'none',
+                cursor: loading ? 'not-allowed' : 'pointer',
+                transition: 'all 0.3s ease',
+                background: loading 
+                  ? 'linear-gradient(135deg, #64748b 0%, #475569 100%)'
+                  : 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+                color: 'white',
+                boxShadow: '0 4px 16px rgba(59, 130, 246, 0.3)',
+                opacity: loading ? 0.7 : 1
+              }}
+              onMouseOver={(e) => {
+                if (!loading) {
+                  e.target.style.background = 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)';
+                  e.target.style.transform = 'translateY(-2px)';
+                  e.target.style.boxShadow = '0 6px 20px rgba(59, 130, 246, 0.4)';
+                }
+              }}
+              onMouseOut={(e) => {
+                if (!loading) {
+                  e.target.style.background = 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)';
+                  e.target.style.transform = 'translateY(0)';
+                  e.target.style.boxShadow = '0 4px 16px rgba(59, 130, 246, 0.3)';
+                }
               }}
             >
               {loading ? (
-                <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
                   <span className="spinner-small" style={{
                     width: '16px',
                     height: '16px',
@@ -156,7 +279,7 @@ const RequestOutpass = () => {
                   ⏳ Creating Outpass...
                 </span>
               ) : (
-                <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
                   🎫 Generate Outpass with QR Code
                 </span>
               )}

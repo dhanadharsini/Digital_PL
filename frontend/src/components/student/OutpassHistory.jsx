@@ -122,7 +122,7 @@ const OutpassHistory = () => {
           <div className="outpass-list" style={{
             display: 'grid',
             gap: 'clamp(16px, 4vw, 20px)',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))'
+            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))'
           }}>
             {outpasses.map((outpass) => (
               <div key={outpass._id} className={`outpass-card ${outpass.status}`} style={{

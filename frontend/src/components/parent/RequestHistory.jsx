@@ -79,12 +79,6 @@ const RequestHistory = () => {
   return (
     <DashboardLayout title="Request History" menuItems={menuItems}>
       <div className="card">
-        <h2 style={{ 
-          fontSize: 'clamp(1.25rem, 4vw, 1.5rem)',
-          marginBottom: 'clamp(16px, 4vw, 20px)',
-          textAlign: 'center'
-        }}>Permission Letter Request History</h2>
-        
         {loading ? (
           <div className="loading-spinner">
             <div className="spinner"></div>

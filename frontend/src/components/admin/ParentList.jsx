@@ -99,13 +99,6 @@ const ParentList = () => {
           gap: '15px',
           padding: '0 4px'
         }}>
-          <h2 style={{ 
-            margin: 0,
-            fontSize: 'clamp(1.25rem, 4vw, 1.5rem)',
-            textAlign: 'center',
-            flex: 1,
-            minWidth: '200px'
-          }}>Registered Parents</h2>
           <div className="search-box" style={{ 
             width: '100%', 
             maxWidth: '300px',

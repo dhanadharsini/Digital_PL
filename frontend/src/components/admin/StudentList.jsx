@@ -121,19 +121,24 @@ const StudentList = () => {
     <DashboardLayout title="Students List" menuItems={menuItems}>
       <div className="card">
         <div className="card-header-actions" style={{ marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
-          <h2 style={{ margin: 0 }}>Registered Students</h2>
-          <div className="search-box">
+           <div className="search-box" style={{ 
+            width: '100%', 
+            maxWidth: '300px',
+            flexShrink: 0
+          }}>
             <input
               type="text"
-              placeholder="Search by name, reg no or dept..."
+              placeholder="Search by name, ID or student reg..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               style={{
-                padding: '8px 12px',
+                padding: '12px 16px',
                 borderRadius: '8px',
-                border: '1px solid #ddd',
+                border: '1px solid #334155',
                 width: '100%',
-                maxWidth: '300px'
+                fontSize: '16px', /* Prevents zoom on iOS */
+                backgroundColor: '#0f172a',
+                color: '#e2e8f0'
               }}
             />
           </div>

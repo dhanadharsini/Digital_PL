@@ -76,26 +76,33 @@ const PendingRequests = () => {
 
   return (
     <DashboardLayout title="Pending PL Requests" menuItems={menuItems}>
-      <div className="card">
+      <div className="card" style={{
+        padding: 'clamp(16px, 4vw, 24px)',
+        borderRadius: '12px',
+        background: 'linear-gradient(135deg, #334155 0%, #1e293b 100%)',
+        border: '1px solid #334155'
+      }}>
         <div className="card-header-actions" style={{ 
-          marginBottom: '20px', 
+          marginBottom: 'clamp(20px, 5vw, 24px)', 
           display: 'flex', 
           justifyContent: 'space-between', 
           alignItems: 'center', 
           flexWrap: 'wrap', 
-          gap: '15px',
+          gap: 'clamp(12px, 3vw, 15px)',
           padding: '0 4px'
         }}>
           <h2 style={{ 
             margin: 0,
             fontSize: 'clamp(1.25rem, 4vw, 1.5rem)',
-            textAlign: 'center',
+            textAlign: 'left',
             flex: 1,
-            minWidth: '200px'
+            minWidth: '200px',
+            color: '#e2e8f0',
+            fontWeight: '700'
           }}>Pending Lists</h2>
           <div className="search-box" style={{ 
             width: '100%', 
-            maxWidth: '300px',
+            maxWidth: 'clamp(250px, 40vw, 300px)',
             flexShrink: 0
           }}>
             <input
@@ -124,45 +131,160 @@ const PendingRequests = () => {
             No pending requests
           </p>
         ) : (
-          <div className="table-container">
-            <table>
+          <div className="table-container" style={{
+            overflowX: 'auto',
+            borderRadius: '8px'
+          }}>
+            <table style={{
+              width: '100%',
+              borderCollapse: 'collapse',
+              fontSize: 'clamp(0.75rem, 2vw, 0.875rem)'
+            }}>
               <thead>
-                <tr>
-                  <th>Student Name</th>
-                  <th>Reg No</th>
-                  <th>Room No</th>
-                  <th>Place of Visit</th>
-                  <th>Reason</th>
-                  <th>Departure</th>
-                  <th>Arrival</th>
-                  <th>Actions</th>
+                <tr style={{
+                  background: 'linear-gradient(135deg, #1e40af 0%, #1d4ed8 100%)',
+                  color: 'white'
+                }}>
+                  <th style={{
+                    padding: 'clamp(10px, 2.5vw, 14px)',
+                    textAlign: 'left',
+                    fontWeight: '800',
+                    fontSize: 'clamp(0.625rem, 1.5vw, 0.75rem)',
+                    textTransform: 'uppercase',
+                    letterSpacing: '1px',
+                    border: 'none'
+                  }}>Student Name</th>
+                  <th style={{
+                    padding: 'clamp(10px, 2.5vw, 14px)',
+                    textAlign: 'left',
+                    fontWeight: '800',
+                    fontSize: 'clamp(0.625rem, 1.5vw, 0.75rem)',
+                    textTransform: 'uppercase',
+                    letterSpacing: '1px',
+                    border: 'none'
+                  }}>Reg No</th>
+                  <th style={{
+                    padding: 'clamp(10px, 2.5vw, 14px)',
+                    textAlign: 'left',
+                    fontWeight: '800',
+                    fontSize: 'clamp(0.625rem, 1.5vw, 0.75rem)',
+                    textTransform: 'uppercase',
+                    letterSpacing: '1px',
+                    border: 'none'
+                  }}>Room No</th>
+                  <th style={{
+                    padding: 'clamp(10px, 2.5vw, 14px)',
+                    textAlign: 'left',
+                    fontWeight: '800',
+                    fontSize: 'clamp(0.625rem, 1.5vw, 0.75rem)',
+                    textTransform: 'uppercase',
+                    letterSpacing: '1px',
+                    border: 'none'
+                  }}>Place of Visit</th>
+                  <th style={{
+                    padding: 'clamp(10px, 2.5vw, 14px)',
+                    textAlign: 'left',
+                    fontWeight: '800',
+                    fontSize: 'clamp(0.625rem, 1.5vw, 0.75rem)',
+                    textTransform: 'uppercase',
+                    letterSpacing: '1px',
+                    border: 'none'
+                  }}>Reason</th>
+                  <th style={{
+                    padding: 'clamp(10px, 2.5vw, 14px)',
+                    textAlign: 'left',
+                    fontWeight: '800',
+                    fontSize: 'clamp(0.625rem, 1.5vw, 0.75rem)',
+                    textTransform: 'uppercase',
+                    letterSpacing: '1px',
+                    border: 'none'
+                  }}>Departure</th>
+                  <th style={{
+                    padding: 'clamp(10px, 2.5vw, 14px)',
+                    textAlign: 'left',
+                    fontWeight: '800',
+                    fontSize: 'clamp(0.625rem, 1.5vw, 0.75rem)',
+                    textTransform: 'uppercase',
+                    letterSpacing: '1px',
+                    border: 'none'
+                  }}>Arrival</th>
+                  <th style={{
+                    padding: 'clamp(10px, 2.5vw, 14px)',
+                    textAlign: 'left',
+                    fontWeight: '800',
+                    fontSize: 'clamp(0.625rem, 1.5vw, 0.75rem)',
+                    textTransform: 'uppercase',
+                    letterSpacing: '1px',
+                    border: 'none'
+                  }}>Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredRequests.map((request) => (
-                  <tr key={request._id}>
-                    <td>{request.name}</td>
-                    <td>{request.regNo}</td>
-                    <td>{request.roomNo}</td>
-                    <td>{request.placeOfVisit}</td>
-                    <td>{request.reasonOfVisit}</td>
-                    <td>{new Date(request.departureDateTime).toLocaleString()}</td>
-                    <td>{new Date(request.arrivalDateTime).toLocaleString()}</td>
-                    <td>
+                  <tr key={request._id} style={{
+                    borderBottom: '1px solid #334155',
+                    '&:hover': {
+                      backgroundColor: 'rgba(255, 255, 255, 0.05)'
+                    }
+                  }}>
+                    <td style={{
+                      padding: 'clamp(12px, 3vw, 16px)',
+                      color: '#e2e8f0',
+                      fontWeight: '500'
+                    }}>{request.name}</td>
+                    <td style={{
+                      padding: 'clamp(12px, 3vw, 16px)',
+                      color: '#e2e8f0',
+                      fontWeight: '500'
+                    }}>{request.regNo}</td>
+                    <td style={{
+                      padding: 'clamp(12px, 3vw, 16px)',
+                      color: '#e2e8f0',
+                      fontWeight: '500'
+                    }}>{request.roomNo}</td>
+                    <td style={{
+                      padding: 'clamp(12px, 3vw, 16px)',
+                      color: '#e2e8f0',
+                      fontWeight: '500'
+                    }}>{request.placeOfVisit}</td>
+                    <td style={{
+                      padding: 'clamp(12px, 3vw, 16px)',
+                      color: '#e2e8f0',
+                      fontWeight: '500'
+                    }}>{request.reasonOfVisit}</td>
+                    <td style={{
+                      padding: 'clamp(12px, 3vw, 16px)',
+                      color: '#e2e8f0',
+                      fontWeight: '500',
+                      fontSize: 'clamp(0.625rem, 1.5vw, 0.75rem)'
+                    }}>{new Date(request.departureDateTime).toLocaleString()}</td>
+                    <td style={{
+                      padding: 'clamp(12px, 3vw, 16px)',
+                      color: '#e2e8f0',
+                      fontWeight: '500',
+                      fontSize: 'clamp(0.625rem, 1.5vw, 0.75rem)'
+                    }}>{new Date(request.arrivalDateTime).toLocaleString()}</td>
+                    <td style={{
+                      padding: 'clamp(8px, 2vw, 12px)'
+                    }}>
                       <div className="action-buttons" style={{
                         display: 'flex',
                         flexDirection: 'column',
-                        gap: '8px',
-                        minWidth: '120px'
+                        gap: 'clamp(6px, 1.5vw, 8px)',
+                        minWidth: 'clamp(100px, 20vw, 120px)'
                       }}>
                         <button
                           className="btn btn-success"
                           onClick={() => handleApprove(request._id)}
                           style={{
-                            fontSize: 'clamp(0.75rem, 2vw, 0.875rem)',
-                            padding: '8px 12px',
-                            minHeight: '40px',
-                            width: '100%'
+                            fontSize: 'clamp(0.625rem, 1.5vw, 0.75rem)',
+                            padding: 'clamp(6px, 1.5vw, 8px) clamp(8px, 2vw, 12px)',
+                            minHeight: 'clamp(36px, 8vw, 40px)',
+                            width: '100%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontWeight: '600'
                           }}
                         >
                           Approve
@@ -171,10 +293,14 @@ const PendingRequests = () => {
                           className="btn btn-danger"
                           onClick={() => handleReject(request._id)}
                           style={{
-                            fontSize: 'clamp(0.75rem, 2vw, 0.875rem)',
-                            padding: '8px 12px',
-                            minHeight: '40px',
-                            width: '100%'
+                            fontSize: 'clamp(0.625rem, 1.5vw, 0.75rem)',
+                            padding: 'clamp(6px, 1.5vw, 8px) clamp(8px, 2vw, 12px)',
+                            minHeight: 'clamp(36px, 8vw, 40px)',
+                            width: '100%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontWeight: '600'
                           }}
                         >
                           Reject

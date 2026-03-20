@@ -139,7 +139,7 @@ const DelayedStudents = () => {
                             <td>{student.name}</td>
                             <td>{student.department}</td>
                             <td>{student.roomNo}</td>
-                            <td>{student.placeVisited}</td>
+                            <td>{student.placeOfVisit}</td>
                             <td>
                               {formatDate(student.exitTime, student.exitTimeFormatted)}
                             </td>
