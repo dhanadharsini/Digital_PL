@@ -23,7 +23,8 @@ const studentSchema = new mongoose.Schema({
   },
   mobileNo: {
     type: String,
-    required: true
+    required: true,
+    unique: true
   },
   yearOfStudy: {
     type: String,

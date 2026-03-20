@@ -22,7 +22,8 @@ const parentSchema = new mongoose.Schema({
   },
   mobileNo: {
     type: String,
-    required: true
+    required: true,
+    unique: true
   },
   studentName: {
     type: String,

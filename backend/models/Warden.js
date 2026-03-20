@@ -22,7 +22,8 @@ const wardenSchema = new mongoose.Schema({
   },
   mobileNo: {
     type: String,
-    required: true
+    required: true,
+    unique: true
   },
   hostelName: {
     type: String,

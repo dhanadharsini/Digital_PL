@@ -85,10 +85,27 @@ export const addStudent = async (req, res) => {
     }
 
     // Check if student already exists
-    const studentExists = await Student.findOne({ $or: [{ email: email.toLowerCase() }, { regNo }] });
+    const studentExists = await Student.findOne({ $or: [{ email: email.toLowerCase() }, { regNo }, { mobileNo }] });
     if (studentExists) {
-      console.log('Student already exists:', { email: email.toLowerCase(), regNo });
-      return res.status(400).json({ message: 'Student already exists with this email or registration number' });
+      if (studentExists.email.toLowerCase() === email.toLowerCase()) {
+        console.log('Student already exists:', { email: email.toLowerCase() });
+        return res.status(400).json({ message: 'Student already exists with this email' });
+      }
+      if (studentExists.regNo === regNo) {
+        console.log('Student already exists:', { regNo });
+        return res.status(400).json({ message: 'Student already exists with this registration number' });
+      }
+      if (studentExists.mobileNo === mobileNo) {
+        console.log('Student already exists:', { mobileNo });
+        return res.status(400).json({ message: 'Student already exists with this phone number' });
+      }
+    }
+
+    // Check if phone number already exists with any parent
+    const parentWithSamePhone = await Parent.findOne({ mobileNo });
+    if (parentWithSamePhone) {
+      console.log('Phone number already exists with parent:', { mobileNo, parentName: parentWithSamePhone.name });
+      return res.status(400).json({ message: 'This phone number is already registered with a parent. Each student and parent must have unique phone numbers.' });
     }
 
     console.log('Creating student with data:', {
@@ -184,6 +201,20 @@ export const addParent = async (req, res) => {
       return res.status(400).json({ message: 'Parent already exists with this email' });
     }
 
+    // Check if phone number already exists with any student
+    const studentWithSamePhone = await Student.findOne({ mobileNo });
+    if (studentWithSamePhone) {
+      console.log('Phone number already exists with student:', { mobileNo, studentName: studentWithSamePhone.name });
+      return res.status(400).json({ message: 'This phone number is already registered with a student. Each parent and student must have unique phone numbers.' });
+    }
+
+    // Check if phone number already exists with any other parent
+    const parentWithSamePhone = await Parent.findOne({ mobileNo });
+    if (parentWithSamePhone) {
+      console.log('Phone number already exists with parent:', { mobileNo, parentName: parentWithSamePhone.name });
+      return res.status(400).json({ message: 'Parent already exists with this phone number' });
+    }
+
     // Verify student exists
     const student = await Student.findOne({ regNo: studentRegNo });
     if (!student) {
@@ -267,6 +298,27 @@ export const addWarden = async (req, res) => {
     if (wardenExists) {
       console.log('Warden already exists:', { email: email.toLowerCase() });
       return res.status(400).json({ message: 'Warden already exists with this email' });
+    }
+
+    // Check if phone number already exists with any student
+    const studentWithSamePhone = await Student.findOne({ mobileNo });
+    if (studentWithSamePhone) {
+      console.log('Phone number already exists with student:', { mobileNo, studentName: studentWithSamePhone.name });
+      return res.status(400).json({ message: 'This phone number is already registered with a student. Each warden must have unique phone numbers.' });
+    }
+
+    // Check if phone number already exists with any parent
+    const parentWithSamePhone = await Parent.findOne({ mobileNo });
+    if (parentWithSamePhone) {
+      console.log('Phone number already exists with parent:', { mobileNo, parentName: parentWithSamePhone.name });
+      return res.status(400).json({ message: 'This phone number is already registered with a parent. Each warden must have unique phone numbers.' });
+    }
+
+    // Check if phone number already exists with any other warden
+    const wardenWithSamePhone = await Warden.findOne({ mobileNo });
+    if (wardenWithSamePhone) {
+      console.log('Phone number already exists with warden:', { mobileNo, wardenName: wardenWithSamePhone.name });
+      return res.status(400).json({ message: 'Warden already exists with this phone number' });
     }
 
     console.log('Creating warden for hostel:', hostelName);
