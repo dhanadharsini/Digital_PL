@@ -1394,6 +1394,24 @@ table tbody tr:last-child td {
    RESPONSIVE DESIGN
    ======================================== */
 
+/* ========================================
+   MOBILE-FIRST RESPONSIVE DESIGN
+   ======================================== */
+
+/* Show hamburger button on mobile */
+.hamburger-btn {
+  display: none;
+}
+
+.mobile-nav {
+  display: none;
+}
+
+.sidebar-overlay {
+  display: none;
+}
+
+/* Base mobile styles */
 @media (max-width: 1024px) {
   .sidebar {
     width: 260px;
@@ -1406,8 +1424,7 @@ table tbody tr:last-child td {
 }
 
 @media (max-width: 768px) {
-
-  /* Show hamburger button on mobile */
+  /* Show mobile navigation */
   .hamburger-btn {
     display: flex;
     flex-direction: column;
@@ -1445,13 +1462,32 @@ table tbody tr:last-child td {
     background: #ef4444;
   }
 
+  .mobile-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem;
+    background: #1e293b;
+    border-bottom: 1px solid #334155;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 998;
+  }
+
+  .light-mode .mobile-nav {
+    background: white;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
   /* Hide sidebar by default on mobile */
   .sidebar {
     position: fixed;
     left: -100%;
     width: 85%;
     max-width: 320px;
-   height: 100vh;
+    height: 100vh;
     transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 100;
   }
@@ -1466,7 +1502,7 @@ table tbody tr:last-child td {
   .sidebar-overlay {
     display: none;
     position: fixed;
-   top: 0;
+    top: 0;
     left: 0;
     right: 0;
     bottom: 0;
@@ -1487,11 +1523,7 @@ table tbody tr:last-child td {
   }
 
   .navbar {
-    padding: 20px 24px;
-  }
-
-  .navbar h2 {
-    font-size: 24px;
+    display: none; /* Hide desktop navbar on mobile */
   }
 
   .stats-container {
@@ -1612,6 +1644,165 @@ table tbody tr:last-child td {
   .reset-modal-content {
     width: 98%;
     padding: 16px;
+  }
+
+  /* Enhanced Mobile Touch Targets */
+@media (max-width: 768px) {
+  /* Improve touch targets for mobile */
+  .btn,
+  .action-buttons button,
+  .submit-btn,
+  .role-tab,
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    min-height: 48px;
+    min-width: 48px;
+  }
+
+  /* Better table scrolling on mobile */
+  .table-container {
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; /* Hide scrollbar for IE/Edge */
+    -ms-overflow-style: none; /* Hide scrollbar for IE/Edge */
+  }
+
+  .table-container::-webkit-scrollbar {
+    display: none; /* Hide scrollbar for Chrome/Safari */
+  }
+
+  /* Mobile-friendly status badges */
+  .status-badge {
+    font-size: 10px;
+    padding: 4px 8px;
+    min-height: 24px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Mobile search improvements */
+  .search-box input {
+    font-size: 16px; /* Prevents zoom on iOS */
+    padding: 12px 16px;
+  }
+
+  /* Mobile card improvements */
+  .card {
+    margin-bottom: 16px;
+    border-radius: 12px;
+  }
+
+  /* Mobile navigation improvements */
+  .sidebar-menu a {
+    padding: 16px;
+    font-size: 15px;
+    min-height: 52px;
+    display: flex;
+    align-items: center;
+  }
+
+  /* Mobile modal improvements */
+  .modal-content,
+  .confirmation-content,
+  .reset-modal-content {
+    max-height: 90vh;
+    overflow-y: auto;
+    border-radius: 16px;
+  }
+
+  /* Mobile form improvements */
+  .form-group {
+    margin-bottom: 20px;
+  }
+
+  .form-group label {
+    font-size: 14px;
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+
+  /* Mobile loading improvements */
+  .loading-spinner {
+    padding: 40px 20px;
+  }
+
+  .spinner {
+    width: 40px;
+    height: 40px;
+    border-width: 3px;
+  }
+}
+
+/* Ultra-small mobile devices */
+@media (max-width: 360px) {
+  .main-content {
+    padding: 60px 8px 8px;
+  }
+
+  .card {
+    padding: 12px;
+    margin-bottom: 12px;
+  }
+
+  .btn {
+    font-size: 12px;
+    padding: 10px 12px;
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    font-size: 14px;
+    padding: 10px 12px;
+  }
+
+  table th,
+  table td {
+    padding: 8px 6px;
+    font-size: 11px;
+  }
+
+  .status-badge {
+    font-size: 9px;
+    padding: 3px 6px;
+  }
+}
+
+/* Large mobile devices (phablets) */
+@media (min-width: 481px) and (max-width: 768px) {
+  .stats-container {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+
+  .action-buttons {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .action-buttons button {
+    flex: 1;
+    min-width: 100px;
+  }
+}
+
+/* Mobile landscape optimizations */
+@media (max-width: 768px) and (orientation: landscape) {
+  .main-content {
+    padding: 50px 12px 12px;
+  }
+
+  .mobile-nav {
+    padding: 8px 12px;
+  }
+
+  .card {
+    padding: 16px;
+  }
+
+  .form-group {
+    margin-bottom: 16px;
   }
 }
 

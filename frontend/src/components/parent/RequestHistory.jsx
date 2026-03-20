@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import Sidebar from '../common/Sidebar';
-import Navbar from '../common/Navbar';
+import DashboardLayout from '../common/DashboardLayout';
 import { api } from '../../services/api';
 
 const RequestHistory = () => {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const menuItems = [
     { label: 'Dashboard', path: '/parent' },
@@ -78,82 +76,53 @@ const RequestHistory = () => {
     }
   };
 
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
-
-  const closeSidebar = () => {
-    setIsSidebarOpen(false);
-  };
-
   return (
-    <div className="dashboard-container">
-      {/* Hamburger Button */}
-      <button 
-        className={`hamburger-btn ${isSidebarOpen ? 'active' : ''}`}
-        onClick={toggleSidebar}
-        aria-label="Toggle menu"
-      >
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
-
-      {/* Sidebar Overlay */}
-      <div 
-        className={`sidebar-overlay ${isSidebarOpen ? 'active' : ''}`}
-        onClick={closeSidebar}
-      ></div>
-
-      <Sidebar 
-        menuItems={menuItems}
-        isOpen={isSidebarOpen}
-        onClose={closeSidebar}
-      />
-      
-      <div className="main-content">
-        <Navbar title="Request History" />
+    <DashboardLayout title="Request History" menuItems={menuItems}>
+      <div className="card">
+        <h2 style={{ 
+          fontSize: 'clamp(1.25rem, 4vw, 1.5rem)',
+          marginBottom: 'clamp(16px, 4vw, 20px)',
+          textAlign: 'center'
+        }}>Permission Letter Request History</h2>
         
-        <div className="card">
-          {loading ? (
-            <div className="loading-spinner">
-              <div className="spinner"></div>
-            </div>
-          ) : (
-            <div className="table-container">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Student Name</th>
-                    <th>Reg No</th>
-                    <th>Place of Visit</th>
-                    <th>Reason</th>
-                    <th>Departure</th>
-                    <th>Arrival</th>
-                    <th>Status</th>
-                    <th>Your Action</th>
+        {loading ? (
+          <div className="loading-spinner">
+            <div className="spinner"></div>
+          </div>
+        ) : (
+          <div className="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th style={{ fontSize: 'clamp(0.75rem, 2vw, 0.875rem)' }}>Student Name</th>
+                  <th style={{ fontSize: 'clamp(0.75rem, 2vw, 0.875rem)' }}>Reg No</th>
+                  <th style={{ fontSize: 'clamp(0.75rem, 2vw, 0.875rem)' }}>Place of Visit</th>
+                  <th style={{ fontSize: 'clamp(0.75rem, 2vw, 0.875rem)' }}>Reason</th>
+                  <th style={{ fontSize: 'clamp(0.75rem, 2vw, 0.875rem)' }}>Departure</th>
+                  <th style={{ fontSize: 'clamp(0.75rem, 2vw, 0.875rem)' }}>Arrival</th>
+                  <th style={{ fontSize: 'clamp(0.75rem, 2vw, 0.875rem)' }}>Status</th>
+                  <th style={{ fontSize: 'clamp(0.75rem, 2vw, 0.875rem)' }}>Your Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {requests.map((request) => (
+                  <tr key={request._id}>
+                    <td style={{ fontSize: 'clamp(0.75rem, 2vw, 0.875rem)' }}>{request.name}</td>
+                    <td style={{ fontSize: 'clamp(0.75rem, 2vw, 0.875rem)' }}>{request.regNo}</td>
+                    <td style={{ fontSize: 'clamp(0.75rem, 2vw, 0.875rem)' }}>{request.placeOfVisit}</td>
+                    <td style={{ fontSize: 'clamp(0.75rem, 2vw, 0.875rem)' }}>{request.reasonOfVisit}</td>
+                    <td style={{ fontSize: 'clamp(0.75rem, 2vw, 0.875rem)' }}>{formatDateTime(request.departureDateTime)}</td>
+                    <td style={{ fontSize: 'clamp(0.75rem, 2vw, 0.875rem)' }}>{formatDateTime(request.arrivalDateTime)}</td>
+                    <td>{getStatusBadge(getDisplayStatus(request))}</td>
+                    <td>{getStatusBadge(request.parentStatus)}</td>
                   </tr>
-                </thead>
-                <tbody>
-                  {requests.map((request) => (
-                    <tr key={request._id}>
-                      <td>{request.name}</td>
-                      <td>{request.regNo}</td>
-                      <td>{request.placeOfVisit}</td>
-                      <td>{request.reasonOfVisit}</td>
-                      <td>{formatDateTime(request.departureDateTime)}</td>
-                      <td>{formatDateTime(request.arrivalDateTime)}</td>
-                      <td>{getStatusBadge(getDisplayStatus(request))}</td>
-                      <td>{getStatusBadge(request.parentStatus)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
-    </div>
+    </DashboardLayout>
   );
 };
 

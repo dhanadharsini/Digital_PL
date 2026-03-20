@@ -77,19 +77,40 @@ const PendingRequests = () => {
   return (
     <DashboardLayout title="Pending PL Requests" menuItems={menuItems}>
       <div className="card">
-        <div className="card-header-actions" style={{ marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '15px' }}>
-          <h2 style={{ margin: 0 }}>Pending Lists</h2>
-          <div className="search-box" style={{ width: '100%', maxWidth: '300px' }}>
+        <div className="card-header-actions" style={{ 
+          marginBottom: '20px', 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center', 
+          flexWrap: 'wrap', 
+          gap: '15px',
+          padding: '0 4px'
+        }}>
+          <h2 style={{ 
+            margin: 0,
+            fontSize: 'clamp(1.25rem, 4vw, 1.5rem)',
+            textAlign: 'center',
+            flex: 1,
+            minWidth: '200px'
+          }}>Pending Lists</h2>
+          <div className="search-box" style={{ 
+            width: '100%', 
+            maxWidth: '300px',
+            flexShrink: 0
+          }}>
             <input
               type="text"
               placeholder="Search by name, reg no or place..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               style={{
-                padding: '8px 12px',
+                padding: '12px 16px',
                 borderRadius: '8px',
-                border: '1px solid #ddd',
-                width: '100%'
+                border: '1px solid #334155',
+                width: '100%',
+                fontSize: '16px', /* Prevents zoom on iOS */
+                backgroundColor: '#0f172a',
+                color: '#e2e8f0'
               }}
             />
           </div>
@@ -128,16 +149,33 @@ const PendingRequests = () => {
                     <td>{new Date(request.departureDateTime).toLocaleString()}</td>
                     <td>{new Date(request.arrivalDateTime).toLocaleString()}</td>
                     <td>
-                      <div className="action-buttons">
+                      <div className="action-buttons" style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '8px',
+                        minWidth: '120px'
+                      }}>
                         <button
                           className="btn btn-success"
                           onClick={() => handleApprove(request._id)}
+                          style={{
+                            fontSize: 'clamp(0.75rem, 2vw, 0.875rem)',
+                            padding: '8px 12px',
+                            minHeight: '40px',
+                            width: '100%'
+                          }}
                         >
                           Approve
                         </button>
                         <button
                           className="btn btn-danger"
                           onClick={() => handleReject(request._id)}
+                          style={{
+                            fontSize: 'clamp(0.75rem, 2vw, 0.875rem)',
+                            padding: '8px 12px',
+                            minHeight: '40px',
+                            width: '100%'
+                          }}
                         >
                           Reject
                         </button>

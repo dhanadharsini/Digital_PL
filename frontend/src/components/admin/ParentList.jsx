@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import Sidebar from '../common/Sidebar';
-import Navbar from '../common/Navbar';
+import DashboardLayout from '../common/DashboardLayout';
 import { api } from '../../services/api';
 
 const ParentList = () => {
@@ -89,81 +88,113 @@ const ParentList = () => {
   ).sort((a, b) => a.parentId.localeCompare(b.parentId, undefined, { numeric: true }));
 
   return (
-    <div className="dashboard-container">
-      <Sidebar menuItems={menuItems} />
-      <div className="main-content">
-        <Navbar title="Parents List" />
-
-        <div className="card">
-          <div className="card-header-actions" style={{ marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <h2 style={{ margin: 0 }}>Registered Parents</h2>
-            <div className="search-box">
-              <input
-                type="text"
-                placeholder="Search by name, ID or student reg..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                style={{
-                  padding: '8px 12px',
-                  borderRadius: '4px',
-                  border: '1px solid #ddd',
-                  width: '300px'
-                }}
-              />
-            </div>
+    <DashboardLayout title="Parents List" menuItems={menuItems}>
+      <div className="card">
+        <div className="card-header-actions" style={{ 
+          marginBottom: '20px', 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center', 
+          flexWrap: 'wrap', 
+          gap: '15px',
+          padding: '0 4px'
+        }}>
+          <h2 style={{ 
+            margin: 0,
+            fontSize: 'clamp(1.25rem, 4vw, 1.5rem)',
+            textAlign: 'center',
+            flex: 1,
+            minWidth: '200px'
+          }}>Registered Parents</h2>
+          <div className="search-box" style={{ 
+            width: '100%', 
+            maxWidth: '300px',
+            flexShrink: 0
+          }}>
+            <input
+              type="text"
+              placeholder="Search by name, ID or student reg..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              style={{
+                padding: '12px 16px',
+                borderRadius: '8px',
+                border: '1px solid #334155',
+                width: '100%',
+                fontSize: '16px', /* Prevents zoom on iOS */
+                backgroundColor: '#0f172a',
+                color: '#e2e8f0'
+              }}
+            />
           </div>
-
-          {loading ? (
-            <div className="loading-spinner">
-              <div className="spinner"></div>
-            </div>
-          ) : (
-            <div className="table-container">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Parent ID</th>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Mobile</th>
-                    <th>Student Name</th>
-                    <th>Student Reg No</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredParents.map((parent) => (
-                    <tr key={parent._id}>
-                      <td>{parent.parentId}</td>
-                      <td>{parent.name}</td>
-                      <td>{parent.email}</td>
-                      <td>{parent.mobileNo}</td>
-                      <td>{parent.studentName}</td>
-                      <td>{parent.studentRegNo}</td>
-                      <td>
-                        <div className="action-buttons">
-                          <button
-                            className="btn btn-primary"
-                            onClick={() => handleEditClick(parent)}
-                            style={{ marginRight: '8px' }}
-                          >
-                            Edit
-                          </button>
-                          <button
-                            className="btn btn-danger"
-                            onClick={() => handleDelete(parent._id)}
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
         </div>
+
+        {loading ? (
+          <div className="loading-spinner">
+            <div className="spinner"></div>
+          </div>
+        ) : (
+          <div className="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Parent ID</th>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Mobile</th>
+                  <th>Student Name</th>
+                  <th>Student Reg No</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredParents.map((parent) => (
+                  <tr key={parent._id}>
+                    <td>{parent.parentId}</td>
+                    <td>{parent.name}</td>
+                    <td>{parent.email}</td>
+                    <td>{parent.mobileNo}</td>
+                    <td>{parent.studentName}</td>
+                    <td>{parent.studentRegNo}</td>
+                    <td>
+                      <div className="action-buttons" style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '8px',
+                        minWidth: '120px'
+                      }}>
+                        <button
+                          className="btn btn-primary"
+                          onClick={() => handleEditClick(parent)}
+                          style={{
+                            fontSize: 'clamp(0.75rem, 2vw, 0.875rem)',
+                            padding: '8px 12px',
+                            minHeight: '40px',
+                            width: '100%'
+                          }}
+                        >
+                          Edit
+                        </button>
+                        <button
+                          className="btn btn-danger"
+                          onClick={() => handleDelete(parent._id)}
+                          style={{
+                            fontSize: 'clamp(0.75rem, 2vw, 0.875rem)',
+                            padding: '8px 12px',
+                            minHeight: '40px',
+                            width: '100%'
+                          }}
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
       {/* Edit Modal */}
@@ -171,12 +202,17 @@ const ParentList = () => {
         <div className="modal-overlay" onClick={() => setShowEditModal(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{
             maxWidth: '600px',
-            width: '90%',
+            width: '95%',
             maxHeight: '90vh',
             overflowY: 'auto',
-            padding: '20px'
+            padding: 'clamp(16px, 4vw, 24px)',
+            borderRadius: '16px'
           }}>
-            <h3>Edit Parent</h3>
+            <h3 style={{ 
+              fontSize: 'clamp(1.25rem, 4vw, 1.5rem)',
+              marginBottom: 'clamp(16px, 4vw, 20px)',
+              textAlign: 'center'
+            }}>Edit Parent</h3>
             <form onSubmit={handleUpdateParent}>
               <div className="form-group">
                 <label>Parent ID:</label>
@@ -187,6 +223,10 @@ const ParentList = () => {
                   readOnly
                   disabled
                   className="readonly-input"
+                  style={{
+                    fontSize: '16px', /* Prevents zoom on iOS */
+                    padding: '12px 16px'
+                  }}
                 />
               </div>
               <div className="form-group">
@@ -197,6 +237,10 @@ const ParentList = () => {
                   value={editForm.name}
                   onChange={handleEditChange}
                   required
+                  style={{
+                    fontSize: '16px', /* Prevents zoom on iOS */
+                    padding: '12px 16px'
+                  }}
                 />
               </div>
               <div className="form-group">
@@ -207,6 +251,10 @@ const ParentList = () => {
                   value={editForm.email}
                   onChange={handleEditChange}
                   required
+                  style={{
+                    fontSize: '16px', /* Prevents zoom on iOS */
+                    padding: '12px 16px'
+                  }}
                 />
               </div>
               <div className="form-group">
@@ -217,6 +265,10 @@ const ParentList = () => {
                   value={editForm.mobileNo}
                   onChange={handleEditChange}
                   required
+                  style={{
+                    fontSize: '16px', /* Prevents zoom on iOS */
+                    padding: '12px 16px'
+                  }}
                 />
               </div>
               <div className="form-group">
@@ -227,6 +279,10 @@ const ParentList = () => {
                   value={editForm.studentName}
                   onChange={handleEditChange}
                   required
+                  style={{
+                    fontSize: '16px', /* Prevents zoom on iOS */
+                    padding: '12px 16px'
+                  }}
                 />
               </div>
               <div className="form-group">
@@ -237,14 +293,38 @@ const ParentList = () => {
                   value={editForm.studentRegNo}
                   onChange={handleEditChange}
                   required
+                  style={{
+                    fontSize: '16px', /* Prevents zoom on iOS */
+                    padding: '12px 16px'
+                  }}
                 />
               </div>
-              <div className="form-actions" style={{ marginTop: '20px', display: 'flex', gap: '10px' }}>
-                <button type="submit" className="btn btn-primary">Save Changes</button>
+              <div className="form-actions" style={{ 
+                marginTop: '20px', 
+                display: 'flex', 
+                gap: '10px',
+                flexDirection: 'column'
+              }}>
+                <button 
+                  type="submit" 
+                  className="btn btn-primary"
+                  style={{
+                    fontSize: 'clamp(0.875rem, 2.5vw, 1rem)',
+                    padding: 'clamp(12px, 3vw, 14px)',
+                    minHeight: '48px'
+                  }}
+                >
+                  Save Changes
+                </button>
                 <button
                   type="button"
                   className="btn btn-secondary"
                   onClick={() => setShowEditModal(false)}
+                  style={{
+                    fontSize: 'clamp(0.875rem, 2.5vw, 1rem)',
+                    padding: 'clamp(12px, 3vw, 14px)',
+                    minHeight: '48px'
+                  }}
                 >
                   Cancel
                 </button>
@@ -253,7 +333,7 @@ const ParentList = () => {
           </div>
         </div>
       )}
-    </div>
+    </DashboardLayout>
   );
 };
 

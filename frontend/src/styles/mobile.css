@@ -1,0 +1,488 @@
+/* ========================================
+   MOBILE-FIRST RESPONSIVE DESIGN
+   Enhanced Mobile Experience for Digital PL
+   ======================================== */
+
+/* Base Mobile Styles (320px and up) */
+@media (max-width: 480px) {
+  /* Typography Scaling */
+  html {
+    font-size: 14px;
+  }
+
+  body {
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  /* Login Page Enhancements */
+  .login-page {
+    padding: 0.5rem;
+  }
+
+  .login-container {
+    border-radius: 1rem;
+    margin: 0.5rem;
+    width: calc(100% - 1rem);
+    max-width: none;
+  }
+
+  .login-form-section {
+    padding: 1.5rem 1rem;
+  }
+
+  .form-title {
+    font-size: 1.5rem;
+    line-height: 1.2;
+  }
+
+  .form-subtitle {
+    font-size: 0.875rem;
+  }
+
+  .role-tab {
+    font-size: 0.75rem;
+    padding: 0.625rem 0.5rem;
+  }
+
+  .form-input {
+    font-size: 16px; /* Prevents zoom on iOS */
+    padding: 0.875rem 0.875rem 0.875rem 2.5rem;
+  }
+
+  .submit-btn {
+    font-size: 1rem;
+    padding: 0.875rem;
+    min-height: 48px;
+  }
+
+  /* Dashboard Layout */
+  .dashboard-container {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    max-width: 320px;
+    position: fixed;
+    left: -100%;
+    top: 0;
+    height: 100vh;
+    z-index: 1000;
+    transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .sidebar.active {
+    left: 0;
+    box-shadow: 8px 0 32px rgba(0, 0, 0, 0.3);
+  }
+
+  .sidebar-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    backdrop-filter: blur(4px);
+  }
+
+  .sidebar-overlay.active {
+    display: block;
+  }
+
+  .main-content {
+    margin-left: 0;
+    width: 100%;
+    padding: 60px 12px 12px;
+  }
+
+  /* Mobile Navigation */
+  .mobile-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem;
+    background: #1e293b;
+    border-bottom: 1px solid #334155;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 998;
+  }
+
+  .hamburger-btn {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 24px;
+    height: 18px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+  }
+
+  .hamburger-btn span {
+    display: block;
+    width: 100%;
+    height: 2px;
+    background: #3b82f6;
+    border-radius: 2px;
+    transition: all 0.3s ease;
+  }
+
+  .hamburger-btn.active span:nth-child(1) {
+    transform: rotate(45deg) translate(5px, 5px);
+  }
+
+  .hamburger-btn.active span:nth-child(2) {
+    opacity: 0;
+  }
+
+  .hamburger-btn.active span:nth-child(3) {
+    transform: rotate(-45deg) translate(5px, -5px);
+  }
+
+  /* Cards and Stats */
+  .card {
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-radius: 12px;
+  }
+
+  .stats-container {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .stat-card {
+    padding: 1.25rem;
+  }
+
+  /* Tables */
+  .table-container {
+    margin: 0 -12px;
+    padding: 0 12px;
+    width: calc(100% + 24px);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  table {
+    font-size: 0.75rem;
+  }
+
+  table th,
+  table td {
+    padding: 0.75rem 0.5rem;
+    white-space: nowrap;
+  }
+
+  /* Forms */
+  .form-group {
+    margin-bottom: 1rem;
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    font-size: 16px; /* Prevents zoom on iOS */
+    padding: 0.875rem;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  /* Buttons */
+  .btn {
+    padding: 0.875rem 1rem;
+    font-size: 0.875rem;
+    min-height: 44px;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .action-buttons button {
+    width: 100%;
+    min-height: 44px;
+  }
+
+  /* Modals */
+  .modal-content,
+  .confirmation-content,
+  .reset-modal-content {
+    padding: 1.5rem;
+    width: 95%;
+    margin: 1rem;
+    border-radius: 12px;
+  }
+
+  .modal-content h3,
+  .confirmation-content h3 {
+    font-size: 1.25rem;
+  }
+
+  .form-actions,
+  .confirmation-actions,
+  .reset-modal-actions {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .form-actions button,
+  .confirmation-actions button,
+  .reset-modal-actions button {
+    width: 100%;
+  }
+
+  /* Status Badges */
+  .status-badge {
+    font-size: 0.625rem;
+    padding: 0.25rem 0.625rem;
+  }
+
+  /* Welcome Message */
+  .welcome-message {
+    padding: 1.5rem 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .welcome-message h1 {
+    font-size: 1.5rem;
+  }
+
+  .welcome-message p {
+    font-size: 0.875rem;
+  }
+
+  /* PL Cards */
+  .pl-card {
+    padding: 1.5rem;
+    border-radius: 16px;
+  }
+
+  .pl-card-header h2 {
+    font-size: 1.5rem;
+  }
+
+  .pl-detail-row {
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 0.75rem 0;
+  }
+
+  .pl-detail-row strong {
+    font-size: 0.875rem;
+  }
+
+  /* QR Code */
+  .qr-code-container img {
+    max-width: 200px;
+    padding: 0.75rem;
+  }
+
+  /* Instructions */
+  .instruction-item {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .instruction-number {
+    width: 32px;
+    height: 32px;
+    font-size: 0.875rem;
+  }
+
+  .instruction-text strong {
+    font-size: 0.875rem;
+  }
+
+  .instruction-text p {
+    font-size: 0.75rem;
+  }
+
+  /* Alerts */
+  .alert {
+    padding: 0.75rem 1rem;
+    font-size: 0.75rem;
+    border-radius: 8px;
+  }
+
+  /* Loading */
+  .spinner {
+    width: 32px;
+    height: 32px;
+    border-width: 3px;
+  }
+}
+
+/* Tablet Styles (481px to 768px) */
+@media (min-width: 481px) and (max-width: 768px) {
+  .login-container {
+    max-width: 90%;
+    margin: 0 auto;
+  }
+
+  .stats-container {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .form-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .action-buttons {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .action-buttons button {
+    flex: 1;
+    min-width: 120px;
+  }
+
+  table th,
+  table td {
+    padding: 0.875rem 0.75rem;
+    font-size: 0.875rem;
+  }
+}
+
+/* Small Desktop Styles (769px to 1024px) */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .sidebar {
+    width: 240px;
+  }
+
+  .main-content {
+    margin-left: 240px;
+    width: calc(100% - 240px);
+    padding: 2rem 1.5rem;
+  }
+
+  .stats-container {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .form-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Large Desktop Optimization (1025px+) */
+@media (min-width: 1025px) {
+  .stats-container {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .form-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Touch-friendly improvements */
+@media (hover: none) and (pointer: coarse) {
+  .btn,
+  .action-buttons button,
+  .submit-btn,
+  .role-tab {
+    min-height: 48px;
+    min-width: 48px;
+  }
+
+  .form-input,
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    min-height: 48px;
+  }
+
+  /* Increase tap targets */
+  .password-toggle {
+    padding: 12px;
+  }
+
+  .forgot-password {
+    padding: 8px 12px;
+  }
+
+  .sidebar-menu a {
+    padding: 16px;
+  }
+}
+
+/* Landscape mobile optimizations */
+@media (max-width: 768px) and (orientation: landscape) {
+  .login-page {
+    padding: 0.25rem;
+  }
+
+  .login-form-section {
+    padding: 1rem;
+  }
+
+  .form-title {
+    font-size: 1.25rem;
+  }
+
+  .main-content {
+    padding: 50px 12px 12px;
+  }
+
+  .mobile-nav {
+    padding: 0.75rem 1rem;
+  }
+}
+
+/* High DPI displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .spinner {
+    border-width: 2px;
+  }
+
+  .status-badge {
+    border-width: 1px;
+  }
+}
+
+/* Dark mode mobile optimizations */
+@media (max-width: 768px) {
+  .light-mode .sidebar {
+    background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  }
+
+  .light-mode .mobile-nav {
+    background: white;
+    border-bottom: 1px solid #e2e8f0;
+  }
+}
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .sidebar,
+  .hamburger-btn span,
+  .btn,
+  .card,
+  .stat-card {
+    transition: none;
+  }
+
+  .spinner {
+    animation: none;
+  }
+
+  @keyframes spin {
+    to {
+      transform: rotate(0deg);
+    }
+  }
+}

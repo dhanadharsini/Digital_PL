@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import Sidebar from '../common/Sidebar';
-import Navbar from '../common/Navbar';
+import DashboardLayout from '../common/DashboardLayout';
 import { useAuth } from '../../context/AuthContext';
 import { api } from '../../services/api';
 
 const RequestPL = () => {
   const { user } = useAuth();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     roomNo: '',
@@ -84,168 +82,248 @@ const RequestPL = () => {
     }
   };
 
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
-
-  const closeSidebar = () => {
-    setIsSidebarOpen(false);
-  };
-
   return (
-    <div className="dashboard-container">
-      {/* Hamburger Button */}
-      <button 
-        className={`hamburger-btn ${isSidebarOpen ? 'active' : ''}`}
-        onClick={toggleSidebar}
-        aria-label="Toggle menu"
-      >
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
-
-      {/* Sidebar Overlay */}
-      <div 
-        className={`sidebar-overlay ${isSidebarOpen ? 'active' : ''}`}
-        onClick={closeSidebar}
-      ></div>
-
-      <Sidebar 
-        menuItems={menuItems}
-        isOpen={isSidebarOpen}
-        onClose={closeSidebar}
-      />
-      
-      <div className="main-content">
-        <Navbar title="Request Permission Letter" />
+    <DashboardLayout title="Request Permission Letter" menuItems={menuItems}>
+      <div className="card" style={{ padding: 'clamp(20px, 5vw, 28px)' }}>
+        <h2 style={{ 
+          fontSize: 'clamp(1.5rem, 4vw, 2rem)',
+          marginBottom: 'clamp(20px, 5vw, 24px)',
+          textAlign: 'center'
+        }}>Request Permission Letter</h2>
         
-        <div className="card">
-          {message.text && (
-            <div className={`alert alert-${message.type}`}>
-              {message.text}
+        {message.text && (
+          <div className={`alert alert-${message.type}`} style={{
+            marginBottom: 'clamp(16px, 4vw, 20px)',
+            padding: 'clamp(12px, 3vw, 16px)',
+            fontSize: 'clamp(0.875rem, 2.5vw, 1rem)'
+          }}>
+            {message.text}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 'clamp(16px, 4vw, 20px)' }}>
+          <div className="form-grid" style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+            gap: 'clamp(16px, 4vw, 20px)'
+          }}>
+            <div className="form-group">
+              <label style={{ 
+                fontSize: 'clamp(0.875rem, 2.5vw, 1rem)',
+                marginBottom: '8px',
+                fontWeight: '600'
+              }}>Name</label>
+              <input
+                type="text"
+                name="name"
+                value={formData.name}
+                readOnly
+                disabled
+                className="readonly-input"
+                style={{
+                  fontSize: '16px', /* Prevents zoom on iOS */
+                  padding: '12px 16px'
+                }}
+              />
             </div>
-          )}
-
-          <form onSubmit={handleSubmit}>
-            <div className="form-grid">
-              <div className="form-group">
-                <label>Name</label>
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  disabled
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Room Number</label>
-                <input
-                  type="text"
-                  name="roomNo"
-                  value={formData.roomNo}
-                  disabled
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Hostel Name</label>
-                <input
-                  type="text"
-                  name="hostelName"
-                  value={formData.hostelName}
-                  disabled
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Year of Study</label>
-                <input
-                  type="text"
-                  name="yearOfStudy"
-                  value={formData.yearOfStudy}
-                  disabled
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Department</label>
-                <input
-                  type="text"
-                  name="department"
-                  value={formData.department}
-                  disabled
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Registration Number</label>
-                <input
-                  type="text"
-                  name="regNo"
-                  value={formData.regNo}
-                  disabled
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Place of Visit *</label>
-                <input
-                  type="text"
-                  name="placeOfVisit"
-                  value={formData.placeOfVisit}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Reason of Visit *</label>
-                <textarea
-                  name="reasonOfVisit"
-                  value={formData.reasonOfVisit}
-                  onChange={handleChange}
-                  rows="3"
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Departure Date & Time *</label>
-                <input
-                  type="datetime-local"
-                  name="departureDateTime"
-                  value={formData.departureDateTime}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Arrival Date & Time *</label>
-                <input
-                  type="datetime-local"
-                  name="arrivalDateTime"
-                  value={formData.arrivalDateTime}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
+            <div className="form-group">
+              <label style={{ 
+                fontSize: 'clamp(0.875rem, 2.5vw, 1rem)',
+                marginBottom: '8px',
+                fontWeight: '600'
+              }}>Room No</label>
+              <input
+                type="text"
+                name="roomNo"
+                value={formData.roomNo}
+                readOnly
+                disabled
+                className="readonly-input"
+                style={{
+                  fontSize: '16px', /* Prevents zoom on iOS */
+                  padding: '12px 16px'
+                }}
+              />
             </div>
+            <div className="form-group">
+              <label style={{ 
+                fontSize: 'clamp(0.875rem, 2.5vw, 1rem)',
+                marginBottom: '8px',
+                fontWeight: '600'
+              }}>Hostel Name</label>
+              <input
+                type="text"
+                name="hostelName"
+                value={formData.hostelName}
+                readOnly
+                disabled
+                className="readonly-input"
+                style={{
+                  fontSize: '16px', /* Prevents zoom on iOS */
+                  padding: '12px 16px'
+                }}
+              />
+            </div>
+            <div className="form-group">
+              <label style={{ 
+                fontSize: 'clamp(0.875rem, 2.5vw, 1rem)',
+                marginBottom: '8px',
+                fontWeight: '600'
+              }}>Year of Study</label>
+              <input
+                type="text"
+                name="yearOfStudy"
+                value={formData.yearOfStudy}
+                readOnly
+                disabled
+                className="readonly-input"
+                style={{
+                  fontSize: '16px', /* Prevents zoom on iOS */
+                  padding: '12px 16px'
+                }}
+              />
+            </div>
+            <div className="form-group">
+              <label style={{ 
+                fontSize: 'clamp(0.875rem, 2.5vw, 1rem)',
+                marginBottom: '8px',
+                fontWeight: '600'
+              }}>Department</label>
+              <input
+                type="text"
+                name="department"
+                value={formData.department}
+                readOnly
+                disabled
+                className="readonly-input"
+                style={{
+                  fontSize: '16px', /* Prevents zoom on iOS */
+                  padding: '12px 16px'
+                }}
+              />
+            </div>
+            <div className="form-group">
+              <label style={{ 
+                fontSize: 'clamp(0.875rem, 2.5vw, 1rem)',
+                marginBottom: '8px',
+                fontWeight: '600'
+              }}>Reg No</label>
+              <input
+                type="text"
+                name="regNo"
+                value={formData.regNo}
+                readOnly
+                disabled
+                className="readonly-input"
+                style={{
+                  fontSize: '16px', /* Prevents zoom on iOS */
+                  padding: '12px 16px'
+                }}
+              />
+            </div>
+          </div>
 
+          <div className="form-group">
+            <label style={{ 
+              fontSize: 'clamp(0.875rem, 2.5vw, 1rem)',
+              marginBottom: '8px',
+              fontWeight: '600'
+            }}>Place of Visit</label>
+            <input
+              type="text"
+              name="placeOfVisit"
+              value={formData.placeOfVisit}
+              onChange={handleChange}
+              required
+              style={{
+                fontSize: '16px', /* Prevents zoom on iOS */
+                padding: '12px 16px'
+              }}
+            />
+          </div>
+
+          <div className="form-group">
+            <label style={{ 
+              fontSize: 'clamp(0.875rem, 2.5vw, 1rem)',
+              marginBottom: '8px',
+              fontWeight: '600'
+            }}>Reason of Visit</label>
+            <textarea
+              name="reasonOfVisit"
+              value={formData.reasonOfVisit}
+              onChange={handleChange}
+              required
+              rows="4"
+              style={{
+                fontSize: '16px', /* Prevents zoom on iOS */
+                padding: '12px 16px',
+                resize: 'vertical',
+                minHeight: '100px'
+              }}
+            />
+          </div>
+
+          <div className="form-group">
+            <label style={{ 
+              fontSize: 'clamp(0.875rem, 2.5vw, 1rem)',
+              marginBottom: '8px',
+              fontWeight: '600'
+            }}>Departure Date & Time</label>
+            <input
+              type="datetime-local"
+              name="departureDateTime"
+              value={formData.departureDateTime}
+              onChange={handleChange}
+              required
+              style={{
+                fontSize: '16px', /* Prevents zoom on iOS */
+                padding: '12px 16px'
+              }}
+            />
+          </div>
+
+          <div className="form-group">
+            <label style={{ 
+              fontSize: 'clamp(0.875rem, 2.5vw, 1rem)',
+              marginBottom: '8px',
+              fontWeight: '600'
+            }}>Arrival Date & Time</label>
+            <input
+              type="datetime-local"
+              name="arrivalDateTime"
+              value={formData.arrivalDateTime}
+              onChange={handleChange}
+              required
+              style={{
+                fontSize: '16px', /* Prevents zoom on iOS */
+                padding: '12px 16px'
+              }}
+            />
+          </div>
+
+          <div className="form-actions" style={{ 
+            display: 'flex', 
+            gap: 'clamp(12px, 3vw, 16px)',
+            marginTop: 'clamp(20px, 5vw, 24px)',
+            flexDirection: 'column'
+          }}>
             <button 
               type="submit" 
-              className="btn btn-primary" 
+              className="btn btn-primary"
               disabled={loading}
-              style={{ marginTop: '20px' }}
+              style={{
+                fontSize: 'clamp(0.875rem, 2.5vw, 1rem)',
+                padding: 'clamp(12px, 3vw, 14px)',
+                minHeight: '48px',
+                width: '100%'
+              }}
             >
-              {loading ? 'Sending Request...' : 'Send Request'}
+              {loading ? 'Submitting...' : 'Submit Request'}
             </button>
-          </form>
-        </div>
+          </div>
+        </form>
       </div>
-    </div>
+    </DashboardLayout>
   );
 };
 

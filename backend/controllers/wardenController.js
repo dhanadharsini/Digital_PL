@@ -491,6 +491,26 @@ export const verifyQR = async (req, res) => {
       // No exit logged yet - this is an EXIT action
       action = 'exit';
       currentStatus = 'In Hostel';
+
+      // ── DEPARTURE TIME RESTRICTION ──────────────────────────────────────
+      // Block exit if current time is before the scheduled departure time
+      const now = new Date();
+      const departureTime = new Date(pl.departureDateTime);
+      if (now < departureTime) {
+        const formattedDeparture = departureTime.toLocaleString('en-IN', {
+          timeZone: 'Asia/Kolkata',
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: true
+        });
+        return res.status(400).json({
+          message: `🚫 Student is not allowed to leave before the departure time. Scheduled departure: ${formattedDeparture}`
+        });
+      }
+      // ────────────────────────────────────────────────────────────────────
     } else if (log.exitTime && !log.entryTime) {
       // Exit logged but no entry - this is an ENTRY action
       action = 'entry';
@@ -509,6 +529,7 @@ export const verifyQR = async (req, res) => {
         regNo: pl.regNo,
         roomNo: pl.roomNo,
         placeOfVisit: pl.placeOfVisit,
+        departureDateTime: pl.departureDateTime,
         arrivalDateTime: pl.arrivalDateTime,
         action,
         currentStatus,
@@ -558,6 +579,25 @@ export const logEntryExit = async (req, res) => {
     let log = await EntryExitLog.findOne({ permissionLetterId: plId });
 
     if (action === 'exit') {
+      // ── DEPARTURE TIME RESTRICTION (server-side guard) ───────────────────
+      const now = new Date();
+      const departureTime = new Date(pl.departureDateTime);
+      if (now < departureTime) {
+        const formattedDeparture = departureTime.toLocaleString('en-IN', {
+          timeZone: 'Asia/Kolkata',
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: true
+        });
+        return res.status(400).json({
+          message: `🚫 Exit not allowed before departure time. Scheduled departure: ${formattedDeparture}`
+        });
+      }
+      // ────────────────────────────────────────────────────────────────────
+
       // NEW: Check if student is already out on an outpass
       const activeOutpass = await Outpass.findOne({
         studentId,

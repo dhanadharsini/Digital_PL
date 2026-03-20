@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import Sidebar from '../common/Sidebar';
-import Navbar from '../common/Navbar';
 import { useAuth } from '../../context/AuthContext';
 import { api } from '../../services/api';
 import DashboardLayout from '../common/DashboardLayout';
@@ -22,7 +20,6 @@ const WardenDashboard = () => {
     { label: 'Students List', path: '/warden/students' },
     { label: 'Reports', path: '/warden/reports' }
   ];
-
 
   useEffect(() => {
     fetchStats();
@@ -60,48 +57,186 @@ const WardenDashboard = () => {
   return (
     <DashboardLayout title="Warden Dashboard" menuItems={menuItems}>
       {error && (
-        <div style={{ padding: '20px', backgroundColor: '#fee', color: '#c00', borderRadius: '8px', marginBottom: '20px' }}>
+        <div style={{ 
+          padding: 'clamp(16px, 4vw, 20px)', 
+          backgroundColor: '#fee', 
+          color: '#c00', 
+          borderRadius: '8px', 
+          marginBottom: 'clamp(16px, 4vw, 20px)',
+          fontSize: 'clamp(0.875rem, 2.5vw, 1rem)'
+        }}>
           ⚠️ {error}
         </div>
       )}
 
       <div className="welcome-message">
-        <h1>Welcome, {user?.name || 'Warden'}!</h1>
-        <p>Hostel Management System</p>
+        <h1 style={{ 
+          fontSize: 'clamp(1.5rem, 5vw, 2rem)',
+          marginBottom: '0.5rem',
+          textAlign: 'center'
+        }}>Welcome, {user?.name || 'Warden'}!</h1>
+        <p style={{ 
+          fontSize: 'clamp(0.875rem, 2.5vw, 1rem)',
+          textAlign: 'center',
+          margin: 0
+        }}>Hostel Management System</p>
       </div>
 
-      <div className="stats-container">
-        <div className="stat-card">
-          <h3>{stats.totalStudents}</h3>
-          <p>Total Students</p>
+      <div className="stats-container" style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+        gap: 'clamp(12px, 3vw, 24px)',
+        marginBottom: 'clamp(20px, 5vw, 32px)'
+      }}>
+        <div className="stat-card" style={{
+          padding: 'clamp(20px, 5vw, 28px)',
+          textAlign: 'center'
+        }}>
+          <h3 style={{ 
+            fontSize: 'clamp(2rem, 6vw, 3rem)',
+            marginBottom: '0.5rem',
+            color: '#3b82f6'
+          }}>{stats.totalStudents}</h3>
+          <p style={{ 
+            fontSize: 'clamp(0.875rem, 2.5vw, 1rem)',
+            margin: 0,
+            fontWeight: '600'
+          }}>Total Students</p>
         </div>
-        <div className="stat-card">
-          <h3>{stats.pendingRequests}</h3>
-          <p>Pending Requests</p>
+        <div className="stat-card" style={{
+          padding: 'clamp(20px, 5vw, 28px)',
+          textAlign: 'center'
+        }}>
+          <h3 style={{ 
+            fontSize: 'clamp(2rem, 6vw, 3rem)',
+            marginBottom: '0.5rem',
+            color: '#f59e0b'
+          }}>{stats.pendingRequests}</h3>
+          <p style={{ 
+            fontSize: 'clamp(0.875rem, 2.5vw, 1rem)',
+            margin: 0,
+            fontWeight: '600'
+          }}>Pending Requests</p>
         </div>
-        <div className="stat-card">
-          <h3>{stats.studentsOnVacation}</h3>
-          <p>Students on Vacation</p>
+        <div className="stat-card" style={{
+          padding: 'clamp(20px, 5vw, 28px)',
+          textAlign: 'center'
+        }}>
+          <h3 style={{ 
+            fontSize: 'clamp(2rem, 6vw, 3rem)',
+            marginBottom: '0.5rem',
+            color: '#ef4444'
+          }}>{stats.studentsOnVacation}</h3>
+          <p style={{ 
+            fontSize: 'clamp(0.875rem, 2.5vw, 1rem)',
+            margin: 0,
+            fontWeight: '600'
+          }}>Students on Vacation</p>
         </div>
       </div>
 
-      <div className="card">
-        <h3>Quick Actions</h3>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px', marginTop: '20px' }}>
-          <button className="btn btn-primary" onClick={() => window.location.href = '/warden/qr-scanner'}>
-            Open QR Scanner
+      <div className="card" style={{ padding: 'clamp(20px, 5vw, 28px)' }}>
+        <h3 style={{ 
+          fontSize: 'clamp(1.25rem, 4vw, 1.5rem)',
+          marginBottom: 'clamp(16px, 4vw, 20px)',
+          textAlign: 'center'
+        }}>Quick Actions</h3>
+        <div style={{ 
+          display: 'grid', 
+          gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', 
+          gap: 'clamp(10px, 2.5vw, 15px)', 
+          marginTop: '20px' 
+        }}>
+          <button 
+            className="btn btn-primary" 
+            onClick={() => window.location.href = '/warden/qr-scanner'}
+            style={{
+              fontSize: 'clamp(0.75rem, 2vw, 0.875rem)',
+              padding: 'clamp(12px, 3vw, 14px) clamp(16px, 4vw, 24px)',
+              minHeight: '48px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              textAlign: 'center',
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis'
+            }}
+          >
+            QR Scanner
           </button>
-          <button className="btn btn-secondary" onClick={() => window.location.href = '/warden/pending-requests'}>
+          <button 
+            className="btn btn-secondary" 
+            onClick={() => window.location.href = '/warden/pending-requests'}
+            style={{
+              fontSize: 'clamp(0.75rem, 2vw, 0.875rem)',
+              padding: 'clamp(12px, 3vw, 14px) clamp(16px, 4vw, 24px)',
+              minHeight: '48px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              textAlign: 'center',
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis'
+            }}
+          >
             PL Requests
           </button>
-          <button className="btn btn-primary" onClick={() => window.location.href = '/warden/delayed-students'}>
-           Delayed Students
+          <button 
+            className="btn btn-primary" 
+            onClick={() => window.location.href = '/warden/delayed-students'}
+            style={{
+              fontSize: 'clamp(0.75rem, 2vw, 0.875rem)',
+              padding: 'clamp(12px, 3vw, 14px) clamp(16px, 4vw, 24px)',
+              minHeight: '48px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              textAlign: 'center',
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis'
+            }}
+          >
+            Delayed Students
           </button>
-          <button className="btn btn-secondary" onClick={() => window.location.href = '/warden/students'}>
+          <button 
+            className="btn btn-secondary" 
+            onClick={() => window.location.href = '/warden/students'}
+            style={{
+              fontSize: 'clamp(0.75rem, 2vw, 0.875rem)',
+              padding: 'clamp(12px, 3vw, 14px) clamp(16px, 4vw, 24px)',
+              minHeight: '48px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              textAlign: 'center',
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis'
+            }}
+          >
             All Students
           </button>
-          <button className="btn btn-primary" onClick={() => window.location.href = '/warden/reports'} style={{ background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-           View Reports
+          <button 
+            className="btn btn-primary" 
+            onClick={() => window.location.href = '/warden/reports'}
+            style={{
+              fontSize: 'clamp(0.75rem, 2vw, 0.875rem)',
+              padding: 'clamp(12px, 3vw, 14px) clamp(16px, 4vw, 24px)',
+              minHeight: '48px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              textAlign: 'center',
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
+            }}
+          >
+            View Reports
           </button>
         </div>
       </div>
