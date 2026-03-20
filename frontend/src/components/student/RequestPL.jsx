@@ -62,6 +62,24 @@ const RequestPL = () => {
     setLoading(true);
     setMessage({ type: '', text: '' });
 
+    // Validate departure time is between 5:00 AM and 6:15 PM
+    if (formData.departureDateTime) {
+      const departureTime = new Date(formData.departureDateTime);
+      const hours = departureTime.getHours();
+      const minutes = departureTime.getMinutes();
+      
+      // Convert to 24-hour format for comparison
+      // 5:00 AM = 5:00, 6:15 PM = 18:15
+      if (hours < 5 || (hours === 18 && minutes > 15) || hours > 18) {
+        setMessage({ 
+          type: 'error', 
+          text: 'Departure time must be between 5:00 AM and 6:15 PM' 
+        });
+        setLoading(false);
+        return;
+      }
+    }
+
     try {
       await api.post('/student/request-pl', formData);
       setMessage({ type: 'success', text: 'Permission letter request sent successfully!' });
@@ -276,6 +294,14 @@ const RequestPL = () => {
                 padding: '12px 16px'
               }}
             />
+            <div style={{
+              fontSize: 'clamp(0.75rem, 2vw, 0.875rem)',
+              color: '#64748b',
+              marginTop: '6px',
+              fontStyle: 'italic'
+            }}>
+              ⏰ Note: Departure time must be between 5:00 AM and 6:15 PM
+            </div>
           </div>
 
           <div className="form-group">
