@@ -82,40 +82,6 @@ const OutpassHistory = () => {
           flexWrap: 'wrap',
           gap: '12px'
         }}>
-          <button
-            className={`btn btn-refresh ${refreshing ? 'refreshing' : ''}`}
-            onClick={fetchOutpassHistory}
-            disabled={refreshing}
-            style={{
-              width: 'auto',
-              padding: 'clamp(8px, 2vw, 12px) clamp(12px, 3vw, 16px)',
-              fontSize: 'clamp(0.75rem, 2vw, 0.875rem)',
-              background: 'rgba(59, 130, 246, 0.1)',
-              color: '#3b82f6',
-              border: '1px solid #3b82f6',
-              borderRadius: '8px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              cursor: refreshing ? 'not-allowed' : 'pointer',
-              minHeight: '40px'
-            }}
-          >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              className={refreshing ? 'spin' : ''}
-            >
-              <path d="M23 4v6h-6"></path>
-              <path d="M1 20v-6h6"></path>
-              <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
-            </svg>
-            {refreshing ? 'Refreshing...' : 'Refresh'}
-          </button>
         </div>
         
         {loading ? (
