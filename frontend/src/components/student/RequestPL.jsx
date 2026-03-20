@@ -85,11 +85,7 @@ const RequestPL = () => {
   return (
     <DashboardLayout title="Request Permission Letter" menuItems={menuItems}>
       <div className="card" style={{ padding: 'clamp(20px, 5vw, 28px)' }}>
-        <h2 style={{ 
-          fontSize: 'clamp(1.5rem, 4vw, 2rem)',
-          marginBottom: 'clamp(20px, 5vw, 24px)',
-          textAlign: 'center'
-        }}>Request Permission Letter</h2>
+      
         
         {message.text && (
           <div className={`alert alert-${message.type}`} style={{

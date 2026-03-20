@@ -39,7 +39,7 @@ const StudentDashboard = () => {
           gap: 'clamp(12px, 3vw, 20px)',
           marginBottom: '20px',
           flexWrap: 'wrap',
-          justifyContent: 'center'
+          justifyContent: 'flex-start'
         }}>
           {studentProfile?.profilePhoto ? (
             <img
@@ -71,7 +71,7 @@ const StudentDashboard = () => {
               {user?.name?.charAt(0)?.toUpperCase() || 'S'}
             </div>
           )}
-          <div style={{ textAlign: 'center', flex: 1, minWidth: '200px' }}>
+          <div style={{ textAlign: 'left', flex: 1, minWidth: '200px' }}>
             <h1 style={{
               fontSize: 'clamp(1.25rem, 4vw, 2rem)',
               marginBottom: '0.5rem',

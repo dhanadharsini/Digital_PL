@@ -73,11 +73,11 @@ const WardenDashboard = () => {
         <h1 style={{ 
           fontSize: 'clamp(1.5rem, 5vw, 2rem)',
           marginBottom: '0.5rem',
-          textAlign: 'center'
+          textAlign: 'left'
         }}>Welcome, {user?.name || 'Warden'}!</h1>
         <p style={{ 
           fontSize: 'clamp(0.875rem, 2.5vw, 1rem)',
-          textAlign: 'center',
+          textAlign: 'left',
           margin: 0
         }}>Hostel Management System</p>
       </div>
