@@ -289,21 +289,38 @@ const PLHistory = () => {
       }}>
         {loading ? (
           <div className="loading-spinner" style={{
-            textAlign: 'center',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            minHeight: '400px',
             padding: 'clamp(40px, 10vw, 60px)',
             fontSize: 'clamp(0.875rem, 2.5vw, 1rem)',
             color: '#e2e8f0'
           }}>
             <div className="spinner" style={{
-              width: '40px',
-              height: '40px',
+              width: '50px',
+              height: '50px',
               border: '4px solid #334155',
               borderTop: '4px solid #3b82f6',
               borderRadius: '50%',
               animation: 'spin 1s linear infinite',
-              margin: '0 auto 16px'
+              margin: '0 auto 20px'
             }}></div>
-            Loading permission letters...
+            <div style={{
+              fontSize: 'clamp(1rem, 3vw, 1.125rem)',
+              fontWeight: '600',
+              marginBottom: '8px'
+            }}>
+              Loading permission letters...
+            </div>
+            <div style={{
+              fontSize: 'clamp(0.75rem, 2vw, 0.875rem)',
+              color: '#94a3b8',
+              textAlign: 'center'
+            }}>
+              Please wait while we fetch your PL history
+            </div>
           </div>
         ) : (
           <div className="table-container" style={{

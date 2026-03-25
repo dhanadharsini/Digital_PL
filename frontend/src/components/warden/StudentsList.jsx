@@ -44,11 +44,54 @@ const StudentsList = () => {
 
   return (
     <DashboardLayout title="Students List" menuItems={menuItems}>
+      <style>{`
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+        .spinner {
+          animation: spin 1s linear infinite;
+        }
+        .status-badge {
+          padding: clamp(4px, 1vw, 6px) clamp(8px, 2vw, 12px);
+          font-size: clamp(0.625rem, 1.5vw, 0.75rem);
+          font-weight: 600;
+          border-radius: 6px;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+        .status-pending {
+          background-color: #f59e0b;
+          color: white;
+        }
+        .status-parent-approved {
+          background-color: #06b6d4;
+          color: white;
+        }
+        .status-approved {
+          background-color: #10b981;
+          color: white;
+        }
+        :root {
+          --card-bg: linear-gradient(135deg, #334155 0%, #1e293b 100%);
+          --card-border: #334155;
+          --card-text: #e2e8f0;
+          --table-border: #334155;
+          --header-bg: linear-gradient(135deg, #1e40af 0%, #1d4ed8 100%);
+        }
+        .light-mode {
+          --card-bg: #ffffff;
+          --card-border: #e5e7eb;
+          --card-text: #1f2937;
+          --table-border: #e5e7eb;
+          --header-bg: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        }
+      `}</style>
       <div className="card" style={{
         padding: 'clamp(16px, 4vw, 24px)',
         borderRadius: '12px',
-        background: 'linear-gradient(135deg, #334155 0%, #1e293b 100%)',
-        border: '1px solid #334155'
+        background: 'var(--card-bg)',
+        border: '1px solid var(--card-border)',
+        color: 'var(--card-text)',
       }}>
         <div className="card-header-actions" style={{
           marginBottom: 'clamp(20px, 5vw, 24px)',
@@ -67,7 +110,7 @@ const StudentsList = () => {
           }}>
             <label style={{
               fontWeight: '600',
-              color: '#e2e8f0',
+              color: 'var(--card-text)',
               fontSize: 'clamp(0.875rem, 2.5vw, 1rem)'
             }}>Filter:</label>
             <select
@@ -76,10 +119,10 @@ const StudentsList = () => {
               style={{
                 padding: 'clamp(8px, 2vw, 12px) clamp(12px, 3vw, 16px)',
                 borderRadius: '8px',
-                border: '1px solid #334155',
+                border: '1px solid var(--card-border)',
                 fontSize: 'clamp(0.875rem, 2.5vw, 1rem)',
-                backgroundColor: '#0f172a',
-                color: '#e2e8f0',
+                backgroundColor: 'var(--card-bg)',
+                color: 'var(--card-text)',
                 fontWeight: '500',
                 cursor: 'pointer',
                 transition: 'all 0.3s ease',
@@ -90,7 +133,7 @@ const StudentsList = () => {
                 e.target.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.1)';
               }}
               onBlur={(e) => {
-                e.target.style.borderColor = '#334155';
+                e.target.style.borderColor = 'var(--card-border)';
                 e.target.style.boxShadow = 'none';
               }}
             >
@@ -113,11 +156,11 @@ const StudentsList = () => {
               style={{
                 padding: '12px 16px',
                 borderRadius: '8px',
-                border: '1px solid #334155',
+                border: '1px solid var(--card-border)',
                 width: '100%',
                 fontSize: '16px', /* Prevents zoom on iOS */
-                backgroundColor: '#0f172a',
-                color: '#e2e8f0'
+                backgroundColor: 'var(--card-bg)',
+                color: 'var(--card-text)'
               }}
             />
           </div>
@@ -125,21 +168,37 @@ const StudentsList = () => {
 
         {loading ? (
           <div className="loading-spinner" style={{
-            textAlign: 'center',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            minHeight: '400px',
             padding: 'clamp(40px, 10vw, 60px)',
             fontSize: 'clamp(0.875rem, 2.5vw, 1rem)',
-            color: '#e2e8f0'
+            color: 'var(--card-text)'
           }}>
             <div className="spinner" style={{
-              width: '40px',
-              height: '40px',
-              border: '4px solid #334155',
+              width: '50px',
+              height: '50px',
+              border: '4px solid var(--card-border)',
               borderTop: '4px solid #3b82f6',
               borderRadius: '50%',
-              animation: 'spin 1s linear infinite',
-              margin: '0 auto 16px'
+              margin: '0 auto 20px'
             }}></div>
-            Loading students...
+            <div style={{
+              fontSize: 'clamp(1rem, 3vw, 1.125rem)',
+              fontWeight: '600',
+              marginBottom: '8px'
+            }}>
+              Loading students...
+            </div>
+            <div style={{
+              fontSize: 'clamp(0.75rem, 2vw, 0.875rem)',
+              color: '#94a3b8',
+              textAlign: 'center'
+            }}>
+              Please wait while we fetch the students list
+            </div>
           </div>
         ) : (
           <div className="table-container" style={{
@@ -153,7 +212,7 @@ const StudentsList = () => {
             }}>
               <thead>
                 <tr style={{
-                  background: 'linear-gradient(135deg, #1e40af 0%, #1d4ed8 100%)',
+                  background: 'var(--header-bg, linear-gradient(135deg, #1e40af 0%, #1d4ed8 100%))',
                   color: 'white'
                 }}>
                   <th style={{
@@ -224,39 +283,39 @@ const StudentsList = () => {
               <tbody>
                 {filteredStudents.map((student) => (
                   <tr key={student._id} style={{
-                    borderBottom: '1px solid #334155',
+                    borderBottom: '1px solid var(--card-border)',
                     '&:hover': {
                       backgroundColor: 'rgba(255, 255, 255, 0.05)'
                     }
                   }}>
                     <td style={{
                       padding: 'clamp(12px, 3vw, 16px)',
-                      color: '#e2e8f0',
+                      color: 'var(--card-text)',
                       fontWeight: '500'
                     }}>{student.regNo}</td>
                     <td style={{
                       padding: 'clamp(12px, 3vw, 16px)',
-                      color: '#e2e8f0',
+                      color: 'var(--card-text)',
                       fontWeight: '500'
                     }}>{student.name}</td>
                     <td style={{
                       padding: 'clamp(12px, 3vw, 16px)',
-                      color: '#e2e8f0',
+                      color: 'var(--card-text)',
                       fontWeight: '500'
                     }}>{student.roomNo}</td>
                     <td style={{
                       padding: 'clamp(12px, 3vw, 16px)',
-                      color: '#e2e8f0',
+                      color: 'var(--card-text)',
                       fontWeight: '500'
                     }}>{student.yearOfStudy}</td>
                     <td style={{
                       padding: 'clamp(12px, 3vw, 16px)',
-                      color: '#e2e8f0',
+                      color: 'var(--card-text)',
                       fontWeight: '500'
                     }}>{student.department}</td>
                     <td style={{
                       padding: 'clamp(12px, 3vw, 16px)',
-                      color: '#e2e8f0',
+                      color: 'var(--card-text)',
                       fontWeight: '500'
                     }}>{student.mobileNo}</td>
                     <td style={{
