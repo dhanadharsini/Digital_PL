@@ -150,13 +150,17 @@ const Navbar = ({ title }) => {
                 top: '100%',
                 right: 0,
                 marginTop: '8px',
-                background: 'rgba(255, 255, 255, 0.98)',
+                background: isDarkMode ? 'rgba(30, 41, 59, 0.98)' : 'rgba(255, 255, 255, 0.98)',
                 borderRadius: '12px',
-                boxShadow: '0 10px 25px rgba(0, 0, 0, 0.15)',
+                boxShadow: isDarkMode 
+                  ? '0 10px 25px rgba(0, 0, 0, 0.5)' 
+                  : '0 10px 25px rgba(0, 0, 0, 0.15)',
                 zIndex: 1000,
                 minWidth: '200px',
                 overflow: 'hidden',
-                border: '1px solid rgba(229, 231, 235, 0.5)'
+                border: isDarkMode 
+                  ? '1px solid rgba(51, 65, 85, 0.5)' 
+                  : '1px solid rgba(229, 231, 235, 0.5)'
               }}>
                 <div style={{
                   padding: '12px 0'
@@ -164,10 +168,10 @@ const Navbar = ({ title }) => {
                   <div style={{
                     padding: '8px 16px',
                     fontSize: '12px',
-                    color: '#6b7280',
+                    color: isDarkMode ? '#94a3b8' : '#6b7280',
                     fontWeight: '600',
                     textTransform: 'uppercase',
-                    borderBottom: '1px solid #e5e7eb'
+                    borderBottom: isDarkMode ? '1px solid #334155' : '1px solid #e5e7eb'
                   }}>
                     {user?.email}
                   </div>
@@ -182,7 +186,7 @@ const Navbar = ({ title }) => {
                       textAlign: 'left',
                       cursor: 'pointer',
                       fontSize: '14px',
-                      color: '#374151',
+                      color: isDarkMode ? '#f1f5f9' : '#374151',
                       fontWeight: '500',
                       transition: 'background-color 0.2s',
                       display: 'flex',
@@ -190,7 +194,7 @@ const Navbar = ({ title }) => {
                       gap: '8px'
                     }}
                     onMouseEnter={(e) => {
-                      e.target.style.backgroundColor = '#f3f4f6';
+                      e.target.style.backgroundColor = isDarkMode ? '#1e293b' : '#f3f4f6';
                     }}
                     onMouseLeave={(e) => {
                       e.target.style.backgroundColor = 'transparent';
@@ -209,16 +213,16 @@ const Navbar = ({ title }) => {
                       textAlign: 'left',
                       cursor: 'pointer',
                       fontSize: '14px',
-                      color: '#dc2626',
+                      color: isDarkMode ? '#f87171' : '#dc2626',
                       fontWeight: '600',
                       transition: 'background-color 0.2s',
-                      borderTop: '1px solid #e5e7eb',
+                      borderTop: isDarkMode ? '1px solid #334155' : '1px solid #e5e7eb',
                       display: 'flex',
                       alignItems: 'center',
                       gap: '8px'
                     }}
                     onMouseEnter={(e) => {
-                      e.target.style.backgroundColor = '#fee2e2';
+                      e.target.style.backgroundColor = isDarkMode ? '#7f1d1d' : '#fee2e2';
                     }}
                     onMouseLeave={(e) => {
                       e.target.style.backgroundColor = 'transparent';

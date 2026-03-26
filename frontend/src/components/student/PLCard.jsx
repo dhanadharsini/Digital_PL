@@ -89,9 +89,31 @@ const PLCard = () => {
 
         <div className="main-content">
           <Navbar title="Permission Letter Card" />
-          <div className="loading-spinner">
-            <div className="spinner"></div>
+          <div className="loading-spinner" style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            minHeight: '60vh',
+            color: 'var(--card-text, #e2e8f0)'
+          }}>
+            <div className="spinner" style={{
+              width: '40px',
+              height: '40px',
+              border: '4px solid var(--card-border, #334155)',
+              borderTop: '4px solid #3b82f6',
+              borderRadius: '50%',
+              animation: 'spin 1s linear infinite',
+              margin: '0 auto 16px'
+            }}></div>
+            Loading permission letter...
           </div>
+          {/* Add keyframe animation */}
+          <style>{`
+            @keyframes spin {
+              to { transform: rotate(360deg); }
+            }
+          `}</style>
         </div>
       </div>
     );
@@ -173,6 +195,125 @@ const PLCard = () => {
 
         {plData ? (
           <div className="pl-card-container">
+            {/* Add CSS variables for theme support */}
+            <style>{`
+              :root {
+                --pl-card-bg: #ffffff;
+                --pl-card-border: #e5e7eb;
+                --pl-card-text: #1f2937;
+                --pl-header-bg: #f8fafc;
+                --pl-header-text: #1e293b;
+                --pl-label-color: #6b7280;
+                --pl-value-color: #1f2937;
+                --pl-qr-border: #e5e7eb;
+                --pl-warning-bg: #fef3c7;
+                --pl-warning-border: #f59e0b;
+                --pl-warning-text: #92400e;
+                --pl-divider: #e5e7eb;
+              }
+              .dark-mode {
+                --pl-card-bg: #1e293b;
+                --pl-card-border: #334155;
+                --pl-card-text: #f1f5f9;
+                --pl-header-bg: #334155;
+                --pl-header-text: #f1f5f9;
+                --pl-label-color: #94a3b8;
+                --pl-value-color: #f1f5f9;
+                --pl-qr-border: #334155;
+                --pl-warning-bg: #451a03;
+                --pl-warning-border: #d97706;
+                --pl-warning-text: #fef3c7;
+                --pl-divider: #334155;
+              }
+              .pl-card {
+                background: var(--pl-card-bg);
+                border: 1px solid var(--pl-card-border);
+                color: var(--pl-card-text);
+                border-radius: 12px;
+                padding: 24px;
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+              }
+              .pl-card-header {
+                background: var(--pl-header-bg);
+                padding: 20px;
+                border-radius: 8px;
+                margin-bottom: 20px;
+                border: 1px solid var(--pl-card-border);
+              }
+              .pl-card-header h2 {
+                color: var(--pl-header-text);
+                margin: 0 0 8px 0;
+                font-size: 24px;
+                font-weight: 700;
+              }
+              .pl-card-header p {
+                color: var(--pl-label-color);
+                margin: 0;
+                font-size: 14px;
+              }
+              .pl-details {
+                background: var(--pl-card-bg);
+                padding: 20px;
+                border-radius: 8px;
+                border: 1px solid var(--pl-card-border);
+                margin-bottom: 20px;
+              }
+              .pl-detail-row {
+                display: flex;
+                justify-content: space-between;
+                padding: 12px 0;
+                border-bottom: 1px solid var(--pl-divider);
+              }
+              .pl-detail-row:last-child {
+                border-bottom: none;
+              }
+              .pl-detail-row strong {
+                color: var(--pl-label-color);
+                font-weight: 600;
+                font-size: 14px;
+              }
+              .pl-detail-row span {
+                color: var(--pl-value-color);
+                font-weight: 500;
+                font-size: 14px;
+                text-align: right;
+              }
+              .qr-code-container {
+                background: var(--pl-card-bg);
+                padding: 20px;
+                border-radius: 8px;
+                border: 1px solid var(--pl-card-border);
+                text-align: center;
+              }
+              .qr-code-container h3 {
+                color: var(--pl-header-text);
+                margin: 0 0 16px 0;
+                font-size: 18px;
+                font-weight: 600;
+              }
+              .qr-code-container img {
+                border: 4px solid var(--pl-qr-border);
+                border-radius: 8px;
+                padding: 12px;
+                background: white;
+                max-width: 200px;
+                height: auto;
+              }
+              .qr-code-container p {
+                color: var(--pl-label-color);
+                font-size: 14px;
+                margin: 12px 0 0 0;
+              }
+              @media (max-width: 768px) {
+                .pl-detail-row {
+                  flex-direction: column;
+                  gap: 4px;
+                }
+                .pl-detail-row span {
+                  text-align: left;
+                }
+              }
+            `}</style>
             <div className="pl-card">
               <div className="pl-card-header">
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -189,7 +330,7 @@ const PLCard = () => {
                         height: '60px',
                         borderRadius: '50%',
                         objectFit: 'cover',
-                        border: '2px solid white'
+                        border: '2px solid var(--pl-card-border)'
                       }}
                     />
                   ) : (
@@ -249,17 +390,15 @@ const PLCard = () => {
               <div className="qr-code-container">
                 <h3>QR Code</h3>
                 <img src={plData.qrCode} alt="QR Code" />
-                <p style={{ marginTop: '10px', fontSize: '14px', color: '#666' }}>
-                  Show this QR code to warden at entry/exit
-                </p>
+                <p>Show this QR code to warden at entry/exit</p>
                 <div style={{
                   marginTop: '15px',
                   padding: '10px',
-                  backgroundColor: '#fff3cd',
+                  backgroundColor: 'var(--pl-warning-bg, #fff3cd)',
                   borderRadius: '5px',
-                  border: '1px solid #ffc107'
+                  border: '1px solid var(--pl-warning-border, #ffc107)'
                 }}>
-                  <p style={{ fontSize: '12px', color: '#856404', margin: 0 }}>
+                  <p style={{ fontSize: '12px', color: 'var(--pl-warning-text, #856404)', margin: 0 }}>
                     ⚠️ <strong>Important:</strong> This QR code can only be used once for exit and once for entry. After returning to hostel, this PL will be marked as expired.
                   </p>
                 </div>
@@ -269,7 +408,7 @@ const PLCard = () => {
               <div style={{
                 marginTop: '30px',
                 paddingTop: '20px',
-                borderTop: '2px solid #ecf0f1',
+                borderTop: '2px solid var(--pl-divider, #ecf0f1)',
                 display: 'flex',
                 justifyContent: 'center'
               }}>

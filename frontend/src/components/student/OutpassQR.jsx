@@ -8,6 +8,22 @@ const OutpassQR = () => {
   const { id } = useParams();
   const [outpass, setOutpass] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isLightMode, setIsLightMode] = useState(false);
+
+  useEffect(() => {
+    fetchOutpass();
+    // Detect theme
+    const detectTheme = () => {
+      const isLight = document.body.classList.contains('light-mode') || 
+                     window.matchMedia('(prefers-color-scheme: light)').matches;
+      setIsLightMode(isLight);
+    };
+    detectTheme();
+    // Listen for theme changes
+    const observer = new MutationObserver(detectTheme);
+    observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+    return () => observer.disconnect();
+  }, [id]);
 
   const menuItems = [
     { label: 'Dashboard', path: '/student' },
@@ -51,10 +67,26 @@ const OutpassQR = () => {
           alignItems: 'center',
           minHeight: '60vh',
           fontSize: 'clamp(0.875rem, 2.5vw, 1rem)',
-          color: '#e2e8f0'
+          color: 'var(--card-text, #e2e8f0)'
         }}>
-          Loading outpass...
+          <div style={{ textAlign: 'center' }}>
+            <div style={{
+              width: '40px',
+              height: '40px',
+              border: '4px solid var(--card-border, #334155)',
+              borderTop: '4px solid #3b82f6',
+              borderRadius: '50%',
+              animation: 'spin 1s linear infinite',
+              margin: '0 auto 16px'
+            }}></div>
+            Loading outpass...
+          </div>
         </div>
+        <style>{`
+          @keyframes spin {
+            to { transform: rotate(360deg); }
+          }
+        `}</style>
       </DashboardLayout>
     );
   }
@@ -73,12 +105,12 @@ const OutpassQR = () => {
         }}>
           <h3 style={{
             fontSize: 'clamp(1.25rem, 4vw, 1.5rem)',
-            color: '#dc2626',
+            color: 'var(--error-color, #dc2626)',
             marginBottom: 'clamp(12px, 3vw, 16px)'
           }}>Outpass Not Found</h3>
           <p style={{
             fontSize: 'clamp(0.875rem, 2.5vw, 1rem)',
-            color: '#94a3b8'
+            color: 'var(--card-text, #94a3b8)'
           }}>This outpass may have been completed or does not exist.</p>
         </div>
       </DashboardLayout>
@@ -87,8 +119,70 @@ const OutpassQR = () => {
 
   return (
     <DashboardLayout title="Outpass QR Code" menuItems={menuItems}>
-      <div className="outpass-qr-container">
-        <div className="qr-card">
+      {/* Add CSS variables for theme support */}
+      <style>{`
+        :root {
+          --header-text: #f1f5f9;
+          --card-bg: #1e293b;
+          --card-border: #334155;
+          --card-text: #e2e8f0;
+        }
+        /* Light mode styles */
+        .light-mode .qr-card {
+          background: white;
+          border: 1px solid #e5e7eb;
+        }
+        .light-mode .qr-header h2 {
+          color: #1f2937;
+          font-weight: 700;
+        }
+        .light-mode .status-badge.active {
+          background-color: #10b981;
+          color: white;
+          font-weight: 700;
+        }
+        .light-mode .status-badge.completed {
+          background-color: #6b7280;
+          color: white;
+          font-weight: 700;
+        }
+        .light-mode .info-value {
+          color: #1e293b;
+        }
+        .light-mode .timing-value {
+          color: #1e293b;
+        }
+        /* Dark mode styles (default) */
+        .qr-card {
+          background: #1e293b;
+          border: 1px solid #334155;
+        }
+        .qr-header h2 {
+          color: #f1f5f9;
+          font-weight: 700;
+        }
+        .status-badge.active {
+          background-color: #10b981;
+          color: white;
+          font-weight: 700;
+        }
+        .status-badge.completed {
+          background-color: #6b7280;
+          color: white;
+          font-weight: 700;
+        }
+        .info-value {
+          color: #f1f5f9;
+        }
+        .timing-value {
+          color: #f1f5f9;
+        }
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
+      <div className={`outpass-qr-container ${isLightMode ? 'light-mode' : ''}`}>
+        <div className={`qr-card ${outpass.status === 'active' ? 'active' : 'completed'}`}>
           <div className="qr-header">
             <div style={{ 
               display: 'flex', 
@@ -131,7 +225,6 @@ const OutpassQR = () => {
                 <h2 style={{ 
                   margin: 0,
                   fontSize: 'clamp(1.25rem, 4vw, 1.75rem)',
-                  color: '#f1f5f9',
                   fontWeight: '700'
                 }}>4-Hour Outpass</h2>
                 <span className={`status-badge ${outpass.status}`} style={{
