@@ -12,6 +12,7 @@ import Login from "./pages/Login.jsx";
 import ChangePassword from "./pages/ChangePassword.jsx";
 // Common Components
 import ProtectedRoute from "./components/common/ProtectedRoute.jsx";
+import MobileAuthGuard from "./components/common/MobileAuthGuard.jsx";
 
 // Admin Components
 import AdminDashboard from "./components/admin/AdminDashboard.jsx";
@@ -45,7 +46,7 @@ import QRScanner from "./components/warden/QRScanner.jsx";
 import Reports from "./components/warden/Reports.jsx";
 
 function App() {
-  const { user, isTempPassword } = useAuth();
+  const { user, isTempPassword, loading } = useAuth();
 
   useEffect(() => {
     // Initialize theme on app load
@@ -61,21 +62,24 @@ function App() {
 
   // Redirect to change password if user logged in with temporary password
   useEffect(() => {
-    if (user && isTempPassword && window.location.pathname !== '/change-password' && !window.location.pathname.includes('/change-password')) {
-      window.location.href = '/change-password';
+    if (!loading && user && isTempPassword && window.location.pathname !== '/change-password' && !window.location.pathname.includes('/change-password')) {
+      // Use navigate instead of direct href to avoid mobile issues
+      window.location.replace('/change-password');
     }
-  }, [user, isTempPassword]);
+  }, [user, isTempPassword, loading]);
 
   // Redirect to dashboard if user is already logged in and trying to access login page
   useEffect(() => {
-    if (user?.role && window.location.pathname === '/login') {
-      window.location.href = `/${user.role}`;
+    if (!loading && user?.role && window.location.pathname === '/login') {
+      // Use navigate instead of direct href to avoid mobile issues
+      window.location.replace(`/${user.role}`);
     }
-  }, [user]);
+  }, [user, loading]);
 
   return (
-    <Router>
-      <Routes>
+    <MobileAuthGuard>
+      <Router>
+        <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/change-password" element={<ChangePassword />} />
         <Route path="/:role/change-password" element={<ChangePassword />} />
@@ -269,6 +273,7 @@ function App() {
         />
       </Routes>
     </Router>
+    </MobileAuthGuard>
   );
 }
 
