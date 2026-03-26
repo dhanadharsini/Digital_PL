@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -46,6 +46,7 @@ import Reports from "./components/warden/Reports.jsx";
 
 function App() {
   const { user, isTempPassword, loading } = useAuth();
+  const [redirectPath, setRedirectPath] = useState(null);
 
   useEffect(() => {
     // Initialize theme on app load
@@ -64,12 +65,19 @@ function App() {
     if (!loading) {
       // Only redirect if not already on the correct page
       if (user && isTempPassword && !window.location.pathname.includes('change-password')) {
-        window.location.href = '/change-password';
+        setRedirectPath('/change-password');
       } else if (user?.role && window.location.pathname === '/login') {
-        window.location.href = `/${user.role}`;
+        setRedirectPath(`/${user.role}`);
+      } else {
+        setRedirectPath(null);
       }
     }
   }, [user, isTempPassword, loading]);
+
+  // Handle redirect
+  if (redirectPath) {
+    return <Navigate to={redirectPath} replace />;
+  }
 
   return (
     <Router>
