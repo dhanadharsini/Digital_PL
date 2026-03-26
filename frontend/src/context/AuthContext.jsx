@@ -33,11 +33,6 @@ export const AuthProvider = ({ children }) => {
         
         // Set API headers
         api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-        
-        // Validate token format and user data
-        if (!parsedUser.role || (token.startsWith('Bearer') && token.length < 20) || (!token.startsWith('Bearer') && token.length < 10)) {
-          throw new Error('Invalid authentication data');
-        }
       }
     } catch (e) {
       console.error("Error parsing user data", e);
@@ -56,11 +51,6 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await api.post('/auth/login', { email, password, role });
       const { token, user: userData, isTempPassword } = response.data;
-
-      // Validate response data
-      if (!token || !userData) {
-        throw new Error('Invalid login response');
-      }
 
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(userData));

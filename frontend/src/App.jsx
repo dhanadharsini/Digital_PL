@@ -12,7 +12,6 @@ import Login from "./pages/Login.jsx";
 import ChangePassword from "./pages/ChangePassword.jsx";
 // Common Components
 import ProtectedRoute from "./components/common/ProtectedRoute.jsx";
-import MobileAuthGuard from "./components/common/MobileAuthGuard.jsx";
 
 // Admin Components
 import AdminDashboard from "./components/admin/AdminDashboard.jsx";
@@ -60,26 +59,21 @@ function App() {
     }
   }, []);
 
-  // Redirect to change password if user logged in with temporary password
+  // Simplified redirects to avoid mobile issues
   useEffect(() => {
-    if (!loading && user && isTempPassword && window.location.pathname !== '/change-password' && !window.location.pathname.includes('/change-password')) {
-      // Use navigate instead of direct href to avoid mobile issues
-      window.location.replace('/change-password');
+    if (!loading) {
+      // Only redirect if not already on the correct page
+      if (user && isTempPassword && !window.location.pathname.includes('change-password')) {
+        window.location.href = '/change-password';
+      } else if (user?.role && window.location.pathname === '/login') {
+        window.location.href = `/${user.role}`;
+      }
     }
   }, [user, isTempPassword, loading]);
 
-  // Redirect to dashboard if user is already logged in and trying to access login page
-  useEffect(() => {
-    if (!loading && user?.role && window.location.pathname === '/login') {
-      // Use navigate instead of direct href to avoid mobile issues
-      window.location.replace(`/${user.role}`);
-    }
-  }, [user, loading]);
-
   return (
-    <MobileAuthGuard>
-      <Router>
-        <Routes>
+    <Router>
+      <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/change-password" element={<ChangePassword />} />
         <Route path="/:role/change-password" element={<ChangePassword />} />
@@ -273,7 +267,6 @@ function App() {
         />
       </Routes>
     </Router>
-    </MobileAuthGuard>
   );
 }
 
