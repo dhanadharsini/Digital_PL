@@ -45,7 +45,7 @@ import QRScanner from "./components/warden/QRScanner.jsx";
 import Reports from "./components/warden/Reports.jsx";
 
 function App() {
-  const { user, isTempPassword, loading } = useAuth();
+  const { user, isTempPassword, loading, authChecked } = useAuth();
   const [redirectPath, setRedirectPath] = useState(null);
 
   useEffect(() => {
@@ -60,9 +60,9 @@ function App() {
     }
   }, []);
 
-  // Simplified redirects to avoid mobile issues
+  // Simplified redirects to avoid mobile issues - only run after auth is checked
   useEffect(() => {
-    if (!loading) {
+    if (!loading && authChecked) {
       // Only redirect if not already on the correct page
       if (user && isTempPassword && !window.location.pathname.includes('change-password')) {
         setRedirectPath('/change-password');
@@ -72,7 +72,7 @@ function App() {
         setRedirectPath(null);
       }
     }
-  }, [user, isTempPassword, loading]);
+  }, [user, isTempPassword, loading, authChecked]);
 
   // Handle redirect
   if (redirectPath) {

@@ -15,11 +15,19 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isTempPassword, setIsTempPassword] = useState(false);
+  const [authChecked, setAuthChecked] = useState(false);
 
   useEffect(() => {
     // Check if user is logged in
     const initializeAuth = () => {
       try {
+        // Check localStorage availability
+        if (typeof localStorage === 'undefined') {
+          console.warn('localStorage not available');
+          setLoading(false);
+          return;
+        }
+
         const token = localStorage.getItem('token');
         const userData = localStorage.getItem('user');
         const tempPassword = localStorage.getItem('isTempPassword');
@@ -37,10 +45,14 @@ export const AuthProvider = ({ children }) => {
             
             // Set API headers
             api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+            
+            console.log('User authenticated:', parsedUser.role);
           } else {
             // Invalid user data, clear it
             throw new Error('Invalid user data');
           }
+        } else {
+          console.log('No authentication data found');
         }
       } catch (e) {
         console.error("Error parsing user data", e);
@@ -55,19 +67,24 @@ export const AuthProvider = ({ children }) => {
           }
         } catch {
           // Only clear if data is actually corrupted
-          localStorage.removeItem('token');
-          localStorage.removeItem('user');
-          localStorage.removeItem('isTempPassword');
+          try {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            localStorage.removeItem('isTempPassword');
+          } catch (clearError) {
+            console.error('Error clearing localStorage:', clearError);
+          }
           setUser(null);
           setIsTempPassword(false);
         }
       } finally {
         setLoading(false);
+        setAuthChecked(true);
       }
     };
 
     // Add delay for mobile to ensure localStorage is ready
-    const timer = setTimeout(initializeAuth, 100);
+    const timer = setTimeout(initializeAuth, 300); // Increased delay for mobile
     
     return () => clearTimeout(timer);
   }, []);
@@ -77,21 +94,34 @@ export const AuthProvider = ({ children }) => {
       const response = await api.post('/auth/login', { email, password, role });
       const { token, user: userData, isTempPassword } = response.data;
 
-      localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify(userData));
-      
-      if (isTempPassword) {
-        localStorage.setItem('isTempPassword', JSON.stringify(true));
-        setIsTempPassword(true);
-      } else {
-        localStorage.removeItem('isTempPassword');
-        setIsTempPassword(false);
+      // Validate response data
+      if (!token || !userData) {
+        throw new Error('Invalid login response');
       }
-      
-      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      setUser(userData);
-      
-      return { success: true, isTempPassword };
+
+      // Store in localStorage with error handling
+      try {
+        localStorage.setItem('token', token);
+        localStorage.setItem('user', JSON.stringify(userData));
+        
+        if (isTempPassword) {
+          localStorage.setItem('isTempPassword', JSON.stringify(true));
+          setIsTempPassword(true);
+        } else {
+          localStorage.removeItem('isTempPassword');
+          setIsTempPassword(false);
+        }
+        
+        api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        setUser(userData);
+        
+        console.log('User logged in successfully:', userData.role);
+        
+        return { success: true, isTempPassword };
+      } catch (storageError) {
+        console.error('Error storing login data:', storageError);
+        throw new Error('Failed to store login data');
+      }
     } catch (error) {
       console.error('Login error:', error);
       return {
@@ -103,12 +133,21 @@ export const AuthProvider = ({ children }) => {
 
   const logout = () => {
     try {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      localStorage.removeItem('isTempPassword');
+      // Clear localStorage with error handling
+      try {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        localStorage.removeItem('isTempPassword');
+      } catch (clearError) {
+        console.error('Error clearing localStorage:', clearError);
+      }
+      
+      // Clear API headers
       delete api.defaults.headers.common['Authorization'];
       setUser(null);
       setIsTempPassword(false);
+      
+      console.log('User logged out');
     } catch (e) {
       console.error('Logout error:', e);
     }
@@ -119,7 +158,8 @@ export const AuthProvider = ({ children }) => {
     login,
     logout,
     loading,
-    isTempPassword
+    isTempPassword,
+    authChecked
   };
 
   return (
