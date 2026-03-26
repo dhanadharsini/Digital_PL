@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import React, { useState, useEffect } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContext.jsx";
+import { handleLoginSuccess } from "../utils/loginState.js";
 import { api } from '../services/api';
 import './Login.css';
 
@@ -59,6 +60,13 @@ const Login = () => {
     try {
       const result = await login(formData.email, formData.password, formData.role);
       if (result.success) {
+        // Store login data
+        localStorage.setItem('user', JSON.stringify(result.user));
+        localStorage.setItem('token', result.token);
+        
+        // Use PWA login state manager
+        handleLoginSuccess(result.user, result.token);
+        
         if (result.isTempPassword) {
           navigate(`/${formData.role}/change-password`);
         } else {

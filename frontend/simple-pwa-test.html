@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple PWA Test</title>
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#3b82f6">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+        }
+        .status {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+        .success { background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; }
+        .error { background: rgba(239, 68, 68, 0.2); border: 1px solid #ef4444; }
+        .info { background: rgba(59, 130, 246, 0.2); border: 1px solid #3b82f6; }
+        button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 10px;
+            font-size: 16px;
+        }
+        button:hover { background: #2563eb; }
+        #results {
+            text-align: left;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Simple PWA Test</h1>
+        <p>Testing basic PWA installation functionality</p>
+        
+        <div id="status" class="status info">
+            Checking PWA support...
+        </div>
+        
+        <button onclick="checkPWA()">🔍 Check PWA Status</button>
+        <button onclick="tryInstall()">📱 Try Install</button>
+        <button onclick="checkServiceWorker()">⚙️ Check Service Worker</button>
+        
+        <div id="results"></div>
+        
+        <div class="info" style="margin-top: 20px;">
+            <h3>🎯 What to Look For:</h3>
+            <ul style="text-align: left;">
+                <li>Install icon (⬇️) in address bar</li>
+                <li>"Install PL System" in Chrome menu (⋮)</li>
+                <li>Service Worker registered</li>
+                <li>Manifest loads successfully</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        const status = document.getElementById('status');
+        const results = document.getElementById('results');
+        let deferredPrompt = null;
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const prefix = type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️';
+            results.textContent += `[${timestamp}] ${prefix} ${message}\n`;
+        }
+
+        function updateStatus(message, type = 'info') {
+            status.textContent = message;
+            status.className = `status ${type}`;
+        }
+
+        // Check PWA support
+        function checkPWA() {
+            results.textContent = '';
+            log('🔍 Starting PWA Check...');
+            
+            // Check basic support
+            if ('serviceWorker' in navigator) {
+                log('✅ Service Worker supported', 'success');
+            } else {
+                log('❌ Service Worker not supported', 'error');
+                updateStatus('Service Worker not supported', 'error');
+                return;
+            }
+
+            if ('beforeinstallprompt' in window) {
+                log('✅ Install prompt API supported', 'success');
+            } else {
+                log('⚠️ Install prompt API not supported', 'error');
+            }
+
+            // Check secure context
+            const isSecure = location.protocol === 'https:' || location.hostname === 'localhost';
+            if (isSecure) {
+                log('✅ Running on secure context', 'success');
+            } else {
+                log('❌ Not on secure context', 'error');
+                updateStatus('Not on secure context', 'error');
+                return;
+            }
+
+            updateStatus('PWA support confirmed!', 'success');
+            log('🎯 PWA support confirmed - install icon should appear!', 'success');
+        }
+
+        // Try to install
+        async function tryInstall() {
+            if (deferredPrompt) {
+                log('🚀 Triggering install prompt...');
+                try {
+                    const result = await deferredPrompt.prompt();
+                    log(`Install result: ${result.outcome}`, 'success');
+                    deferredPrompt = null;
+                } catch (error) {
+                    log(`Install error: ${error.message}`, 'error');
+                }
+            } else {
+                log('❌ No install prompt available', 'error');
+                updateStatus('No install prompt available - try refreshing', 'error');
+            }
+        }
+
+        // Check service worker
+        async function checkServiceWorker() {
+            log('⚙️ Checking Service Worker...');
+            
+            try {
+                const registrations = await navigator.serviceWorker.getRegistrations();
+                
+                if (registrations.length > 0) {
+                    log(`✅ Found ${registrations.length} service worker(s)`, 'success');
+                    registrations.forEach((reg, index) => {
+                        log(`   SW ${index + 1}: ${reg.scope} - ${reg.active ? 'active' : 'inactive'}`);
+                    });
+                } else {
+                    log('❌ No service workers found - trying to register...', 'error');
+                    
+                    try {
+                        const registration = await navigator.serviceWorker.register('/sw.js');
+                        log(`✅ Service worker registered: ${registration.scope}`, 'success');
+                        updateStatus('Service Worker registered!', 'success');
+                    } catch (error) {
+                        log(`❌ Failed to register: ${error.message}`, 'error');
+                        updateStatus('Service Worker registration failed', 'error');
+                    }
+                }
+            } catch (error) {
+                log(`❌ Error checking SW: ${error.message}`, 'error');
+            }
+        }
+
+        // Listen for install prompt
+        window.addEventListener('beforeinstallprompt', (e) => {
+            log('🎯 Install prompt event received!', 'success');
+            updateStatus('Install prompt available! Check address bar for ⬇️ icon', 'success');
+            e.preventDefault();
+            deferredPrompt = e;
+        });
+
+        // Listen for app installed
+        window.addEventListener('appinstalled', () => {
+            log('🎉 PWA was installed successfully!', 'success');
+            updateStatus('PWA installed successfully!', 'success');
+            deferredPrompt = null;
+        });
+
+        // Auto-check on load
+        window.addEventListener('load', () => {
+            log('📱 Simple PWA Test loaded');
+            setTimeout(checkPWA, 1000);
+        });
+    </script>
+</body>
+</html>

@@ -6,10 +6,14 @@ import {
   Navigate,
 } from "react-router-dom";
 import { useAuth } from "./context/AuthContext.jsx";
+import { initializeLoginState } from "./utils/loginState.js";
 
 // Pages
 import Login from "./pages/Login.jsx";
 import ChangePassword from "./pages/ChangePassword.jsx";
+// Common Layout Components
+import DashboardLayout from "./components/common/DashboardLayout.jsx";
+import MobileNav from "./components/common/MobileNav.jsx";
 // Common Components
 import ProtectedRoute from "./components/common/ProtectedRoute.jsx";
 
@@ -48,16 +52,67 @@ function App() {
   const { user, isTempPassword } = useAuth();
 
   useEffect(() => {
-    // Initialize theme on app load
-    const savedTheme = localStorage.getItem('theme');
-    const prefersDark = savedTheme ? savedTheme === 'dark' : true;
+    // Initialize PWA login state first
+    initializeLoginState();
 
-    if (!prefersDark) {
-      document.body.classList.add('light-mode');
-    } else {
-      document.body.classList.remove('light-mode');
+    // Check for saved theme preference
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) {
+      document.body.classList.toggle('light-mode', savedTheme === 'light');
     }
+
+    // Set initial theme based on system preference
+    if (!savedTheme) {
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      document.body.classList.toggle('light-mode', !prefersDark);
+      localStorage.setItem('theme', prefersDark ? 'dark' : 'light');
+    }
+
+    // Initialize PWA behavior
+    initializePWA();
   }, []);
+
+  // Initialize PWA-specific behavior
+  const initializePWA = () => {
+    // Check if running as PWA
+    const isPWA = window.matchMedia('(display-mode: standalone)').matches ||
+                   window.navigator.standalone === true ||
+                   document.referrer.includes('android-app://');
+
+    if (isPWA) {
+      console.log('Running as PWA');
+      
+      // Add PWA-specific styles
+      document.body.classList.add('pwa-mode');
+    }
+
+    // Listen for online/offline status
+    const updateOnlineStatus = () => {
+      const isOnline = navigator.onLine;
+      console.log('Network status:', isOnline ? 'online' : 'offline');
+      
+      // Show offline indicator
+      if (!isOnline) {
+        document.body.classList.add('offline-mode');
+      } else {
+        document.body.classList.remove('offline-mode');
+      }
+    };
+
+    window.addEventListener('online', updateOnlineStatus);
+    window.addEventListener('offline', updateOnlineStatus);
+    updateOnlineStatus();
+
+    // Handle PWA install prompt
+    window.addEventListener('beforeinstallprompt', (e) => {
+      console.log('PWA install prompt available');
+      e.preventDefault();
+    });
+
+    window.addEventListener('appinstalled', () => {
+      console.log('PWA installed successfully');
+    });
+  };
 
   // Redirect to change password if user logged in with temporary password
   useEffect(() => {
@@ -84,7 +139,10 @@ function App() {
           path="/admin"
           element={
             <ProtectedRoute allowedRoles={["admin"]}>
-              <AdminDashboard />
+              <>
+                <AdminDashboard />
+                <MobileNav />
+              </>
             </ProtectedRoute>
           }
         />
@@ -92,7 +150,10 @@ function App() {
           path="/admin/add-student"
           element={
             <ProtectedRoute allowedRoles={["admin"]}>
-              <AddStudent />
+              <>
+                <AddStudent />
+                <MobileNav />
+              </>
             </ProtectedRoute>
           }
         />
@@ -100,7 +161,10 @@ function App() {
           path="/admin/add-parent"
           element={
             <ProtectedRoute allowedRoles={["admin"]}>
-              <AddParent />
+              <>
+                <AddParent />
+                <MobileNav />
+              </>
             </ProtectedRoute>
           }
         />
@@ -108,7 +172,10 @@ function App() {
           path="/admin/add-warden"
           element={
             <ProtectedRoute allowedRoles={["admin"]}>
-              <AddWarden />
+              <>
+                <AddWarden />
+                <MobileNav />
+              </>
             </ProtectedRoute>
           }
         />
@@ -116,7 +183,10 @@ function App() {
           path="/admin/students"
           element={
             <ProtectedRoute allowedRoles={["admin"]}>
-              <StudentList />
+              <>
+                <StudentList />
+                <MobileNav />
+              </>
             </ProtectedRoute>
           }
         />
@@ -124,7 +194,10 @@ function App() {
           path="/admin/parents"
           element={
             <ProtectedRoute allowedRoles={["admin"]}>
-              <ParentList />
+              <>
+                <ParentList />
+                <MobileNav />
+              </>
             </ProtectedRoute>
           }
         />
@@ -132,7 +205,10 @@ function App() {
           path="/admin/wardens"
           element={
             <ProtectedRoute allowedRoles={["admin"]}>
-              <WardenList />
+              <>
+                <WardenList />
+                <MobileNav />
+              </>
             </ProtectedRoute>
           }
         />
@@ -141,7 +217,10 @@ function App() {
           path="/student"
           element={
             <ProtectedRoute allowedRoles={["student"]}>
-              <StudentDashboard />
+              <>
+                <StudentDashboard />
+                <MobileNav />
+              </>
             </ProtectedRoute>
           }
         />
@@ -149,7 +228,10 @@ function App() {
           path="/student/request-pl"
           element={
             <ProtectedRoute allowedRoles={["student"]}>
-              <RequestPL />
+              <>
+                <RequestPL />
+                <MobileNav />
+              </>
             </ProtectedRoute>
           }
         />
@@ -157,15 +239,21 @@ function App() {
           path="/student/request-outpass"
           element={
             <ProtectedRoute allowedRoles={["student"]}>
-              <RequestOutpass />
+              <>
+                <RequestOutpass />
+                <MobileNav />
+              </>
             </ProtectedRoute>
           }
-        />{" "}
+        />
         <Route
           path="/student/pl-history"
           element={
             <ProtectedRoute allowedRoles={["student"]}>
-              <PLHistory />
+              <>
+                <PLHistory />
+                <MobileNav />
+              </>
             </ProtectedRoute>
           }
         />
@@ -173,15 +261,21 @@ function App() {
           path="/student/outpass-history"
           element={
             <ProtectedRoute allowedRoles={["student"]}>
-              <OutpassHistory />
+              <>
+                <OutpassHistory />
+                <MobileNav />
+              </>
             </ProtectedRoute>
           }
-        />{" "}
+        />
         <Route
           path="/student/pl-card/:id"
           element={
             <ProtectedRoute allowedRoles={["student"]}>
-              <PLCard />
+              <>
+                <PLCard />
+                <MobileNav />
+              </>
             </ProtectedRoute>
           }
         />
@@ -189,7 +283,10 @@ function App() {
           path="/student/outpass-qr/:id"
           element={
             <ProtectedRoute allowedRoles={["student"]}>
-              <OutpassQR />
+              <>
+                <OutpassQR />
+                <MobileNav />
+              </>
             </ProtectedRoute>
           }
         />
@@ -198,7 +295,10 @@ function App() {
           path="/parent"
           element={
             <ProtectedRoute allowedRoles={["parent"]}>
-              <ParentDashboard />
+              <>
+                <ParentDashboard />
+                <MobileNav />
+              </>
             </ProtectedRoute>
           }
         />
@@ -206,7 +306,10 @@ function App() {
           path="/parent/pl-requests"
           element={
             <ProtectedRoute allowedRoles={["parent"]}>
-              <PLRequests />
+              <>
+                <PLRequests />
+                <MobileNav />
+              </>
             </ProtectedRoute>
           }
         />
@@ -214,7 +317,10 @@ function App() {
           path="/parent/request-history"
           element={
             <ProtectedRoute allowedRoles={["parent"]}>
-              <RequestHistory />
+              <>
+                <RequestHistory />
+                <MobileNav />
+              </>
             </ProtectedRoute>
           }
         />
@@ -223,7 +329,10 @@ function App() {
           path="/warden"
           element={
             <ProtectedRoute allowedRoles={["warden"]}>
-              <WardenDashboard />
+              <>
+                <WardenDashboard />
+                <MobileNav />
+              </>
             </ProtectedRoute>
           }
         />
@@ -231,7 +340,10 @@ function App() {
           path="/warden/pending-requests"
           element={
             <ProtectedRoute allowedRoles={["warden"]}>
-              <PendingRequests />
+              <>
+                <PendingRequests />
+                <MobileNav />
+              </>
             </ProtectedRoute>
           }
         />
@@ -239,7 +351,10 @@ function App() {
           path="/warden/students"
           element={
             <ProtectedRoute allowedRoles={["warden"]}>
-              <StudentsList />
+              <>
+                <StudentsList />
+                <MobileNav />
+              </>
             </ProtectedRoute>
           }
         />
@@ -247,7 +362,10 @@ function App() {
           path="/warden/delayed-students"
           element={
             <ProtectedRoute allowedRoles={["warden"]}>
-              <DelayedStudents />
+              <>
+                <DelayedStudents />
+                <MobileNav />
+              </>
             </ProtectedRoute>
           }
         />
@@ -255,7 +373,10 @@ function App() {
           path="/warden/qr-scanner"
           element={
             <ProtectedRoute allowedRoles={["warden"]}>
-              <QRScanner />
+              <>
+                <QRScanner />
+                <MobileNav />
+              </>
             </ProtectedRoute>
           }
         />
@@ -263,10 +384,14 @@ function App() {
           path="/warden/reports"
           element={
             <ProtectedRoute allowedRoles={["warden"]}>
-              <Reports />
+              <>
+                <Reports />
+                <MobileNav />
+              </>
             </ProtectedRoute>
           }
         />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>
   );

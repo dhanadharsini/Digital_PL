@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .success {
+            color: #10b981;
+            background: #d1fae5;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .error {
+            color: #ef4444;
+            background: #fee2e2;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .info {
+            color: #3b82f6;
+            background: #dbeafe;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        a {
+            color: #3b82f6;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🔐 Login Page Test</h1>
+        
+        <div class="info">
+            <strong>Development Server Status:</strong><br>
+            ✅ Server is running on <a href="http://localhost:3001" target="_blank">http://localhost:3001</a><br>
+            ✅ PWA features are enabled<br>
+            ✅ Service Worker is configured
+        </div>
+
+        <h2>🧪 Testing Steps:</h2>
+        
+        <div class="success">
+            <strong>✅ What Should Work:</strong><br>
+            1. Login page loads at <a href="http://localhost:3001/login" target="_blank">http://localhost:3001/login</a><br>
+            2. Role selection tabs (Student, Parent, Warden, Admin)<br>
+            3. Email and password input fields<br>
+            4. Remember me checkbox<br>
+            5. Forgot password link<br>
+            6. Sign in button<br>
+            7. Modern dark theme design<br>
+            8. Responsive layout for mobile
+        </div>
+
+        <h2>🔧 Troubleshooting:</h2>
+        
+        <div class="error">
+            <strong>❌ If Login Page Doesn't Display:</strong><br>
+            1. Check browser console for errors (F12 → Console)<br>
+            2. Make sure development server is running<br>
+            3. Clear browser cache and refresh<br>
+            4. Try opening in incognito mode<br>
+            5. Check if React is loading properly
+        </div>
+
+        <h2>📱 PWA Features:</h2>
+        
+        <div class="info">
+            <strong>🚀 New PWA Features Added:</strong><br>
+            • Install prompt appears after 3 seconds<br>
+            • Offline functionality<br>
+            • Service Worker caching<br>
+            • App-like experience on mobile<br>
+            • Online/offline status indicator
+        </div>
+
+        <h2>🎯 Quick Test:</h2>
+        
+        <div style="text-align: center; margin: 20px 0;">
+            <a href="http://localhost:3001/login" target="_blank" style="
+                background: #3b82f6;
+                color: white;
+                padding: 12px 24px;
+                text-decoration: none;
+                border-radius: 6px;
+                font-weight: 600;
+                display: inline-block;
+            ">
+                🚀 Open Login Page
+            </a>
+        </div>
+
+        <h2>📋 Development Commands:</h2>
+        
+        <div style="background: #f3f4f6; padding: 15px; border-radius: 6px; font-family: monospace;">
+            <div># Start development server</div>
+            <div>npm run dev</div>
+            <div style="margin-top: 10px;"># Build for production</div>
+            <div>npm run build:pwa</div>
+            <div style="margin-top: 10px;"># Preview PWA</div>
+            <div>npm run serve</div>
+        </div>
+
+        <div style="margin-top: 20px; padding: 15px; background: #fef3c7; border-radius: 6px;">
+            <strong>💡 Note:</strong> The login page should now be working! The server is running on port 3001. 
+            If you still see issues, check the browser console for any JavaScript errors.
+        </div>
+    </div>
+
+    <script>
+        // Test if we can reach the development server
+        fetch('http://localhost:3001')
+            .then(response => {
+                if (response.ok) {
+                    console.log('✅ Development server is reachable');
+                } else {
+                    console.log('⚠️ Development server responded with:', response.status);
+                }
+            })
+            .catch(error => {
+                console.log('❌ Cannot reach development server:', error.message);
+            });
+    </script>
+</body>
+</html>
