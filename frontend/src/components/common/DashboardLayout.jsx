@@ -3,7 +3,7 @@ import Sidebar from './Sidebar';
 import Navbar from './Navbar';
 
 const DashboardLayout = ({ children, title, menuItems }) => {
-    const [isSidebarOpen, setIsSidebarOpen] = useState(true); // Always open on mobile now
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     const toggleSidebar = () => {
         setIsSidebarOpen(!isSidebarOpen);
@@ -15,7 +15,29 @@ const DashboardLayout = ({ children, title, menuItems }) => {
 
     return (
         <div className="dashboard-container">
-            {/* Sidebar Overlay for Mobile (Hidden) */}
+            {/* Mobile Navigation Bar */}
+            <div className="mobile-nav">
+                <button
+                    className={`hamburger-btn ${isSidebarOpen ? 'active' : ''}`}
+                    onClick={toggleSidebar}
+                    aria-label="Toggle menu"
+                >
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+                <h2 style={{ 
+                    margin: 0, 
+                    fontSize: '1.25rem', 
+                    fontWeight: '700',
+                    color: 'var(--text-main)'
+                }}>
+                    {title}
+                </h2>
+                <div style={{ width: '30px' }}></div> {/* Spacer for centering */}
+            </div>
+
+            {/* Sidebar Overlay for Mobile */}
             <div
                 className={`sidebar-overlay ${isSidebarOpen ? 'active' : ''}`}
                 onClick={closeSidebar}
