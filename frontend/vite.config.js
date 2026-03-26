@@ -11,10 +11,5 @@ export default defineConfig({
         changeOrigin: true
       }
     }
-  },
-  build: {
-    assetsDir: 'assets',
-    sourcemap: true
-  },
-  publicDir: 'public'
+  }
 })

@@ -1,17 +1,13 @@
 {
-  "name": "pl-system-pwa",
+  "name": "frontend",
   "private": true,
-  "version": "1.0.0",
+  "version": "0.0.0",
   "type": "module",
-  "description": "Student Permission Leave Management System - PWA",
-  "homepage": ".",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "build:pwa": "vite build --mode production",
-    "preview": "vite preview",
     "lint": "eslint .",
-    "serve": "vite preview --port 3000 --host"
+    "preview": "vite preview"
   },
   "dependencies": {
     "axios": "^1.13.2",
