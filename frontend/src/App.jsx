@@ -75,12 +75,9 @@ function App() {
   }, [user, isTempPassword, loading, authChecked]);
 
   // Handle redirect
-  if (redirectPath) {
-    return <Navigate to={redirectPath} replace />;
-  }
-
   return (
     <Router>
+      {redirectPath && <Navigate to={redirectPath} replace />}
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/change-password" element={<ChangePassword />} />
@@ -166,7 +163,7 @@ function App() {
               <RequestOutpass />
             </ProtectedRoute>
           }
-        />{" "}
+        />
         <Route
           path="/student/pl-history"
           element={
@@ -182,7 +179,7 @@ function App() {
               <OutpassHistory />
             </ProtectedRoute>
           }
-        />{" "}
+        />
         <Route
           path="/student/pl-card/:id"
           element={
