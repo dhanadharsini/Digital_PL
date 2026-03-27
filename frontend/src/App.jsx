@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -45,8 +45,7 @@ import QRScanner from "./components/warden/QRScanner.jsx";
 import Reports from "./components/warden/Reports.jsx";
 
 function App() {
-  const { user, isTempPassword, loading, authChecked } = useAuth();
-  const [redirectPath, setRedirectPath] = useState(null);
+  const { user, isTempPassword, loading } = useAuth();
 
   useEffect(() => {
     // Initialize theme on app load
@@ -60,24 +59,20 @@ function App() {
     }
   }, []);
 
-  // Simplified redirects to avoid mobile issues - only run after auth is checked
+  // Simplified redirects to avoid mobile issues
   useEffect(() => {
-    if (!loading && authChecked) {
+    if (!loading) {
       // Only redirect if not already on the correct page
       if (user && isTempPassword && !window.location.pathname.includes('change-password')) {
-        setRedirectPath('/change-password');
+        window.location.href = '/change-password';
       } else if (user?.role && window.location.pathname === '/login') {
-        setRedirectPath(`/${user.role}`);
-      } else {
-        setRedirectPath(null);
+        window.location.href = `/${user.role}`;
       }
     }
-  }, [user, isTempPassword, loading, authChecked]);
+  }, [user, isTempPassword, loading]);
 
-  // Handle redirect
   return (
     <Router>
-      {redirectPath && <Navigate to={redirectPath} replace />}
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/change-password" element={<ChangePassword />} />
@@ -163,7 +158,7 @@ function App() {
               <RequestOutpass />
             </ProtectedRoute>
           }
-        />
+        />{" "}
         <Route
           path="/student/pl-history"
           element={
@@ -179,7 +174,7 @@ function App() {
               <OutpassHistory />
             </ProtectedRoute>
           }
-        />
+        />{" "}
         <Route
           path="/student/pl-card/:id"
           element={
